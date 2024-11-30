@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-// Define the enum for user roles
+
 enum UserRole {
   Customer = "Customer",
   Promoter = "Promoter",
@@ -13,7 +13,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<UserRole>(UserRole.Customer); // Default role
+  const [role, setRole] = useState<UserRole>(UserRole.Customer); 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +33,7 @@ export default function RegisterPage() {
       <div
         className="bg-cover bg-center absolute inset-0 bg-black/50"
         style={{
-          backgroundImage: "url('/concert1.jpg')", // Same background as login page
+          backgroundImage: "url('/concert1.jpg')", 
           backgroundBlendMode: "overlay",
         }}
       ></div>
@@ -45,18 +45,7 @@ export default function RegisterPage() {
             <p className="text-sm mb-4">Create your account now!</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block mb-1">Signup as a</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as UserRole)}
-                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                >
-                  <option value={UserRole.Customer}>Customer</option>
-                  <option value={UserRole.Promoter}>Promoter</option>
-                </select>
-              </div>
-
+        
               <div>
                 <label className="block mb-1">Username</label>
                 <input

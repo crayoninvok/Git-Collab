@@ -28,9 +28,9 @@ export default function LoginPage() {
 
       <div className="relative flex flex-col md:flex-row items-center justify-between h-full px-10">
         <div className="flex items-center justify-center w-full md:w-1/2">
-          <div className="p-8 md:p-12 lg:p-16 max-w-md md:max-w-lg lg:w-[70rem] items-end bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
+          <div className="p-8 md:p-12 lg:p-16 max-w-md md:max-w-lg lg:w-[70rem] items-end bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm ">
             <h1 className="text-3xl font-bold mb-2">Login</h1>
-            <p className="text-sm mb-4">Welcome back!</p>
+            <p className="text-sm mb-4">Welcome back !</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
