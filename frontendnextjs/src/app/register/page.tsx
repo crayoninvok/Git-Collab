@@ -1,19 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
 
-export default function LoginPage() {
+// Define the enum for user roles
+enum UserRole {
+  Customer = "Customer",
+  Promoter = "Promoter",
+}
+
+export default function RegisterPage() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState<UserRole>(UserRole.Customer); // Default role
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
-      alert("Please input the username and password");
+    if (!username || !email || !password || !confirmPassword) {
+      alert("Please fill in all the fields");
       return;
     }
-    alert("Login successful redirect ke dashboard event kali ya");
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    alert(`Registration successful as a ${role}! Redirecting...`);
   };
 
   return (
@@ -21,7 +33,7 @@ export default function LoginPage() {
       <div
         className="bg-cover bg-center absolute inset-0 bg-black/50"
         style={{
-          backgroundImage: "url('/concert1.jpg')",
+          backgroundImage: "url('/concert1.jpg')", // Same background as login page
           backgroundBlendMode: "overlay",
         }}
       ></div>
@@ -29,10 +41,22 @@ export default function LoginPage() {
       <div className="relative flex flex-col md:flex-row items-center justify-between h-full px-10">
         <div className="flex items-center justify-center w-full md:w-1/2">
           <div className="p-8 md:p-12 lg:p-16 max-w-md md:max-w-lg lg:w-[70rem] items-end bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
-            <h1 className="text-3xl font-bold mb-2">Login</h1>
-            <p className="text-sm mb-4">Welcome back!</p>
+            <h1 className="text-3xl font-bold mb-2">Signup</h1>
+            <p className="text-sm mb-4">Create your account now!</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block mb-1">Signup as a</label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as UserRole)}
+                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
+                >
+                  <option value={UserRole.Customer}>Customer</option>
+                  <option value={UserRole.Promoter}>Promoter</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block mb-1">Username</label>
                 <input
@@ -40,6 +64,17 @@ export default function LoginPage() {
                   placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1">Email</label>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
               </div>
@@ -55,50 +90,33 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <input type="checkbox" id="rememberMe" className="mr-2" />
-                  <label htmlFor="rememberMe" className="text-sm">
-                    Remember me
-                  </label>
-                </div>
-                <a href="?" className="text-sm text-indigo-400">
-                  Forgot password?
-                </a>
+              <div>
+                <label className="block mb-1">Confirm Password</label>
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
+                />
               </div>
 
               <button
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-md text-white font-bold"
               >
-                Login
+                Register
               </button>
             </form>
 
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-gray-600"></div>
-              <span className="mx-2 text-gray-400">Or</span>
-              <div className="flex-grow border-t border-gray-600"></div>
-            </div>
-            <div className="flex justify-between gap-4">
-              <button className="w-full bg-red-500 py-2 rounded-md flex items-center justify-center">
-                <FaGoogle className="mr-2" />
-                Google
-              </button>
-              <button className="w-full bg-blue-600 py-2 rounded-md flex items-center justify-center">
-                <FaFacebook className="mr-2" />
-                Facebook
-              </button>
-            </div>
-
             <div className="text-center text-sm mt-4">
-              Don't have an account ?{" "} 
-              <a href="/register" className="text-indigo-400 ml-1">
-                Signup
+              Already have an account?{" "}
+              <a href="/login" className="text-indigo-400">
+                Login
               </a>
             </div>
 
-            <div className="mt-4 text-xs text-center space-x-2">
+            <div className="mt-4 text-xs text-center">
               <a href="?" className="text-gray-400 hover:text-gray-300">
                 Terms & Conditions
               </a>
@@ -112,15 +130,15 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="flex items-start justify-start w-full md:w-1/2">
+        <div className="flex items-start justify-start w-full md:w-1/2 ">
           <div className="text-white text-start max-w-lg">
             <h2 className="text-4xl font-bold mb-4">
-              Find Amazing Events Happening With
+              Join the Excitement With
               <span className="text-orange-400"> TIKO</span>
             </h2>
             <p className="text-sm">
-              Discover the best events in town and get exclusive access to
-              tickets and updates!
+              Register now and explore amazing events happening near you. Be the
+              first to know about exclusive offers and updates!
             </p>
           </div>
         </div>
