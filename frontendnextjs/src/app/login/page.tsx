@@ -1,20 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { FaTimes } from "react-icons/fa";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-      alert("Please input the username and password");
+      setAlertMessage("Please input the username and password");
       return;
     }
-    alert("Login successful redirect ke dashboard event kali ya");
+
+    if (password !== "correct_password") {
+      setAlertMessage("Sorry, that password isn't right");
+      return;
+    }
+
+    alert("Login successful! Redirecting to the dashboard...");
+    setAlertMessage(null); // Clear alert on successful login
   };
 
   return (
@@ -28,14 +37,23 @@ export default function LoginPage() {
         }}
       ></div>
 
-      {/* DIV KIRI KANAN */}
+ 
       <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20">
-        {/* Login Carrd */}
+        {/* CARD LOGIN */}
         <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[12rem]">
-          <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
+          <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/80 to-black/50 text-white rounded-3xl shadow-2xl border border-gray-300 backdrop-blur-lg">
             <h1 className="text-3xl font-bold mb-2">Login</h1>
             <p className="text-sm mb-4">Welcome back!</p>
 
+            {/* ALERT MASSAGE MERAH */}
+            {alertMessage && (
+              <div className="flex items-center bg-red-500 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-md space-x-3 mb-4">
+                <FaTimes className="text-xl" />
+                <span>{alertMessage}</span>
+              </div>
+            )}
+
+            {/* FORM LOGIN RUBAH KE FORMIK*/}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block mb-1">Username / Email</label>
@@ -88,7 +106,6 @@ export default function LoginPage() {
             <div className="flex sm:flex-row justify-between gap-4">
               <button className="w-full bg-transparent py-2 rounded-full flex items-center justify-end">
                 <FcGoogle className="text-5xl" />{" "}
-         
               </button>
               <button className="w-full bg-transparent py-2 rounded-full flex items-center justify-start">
                 <FaFacebook className="text-5xl text-blue-600" />{" "}
@@ -116,7 +133,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* TEXT SEBELAH KANAN */}
+        {/* FLEX KANAN */}
         <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
           <div className="text-white text-center lg:text-left max-w-lg">
             <h2 className="text-5xl font-bold mb-4 md:mt-[10rem] ">
