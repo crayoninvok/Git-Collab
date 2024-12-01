@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -17,7 +18,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen bg-transparant relative">
+    <div className="min-h-screen bg-transparent relative">
+      {/* BG */}
       <div
         className="bg-cover bg-center absolute inset-0 bg-black/50"
         style={{
@@ -26,15 +28,17 @@ export default function LoginPage() {
         }}
       ></div>
 
-      <div className="relative flex flex-col md:flex-row items-center justify-between h-full px-10">
-        <div className="flex items-center justify-center w-full md:w-1/2">
-          <div className="p-8 md:p-12 lg:p-16 max-w-md md:max-w-lg lg:w-[70rem] items-end bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm ">
+      {/* DIV KIRI KANAN */}
+      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20">
+        {/* Login Carrd */}
+        <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[12rem]">
+          <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
             <h1 className="text-3xl font-bold mb-2">Login</h1>
-            <p className="text-sm mb-4">Welcome back !</p>
+            <p className="text-sm mb-4">Welcome back!</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block mb-1">Username</label>
+                <label className="block mb-1">Username / Email</label>
                 <input
                   type="text"
                   placeholder="Username"
@@ -80,19 +84,19 @@ export default function LoginPage() {
               <span className="mx-2 text-gray-400">Or</span>
               <div className="flex-grow border-t border-gray-600"></div>
             </div>
-            <div className="flex justify-between gap-4">
-              <button className="w-full bg-red-500 py-2 rounded-md flex items-center justify-center">
-                <FaGoogle className="mr-2" />
-                Google
+
+            <div className="flex sm:flex-row justify-between gap-4">
+              <button className="w-full bg-transparent py-2 rounded-full flex items-center justify-end">
+                <FcGoogle className="text-5xl" />{" "}
+         
               </button>
-              <button className="w-full bg-blue-600 py-2 rounded-md flex items-center justify-center">
-                <FaFacebook className="mr-2" />
-                Facebook
+              <button className="w-full bg-transparent py-2 rounded-full flex items-center justify-start">
+                <FaFacebook className="text-5xl text-blue-600" />{" "}
               </button>
             </div>
 
             <div className="text-center text-sm mt-4">
-              Don't have an account ?{" "} 
+              Don't have an account ?{" "}
               <a href="/register" className="text-indigo-400 ml-1">
                 Signup
               </a>
@@ -112,13 +116,14 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="flex items-start justify-start w-full md:w-1/2">
-          <div className="text-white text-start max-w-lg">
-            <h2 className="text-4xl font-bold mb-4">
+        {/* TEXT SEBELAH KANAN */}
+        <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
+          <div className="text-white text-center lg:text-left max-w-lg">
+            <h2 className="text-5xl font-bold mb-4 md:mt-[10rem] ">
               Find Amazing Events Happening With
               <span className="text-orange-400"> TIKO</span>
             </h2>
-            <p className="text-sm">
+            <p className="text-sm mb-5">
               Discover the best events in town and get exclusive access to
               tickets and updates!
             </p>
