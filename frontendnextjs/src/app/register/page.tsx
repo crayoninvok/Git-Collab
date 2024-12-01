@@ -1,4 +1,7 @@
-"use client";
+{
+  /* TEST RUBAH KE FORMIK YUP */
+}
+("use client");
 
 import { useState } from "react";
 
@@ -34,7 +37,7 @@ export default function RegisterPage() {
       ></div>
 
       {/* DIV KANAN KIRI */}
-      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20">
+      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[5%]">
         {/* REGISTER CARD */}
         <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[6rem]">
           <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">

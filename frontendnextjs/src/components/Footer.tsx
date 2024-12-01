@@ -11,7 +11,7 @@ export default function Footer() {
   return (
     <footer className="bg-white text-gray-700 border-t border-gray-200 py-6">
       <div className="container mx-auto flex flex-col md:flex-row items-center justify-between">
-        {/* Left Section */}
+        {/* FOOTER */}
         <div className="mb-4 md:mb-0">
           <h1 className="text-2xl font-bold text-orange-600">TIKO</h1>
           <p className="text-sm mt-2">Copyright 2023 TIKO, Bojongsoang</p>
@@ -21,7 +21,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Center Section */}
+        {/* BELUM DI LINK */}
         <div className="hidden md:flex space-x-6">
           <a href="#" className="text-sm hover:underline">
             About
@@ -43,7 +43,7 @@ export default function Footer() {
           </a>
         </div>
 
-        {/* Right Section */}
+        {/* BELUM DI LINK */}
         <div>
           <h2 className="text-sm font-semibold mb-2">Find us on</h2>
           <div className="flex space-x-3">
