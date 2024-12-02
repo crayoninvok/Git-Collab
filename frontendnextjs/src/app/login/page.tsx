@@ -1,8 +1,6 @@
-{
-  /* TEST RUBAH KE FORMIK YUP */
-}
 
-("use client");
+
+"use client"
 
 import { useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
