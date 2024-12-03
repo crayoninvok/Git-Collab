@@ -9,6 +9,156 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  User
+  Promotor
+}
+
+enum EventCategory {
+  Music
+  Opera
+  Orchestra
+  Other
+}
+
+enum TiketType {
+  Regular
+  Cat
+  Festival
+  VIP
+}
+
+enum PaymentMethod {
+  BCA
+  MANDIRI
+  DANA
+  GOPAY
+}
+
+enum TicketTypes {
+  Regular
+  CAT
+  Festival
+  VIP
+}
+
+model User {
+  user_id      String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  password     String
+  avatar       String?
+  role         Role     @default(User)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  pointBalance Int
+  isVerify     Boolean
+
+  Reveral  Reveral[]
+  Review   Review[]
+  Payments Payments[]
+}
+
+model Reveral {
+  reveral_id Int      @id @default(autoincrement())
+  point      Int
+  code       String   @default(uuid())
+  validation Boolean
+  createdAt  DateTime @default(now())
+  expiredAt  DateTime
+  userId     User     @relation(fields: [user_id], references: [user_id])
+  user_id    String
+}
+
+model Review {
+  review_id Int    @id @default(autoincrement())
+  rating    Int
+  comment   String
+
+  userId   User   @relation(fields: [user_id], references: [user_id])
+  user_id  String
+  EventId  Event  @relation(fields: [event_id], references: [event_id])
+  event_id Int
+}
+
+model Event {
+  event_id        Int           @id @default(autoincrement())
+  event_name      String        @unique
+  startDate       DateTime
+  endDate         DateTime
+  startTime       DateTime
+  endTime         DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  event_thumbnail String
+  artist          String
+  free_event      String
+  slug            String        @unique
+  categoryId      EventCategory
+  descriptionId   Description   @relation(fields: [description_id], references: [description_id])
+  venueId         Venue         @relation(fields: [venue_id], references: [venue_id])
+  ticket_types    TicketTypes
+  Review          Review[]
+  description_id  Int
+  venue_id        Int
+  Ticket          Ticket[]
+}
+
+model Description {
+  description_id Int     @id @default(autoincrement())
+  title          String
+  description    String
+  terms          Json
+  Event          Event[]
+}
+
+model Venue {
+  venue_id      Int     @id @default(autoincrement())
+  venueName     String
+  venueLocation String
+  Event         Event[]
+}
+
+model Ticket {
+  ticket_id    Int           @id @default(autoincrement())
+  eventId      Event         @relation(fields: [event_id], references: [event_id])
+  ticket_types TicketTypes
+  event_id     Int
+  price        Int
+  quota        Int
+  sold         Int
+  OrderDetail  OrderDetail[]
+}
+
+model OrderDetail {
+  order_detail_id Int     @id @default(autoincrement())
+  quantity        Int
+  totalPrice      Int
+  ticketId        Ticket  @relation(fields: [ticket_id], references: [ticket_id])
+  Order           Order[]
+  ticket_id       Int
+}
+
+model Order {
+  order_id       Int         @id @default(autoincrement())
+  orderedAt      DateTime    @updatedAt
+  Payments       Payments[]
+  orderDetailId  OrderDetail @relation(fields: [orderDetail_id], references: [order_detail_id])
+  orderDetail_id Int
+}
+
+model Payments {
+  payment_id    Int           @id @default(autoincrement())
+  payment_metod PaymentMethod
+  payment_date  DateTime      @default(now())
+  status        Boolean       @default(false)
+  orderId       Order         @relation(fields: [order_id], references: [order_id])
+  order_id      Int
+  userId        User          @relation(fields: [user_id], references: [user_id])
+  user_id       String
 }
