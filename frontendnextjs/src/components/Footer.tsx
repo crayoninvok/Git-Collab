@@ -14,7 +14,7 @@ export default function Footer() {
         {/* FOOTER */}
         <div className="mb-4 md:mb-0">
           <h1 className="text-2xl font-bold text-orange-600">TIKO</h1>
-          <p className="text-sm mt-2">Copyright 2023 TIKO, Bojongsoang</p>
+          <p className="text-sm mt-2">Copyright 2024 TIKO, Bojongsoang</p>
           <ul className="text-xs mt-2 space-y-1">
             <li>Terms of Use | Privacy Policy | Cookie Policy</li>
             <li>GDPR/CCPA Privacy Request | Cookie Settings</li>
@@ -45,24 +45,24 @@ export default function Footer() {
 
         {/* BELUM DI LINK */}
         <div>
-          <h2 className="text-sm font-semibold mb-2">Find us on</h2>
-          <div className="flex space-x-3">
-            <a href="#" className="hover:text-gray-500">
+          <h2 className="text-md font-semibold mb-2">Find us on</h2>
+          <div className="flex text-md space-x-3">
+            <a href="#" className="hover:text-blue-700">
               <FaFacebook size={24} />
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="#" className="hover:text-pink-400">
               <FaInstagram size={24} />
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="#" className="hover:text-black">
               <FaTiktok size={24} />
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="#" className="hover:text-blue-500">
               <FaTwitter size={24} />
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="#" className="hover:text-purple-500">
               <FaTwitch size={24} />
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="#" className="hover:text-red-500">
               <FaYoutube size={24} />
             </a>
           </div>

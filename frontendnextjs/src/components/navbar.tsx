@@ -3,27 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import BurgerMenu from "./BurgerMenu";
-import { Comfortaa } from "next/font/google";
 import Image from "next/image";
-
-const comfortaa = Comfortaa({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-});
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Handle scroll behavior
+  // Handle scroll Ilang
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
     if (currentScrollY > lastScrollY && currentScrollY > 100) {
-
       setIsVisible(false);
     } else {
- 
       setIsVisible(true);
     }
     setLastScrollY(currentScrollY);
@@ -31,9 +22,7 @@ export default function Navbar() {
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
   return (
@@ -44,28 +33,41 @@ export default function Navbar() {
     >
       {/* LOGO */}
       <Link href="/">
-        <Image
-          src="/tiko.png" 
-          alt="Logo"
-          width={110} 
-          height={40} 
-        />
+        <span className="cursor-pointer">
+          <Image src="/tiko.png" alt="Logo" width={110} height={40} priority />
+        </span>
       </Link>
 
       {/* NAVLINKS */}
       <ul className="flex gap-8 text-xl">
-        {["Homepage", "Event", "Artist", "News"].map((link) => (
-          <li key={link}>
-            <Link
-              href={`/${link.toLowerCase()}`}
-              className="relative group cursor-pointer"
-            >
-              <span className="transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom group-hover:bg-[length:100%_100%] group-hover:underline-[length:100%_100%] group-hover:text-black text-white">
-                {link}
-              </span>
-            </Link>
-          </li>
-        ))}
+        <li>
+          <Link href="/">
+            <span className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%]  hover:text-black text-white">
+              Homepage
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link href="/event">
+            <span className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%]  hover:text-black text-white">
+              Event
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link href="/artist">
+            <span className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%]  hover:text-black text-white">
+              Artist
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link href="/news">
+            <span className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%]  hover:text-black text-white">
+              News
+            </span>
+          </Link>
+        </li>
       </ul>
 
       {/* Burger Menu */}

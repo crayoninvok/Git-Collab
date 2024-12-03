@@ -23,7 +23,7 @@ export default function BurgerMenu() {
 
       {/* Side Panel Menu */}
       <div
-        className={`fixed top-0 right-0 w-80 h-screen bg-gray-800 text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 right-0 w-80 h-[50vh] rounded-bl-2xl bg-sky-900 backdrop-blur-3xl text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
