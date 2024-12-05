@@ -1,31 +1,39 @@
+"use client";
 
-"use client"
-
-import { useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 export default function RegisterPage() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username || !email || !phone || !password || !confirmPassword) {
-      alert("Please fill in all the fields");
-      return;
-    }
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-    alert("Registration successful! Redirecting...");
-  };
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      referralCode: "",
+    },
+    validationSchema: Yup.object({
+      username: Yup.string().required("Username is required"),
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
+      password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password"), undefined], "Passwords must match")
+        .required("Confirm password is required"),
+      referralCode: Yup.string(),
+    }),
+    onSubmit: (values) => {
+      alert("Registration successful! Redirecting...");
+      console.log(values);
+    },
+  });
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      {/* BG */}
+      {/* Background */}
       <div
         className="bg-cover bg-center absolute inset-0 bg-black/50"
         style={{
@@ -34,79 +42,107 @@ export default function RegisterPage() {
         }}
       ></div>
 
-      {/* DIV KANAN KIRI */}
+      {/* Layout */}
       <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[5%]">
-        {/* REGISTER CARD */}
+        {/* Register Card */}
         <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[6rem]">
           <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
             <h1 className="text-3xl font-bold mb-2">Signup</h1>
             <p className="text-sm mb-4">Create your account now!</p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Form */}
+            <form onSubmit={formik.handleSubmit} className="space-y-4">
+              {/* Username */}
               <div>
                 <label className="block mb-1">Username</label>
                 <input
                   type="text"
+                  name="username"
                   placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={formik.values.username}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
+                {formik.touched.username && formik.errors.username && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {formik.errors.username}
+                  </div>
+                )}
               </div>
 
+              {/* Email */}
               <div>
                 <label className="block mb-1">Email</label>
                 <input
                   type="email"
+                  name="email"
                   placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
+                {formik.touched.email && formik.errors.email && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {formik.errors.email}
+                  </div>
+                )}
               </div>
-
-              <div>
-                <label className="block mb-1">Phone Number</label>
-                <input
-                  type="text"
-                  placeholder="Phone Number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                />
-              </div>
-
+  
+              {/* Password */}
               <div>
                 <label className="block mb-1">Password</label>
                 <input
                   type="password"
+                  name="password"
                   placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
+                {formik.touched.password && formik.errors.password && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {formik.errors.password}
+                  </div>
+                )}
               </div>
 
+              {/* Confirm Password */}
               <div>
                 <label className="block mb-1">Confirm Password</label>
                 <input
                   type="password"
+                  name="confirmPassword"
                   placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={formik.values.confirmPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
+                {formik.touched.confirmPassword &&
+                  formik.errors.confirmPassword && (
+                    <div className="text-red-500 text-sm mt-1">
+                      {formik.errors.confirmPassword}
+                    </div>
+                  )}
               </div>
 
+              {/* Referral Code */}
               <div>
-                <label className="block mb-1">Reveral Code</label>
+                <label className="block mb-1">Referral Code</label>
                 <input
-                  type="reveralcode"
-                  placeholder="Reveral Code (optional if you have)"
+                  type="text"
+                  name="referralCode"
+                  placeholder="Referral Code (optional)"
+                  value={formik.values.referralCode}
+                  onChange={formik.handleChange}
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
               </div>
 
+              {/* Submit Button */}
               <button
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-md text-white font-bold"
@@ -114,32 +150,13 @@ export default function RegisterPage() {
                 Register
               </button>
             </form>
-
-            <div className="text-center text-sm mt-4">
-              Already have an account?{" "}
-              <a href="/login" className="text-indigo-400">
-                Login
-              </a>
-            </div>
-
-            <div className="mt-4 text-xs text-center space-x-3">
-              <a href="?" className="text-gray-400 hover:text-gray-300">
-                Terms & Conditions
-              </a>
-              <a href="?" className="text-gray-400 hover:text-gray-300">
-                Support
-              </a>
-              <a href="?" className="text-gray-400 hover:text-gray-300">
-                Customer Care
-              </a>
-            </div>
           </div>
         </div>
 
-        {/*  TEXT KANAN */}
+        {/* Right Text Section */}
         <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
           <div className="text-white text-center lg:text-left max-w-lg">
-            <h2 className="text-5xl font-bold mb-4 md:mt-[10rem]">
+            <h2 className="text-5xl font-bold mb-4">
               Join the Excitement With
               <span className="text-orange-400"> TIKO</span>
             </h2>

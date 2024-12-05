@@ -36,13 +36,13 @@ export default function AdminSidebar() {
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/users">
+            <Link href="/dashboard/create">
               <span
                 className={`block px-4 py-2 rounded ${
-                  pathname === "/dashboard/users" ? "bg-gray-700" : "hover:bg-gray-700"
+                  pathname === "/dashboard/create" ? "bg-gray-700" : "hover:bg-gray-700"
                 }`}
               >
-                Users
+                Create
               </span>
             </Link>
           </li>
