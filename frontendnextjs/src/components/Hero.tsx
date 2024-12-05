@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 interface HeroProps {
-  targetDate: string; // Prop for target date
+  targetDate: string;
 }
 
 export default function Hero({ targetDate }: HeroProps) {
@@ -32,7 +32,7 @@ export default function Hero({ targetDate }: HeroProps) {
       style={{ backgroundImage: "url('/path-to-background.jpg')" }}
     >
       <div className="text-center">
-        <p className="uppercase text-sm tracking-wide mb-4">
+        <p className="uppercase text-sm tracking-wide mb-4 mt-[7rem]">
           A Festival Experience by{" "}
           <span className="text-yellow-500">ISMAYA Live</span>
         </p>
@@ -45,7 +45,7 @@ export default function Hero({ targetDate }: HeroProps) {
         <p className="text-sm md:text-lg mt-1">
           JIEXPO KEMAYORAN • JAKARTA, INDONESIA
         </p>
-        {/* Countdown Timer Display */}
+
         <div className="text-md font-semibold mb-3">{timeLeft}</div>
         <div className="flex justify-center space-x-4 mt-6">
           <button className="px-8 py-3 border-2 border-pink-500 text-white font-semibold rounded-xl hover:bg-orange-500 hover:text-black transition-all">

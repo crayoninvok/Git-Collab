@@ -3,13 +3,15 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import { Comfortaa } from "next/font/google";
-import Navbar from "@/components/Navbar";
+import NavbarWrapper from "@/components/NavbarWrapper";
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
@@ -17,9 +19,9 @@ const geistMono = localFont({
 });
 
 const comfortaa = Comfortaa({
-  subsets: ["latin"], // Adjust subsets if needed
-  weight: ["400", "600", "700"], // Add weights based on your design needs
-  display: "swap", // Improves font loading experience
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -29,15 +31,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${comfortaa.className} antialiased`}
       >
-        <Navbar />
+        {/* Use NavbarWrapper for conditional navbar rendering */}
+       <NavbarWrapper />
         {children}
         <Footer />
       </body>

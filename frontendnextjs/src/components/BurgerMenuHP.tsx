@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FaTimes, FaUser } from "react-icons/fa";
+import { FaTimes     } from "react-icons/fa";
+import { TbMenuDeep } from "react-icons/tb";
 
-export default function BurgerMenu() {
+export default function BurgerHandphone() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -14,17 +15,17 @@ export default function BurgerMenu() {
   return (
     <>
       {/* Burger Menu Button */}
-
+    
       <button
         onClick={toggleMenu}
-        className="text-2xl text-white hover:text-orange-400 focus:outline-none"
+        className="text-3xl text-white hover:text-orange-400 focus:outline-none"
       >
-        {isMenuOpen ? <FaTimes /> : <FaUser />}
+        {isMenuOpen ? <FaTimes /> : <TbMenuDeep />}
       </button>
 
       {/* Side Panel Menu */}
       <div
-        className={`fixed top-0 right-0 w-80 h-[50vh] rounded-bl-2xl bg-sky-900 backdrop-blur-3xl text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 right-0 w-80 h-[55vh] rounded-bl-2xl bg-sky-900 backdrop-blur-3xl text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -39,6 +40,34 @@ export default function BurgerMenu() {
         {/* Menu Links */}
         <nav className="mt-16 p-6 flex flex-col gap-6">
           <Link
+            href="/"
+            onClick={() => setIsMenuOpen(false)}
+            className="text-lg hover:text-orange-400"
+          >
+            Homepage
+          </Link>
+          <Link
+            href="/artist"
+            onClick={() => setIsMenuOpen(false)}
+            className="text-lg hover:text-orange-400"
+          >
+            Artist
+          </Link>
+          <Link
+            href="/event"
+            onClick={() => setIsMenuOpen(false)}
+            className="text-lg hover:text-orange-400"
+          >
+            Event
+          </Link>
+          <Link
+            href="/news"
+            onClick={() => setIsMenuOpen(false)}
+            className="text-lg hover:text-orange-400"
+          >
+            News
+          </Link>
+          <Link
             href="/login"
             onClick={() => setIsMenuOpen(false)}
             className="text-lg hover:text-orange-400"
@@ -51,13 +80,6 @@ export default function BurgerMenu() {
             className="text-lg hover:text-orange-400"
           >
             Register
-          </Link>
-          <Link
-            href="/dashboard"
-            onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
-          >
-            Promotor Mode(swtich nya nanti pas sudah login sementara disini)
           </Link>
           <Link
             href="/about"
@@ -76,6 +98,7 @@ export default function BurgerMenu() {
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
         ></div>
       )}
+   
     </>
   );
 }
