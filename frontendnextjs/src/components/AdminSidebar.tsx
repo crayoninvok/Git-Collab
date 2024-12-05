@@ -47,13 +47,24 @@ export default function AdminSidebar() {
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/settings">
+            <Link href="/dashboard/profileadmin">
               <span
                 className={`block px-4 py-2 rounded ${
-                  pathname === "/dashboard/settings" ? "bg-gray-700" : "hover:bg-gray-700"
+                  pathname === "/dashboard/profileadmin" ? "bg-gray-700" : "hover:bg-gray-700"
                 }`}
               >
-                Settings
+                Profile
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link href="/">
+              <span
+                className={`block px-4 py-2 rounded ${
+                  pathname === "/" ? "bg-gray-700" : "hover:bg-gray-700"
+                }`}
+              >
+                Logout
               </span>
             </Link>
           </li>

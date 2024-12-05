@@ -18,7 +18,7 @@ export default function DashboardPage() {
       <div className="flex-1 p-6 bg-gray-100">
         {/* Header */}
         <header className="mb-6">
-          <h1 className="text-3xl font-bold">Welcome to the Dashboard</h1>
+          <h1 className="text-3xl font-bold">Welcome to the Promotor Dashboard</h1>
           <p className="text-gray-600 mt-2">Your summary at a glance</p>
         </header>
 
