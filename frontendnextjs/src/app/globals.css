@@ -24,4 +24,19 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Glowing Text Utility */
+  .glowing-text {
+    text-shadow: 0 0 8px #00ffab, 0 0 16px #00ffab, 0 0 24px #00ffab;
+    color: #ffffff;
+  }
+
+  /* Shadow Glow Utility */
+  .shadow-glow {
+     box-shadow: 0 0 10px #ff9500, 0 0 20px #ff9500, 0 0 30px #ff9500;
+  }
+
+  .hover\:shadow-glow:hover {
+     box-shadow: 0 0 10px #ff9500, 0 0 20px #ff9500, 0 0 30px #ff9500;
+  }
 }
