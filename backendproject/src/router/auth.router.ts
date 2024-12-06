@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "../controller/auth.controller";
+import { verifyToken } from "../middleware/verify";
 
 export class AuthRouter {
   private authController: AuthController;
@@ -12,15 +13,13 @@ export class AuthRouter {
   }
 
   private initializeRoutes() {
-    this.router.post(
-      "/login",
-      this.authController.loginUser.bind(this.authController)
-    );
+    //FOR USER
+   this.router.post("/login",verifyToken, this.authController.loginUser)
+   this.router.post("/register", this.authController.registerUser)
 
-    this.router.post(
-      "/register",
-      this.authController.registerUser.bind(this.authController)
-    );
+   //FOR PROMOTOR
+   this.router.post("/promotor/register", this.authController.registerPromotor)
+   this.router.post("/promotor/login",this.authController.loginPromotor)
   }
 
   public getRouter(): Router {

@@ -1,11 +1,6 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
-
-// Define the expected structure of the JWT payload
-interface UserPayload {
-  id: string;
-  role: string;
-}
+import { UserPayload } from "../custom";
 
 export const verifyToken = async (
   req: Request,
@@ -13,18 +8,18 @@ export const verifyToken = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.cookies?.token; // Extract token from cookies
-    if (!token) throw new Error("Unauthorized");
+    // const token = req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies?.token;
+    if (!token) throw { message: "Unauthorize!" };
+    console.log(token);
+    
+    const verifiedUser = verify(token, process.env.JWT_KEY!);
 
-    // Verify the token
-    const verifiedUser = verify(token, process.env.JWT_KEY!) as UserPayload;
-
-    // Attach the verified user to the request object
-    (req as any).user = verifiedUser;
+    req.user = verifiedUser as UserPayload;
 
     next();
   } catch (err) {
-    console.error(err);
-    res.status(401).json({ message: "Invalid or expired token" });
+    console.log(err);
+    res.status(400).send(err);
   }
 };

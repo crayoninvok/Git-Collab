@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 import prisma from "../prisma";
-import { error } from "console";
+
 
 export class UserController {
   async getUser(req: Request, res: Response) {
@@ -33,15 +33,14 @@ export class UserController {
 
   async getUserId(req: Request, res: Response) {
     try {
-      const { user_id } = req.params;
+      const { id } = req.params;
       const user = await prisma.user.findUnique({
-        where: { user_id },
+        where: { id },
         select: {
-          user_id: true,
+          id: true,
           username: true,
           email: true,
           avatar: true,
-          role: true,
           createdAt: true,
           updatedAt: true,
           isVerify: true,
@@ -69,10 +68,10 @@ export class UserController {
 
   async editUser(req: Request, res: Response) {
     try {
-      const { user_id } = req.params;
+      const { id } = req.params;
 
       const updatedUser = await prisma.user.update({
-        where: { user_id: user_id || "" },
+        where: { id: id || "" },
         data: req.body,
       });
 
@@ -85,8 +84,8 @@ export class UserController {
 
   async deleteUser(req: Request, res: Response) {
     try {
-      const { user_id } = req.params;
-      await prisma.user.delete({ where: { user_id } });
+      const { id } = req.params;
+      await prisma.user.delete({ where: { id } });
       res.status(200).send("User Deleted");
     } catch (err) {
       console.log(err);
