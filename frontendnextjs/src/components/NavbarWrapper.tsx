@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Navbar from "./Navbar";
+import Navbar from "./navbar";
 
 export default function NavbarWrapper() {
   const pathname = usePathname();
@@ -9,5 +9,5 @@ export default function NavbarWrapper() {
   // Untuk misahin navbar customer dan promotor
   const noNavbarRoutes = ["/dashboard"];
 
-  return noNavbarRoutes.includes(pathname) ? null : <Navbar />;
+  return noNavbarRoutes.includes(pathname) ? null : <Navbar/>;
 }

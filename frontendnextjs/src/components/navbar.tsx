@@ -86,7 +86,7 @@ export default function Navbar() {
           </Link>
         </div>
         <div>
-          <Link href="/event">
+          <Link href="/concert">
             <div className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%] hover:text-black text-white">
               Event
             </div>
