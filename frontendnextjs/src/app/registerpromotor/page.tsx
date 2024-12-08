@@ -1,159 +1,212 @@
 "use client";
-
-import { useFormik } from "formik";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/effect-coverflow";
+import { Pagination, EffectCoverflow, Autoplay } from "swiper/modules";
+import Image from "next/image";
+import Link from "next/link";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-export default function RegisterPage() {
-  const formik = useFormik({
-    initialValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      referralCode: "",
+export default function PromoterRegister() {
+  const slides = [
+    { src: "/entertaiment/ISMAYA.png", alt: "Ismaya logo", label: "Ismaya" },
+    {
+      src: "/entertaiment/PKENT.png",
+      alt: "PK logo",
+      label: "PK ENTERTAIMENT",
     },
-    validationSchema: Yup.object({
-      username: Yup.string().required("Username is required"),
-      email: Yup.string()
-        .email("Invalid email address")
-        .required("Email is required"),
-      password: Yup.string()
-        .min(6, "Password must be at least 6 characters")
-        .required("Password is required"),
-      confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password"), undefined], "Passwords must match")
-        .required("Confirm password is required"),
-      referralCode: Yup.string(),
-    }),
-    onSubmit: (values) => {
-      alert("Registration successful! Redirecting...");
-      console.log(values);
+    {
+      src: "/entertaiment/AKSELERASI.png",
+      alt: "Aksel logo",
+      label: "AKSELERASI",
     },
+    {
+      src: "/entertaiment/IME.jpg",
+      alt: "Ime logo",
+      label: "IME KOREAN ENTERTAIMENT",
+    },
+  ];
+
+  // Yup Validation Schema
+  const validationSchema = Yup.object({
+    promotorName: Yup.string().required("Promotor name is required"),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    password: Yup.string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
+    agreeToTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
   });
 
+  const handleSubmit = (values: any, { setSubmitting }: any) => {
+    console.log("Form Data Submitted:", values);
+    setTimeout(() => {
+      setSubmitting(false);
+    }, 2000);
+  };
+
   return (
-    <div className="min-h-screen bg-transparent relative">
-      {/* Background */}
-      <div
-        className="bg-cover bg-center absolute inset-0 bg-black/50"
-        style={{
-          backgroundImage: "url('/concert1.jpg')",
-          backgroundBlendMode: "overlay",
-        }}
-      ></div>
+    <div
+      className="min-h-screen flex flex-col lg:flex-row items-center justify-center bg-cover bg-center relative"
+      style={{ backgroundImage: "url('/concert1.jpg')" }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/60"></div>
 
-      {/* Layout */}
-      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[5%]">
-        {/* Register Card */}
-        <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[6rem]">
-          <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
-            <h1 className="text-3xl font-bold mb-2">Signup</h1>
-            <p className="text-sm mb-4">Create your account now!</p>
+      {/* Left Description Section */}
+      <div className="relative z-10 flex flex-col items-center lg:items-start justify-center w-full lg:w-1/2 p-6 lg:p-20 text-center lg:text-left">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+          Find Amazing Events Happening With
+          <span className="text-orange-400"> TIKO</span>
+        </h2>
+        <p className="text-gray-200 text-sm md:text-base mb-5">
+          Discover the best events in town and get exclusive access to tickets
+          and updates!
+        </p>
+      </div>
 
-            {/* Form */}
-            <form onSubmit={formik.handleSubmit} className="space-y-4">
-
-
-              {/* Promotor Name */}
-              <div>
-                <label className="block mb-1">Promotor Name</label>
-                <input
-                  type="text"
-                  name="promotor name"
-                  placeholder="Promotor name"
-                  value={formik.values.username}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                />
-                {formik.touched.username && formik.errors.username && (
-                  <div className="text-red-500 text-sm mt-1">
-                    {formik.errors.username}
-                  </div>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block mb-1">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                />
-                {formik.touched.email && formik.errors.email && (
-                  <div className="text-red-500 text-sm mt-1">
-                    {formik.errors.email}
-                  </div>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block mb-1">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                />
-                {formik.touched.password && formik.errors.password && (
-                  <div className="text-red-500 text-sm mt-1">
-                    {formik.errors.password}
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="block mb-1">Confirm Password</label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                  value={formik.values.confirmPassword}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                />
-                {formik.touched.confirmPassword &&
-                  formik.errors.confirmPassword && (
-                    <div className="text-red-500 text-sm mt-1">
-                      {formik.errors.confirmPassword}
-                    </div>
-                  )}
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-md text-white font-bold"
+      {/* Right Form Section */}
+      <div className="relative z-10 bg-transparent shadow-xl rounded-xl flex flex-col lg:flex-row w-full max-w-6xl overflow-hidden lg:h-[65vh]">
+        {/* Left Swiper Section */}
+        <div className="hidden md:flex w-full lg:w-1/2 bg-gradient-to-r from-orange-400 to-black/80 backdrop-blur-lg items-center justify-center text-white p-6 lg:p-10">
+          <Swiper
+            modules={[Pagination, EffectCoverflow, Autoplay]}
+            pagination={{ clickable: true }}
+            effect="coverflow"
+            grabCursor={true}
+            centeredSlides={true}
+            slidesPerView="auto"
+            autoplay={{ delay: 3000, disableOnInteraction: false }}
+            coverflowEffect={{
+              rotate: 50,
+              stretch: 0,
+              depth: 100,
+              modifier: 1,
+              slideShadows: true,
+            }}
+            className="w-full h-full"
+          >
+            {slides.map((slide, index) => (
+              <SwiperSlide
+                key={index}
+                className="flex flex-col justify-center items-center"
               >
-                Register
-              </button>
-            </form>
-          </div>
+                <Image
+                  src={slide.src}
+                  alt={slide.alt}
+                  width={500}
+                  height={500}
+                  className="rounded-lg"
+                />
+                <h2 className="absolute bottom-10 text-5xl font-bold text-white">
+                  {slide.label}
+                </h2>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
-        {/* Right Text Section */}
-        <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
-          <div className="text-white text-center lg:text-left max-w-lg">
-            <h2 className="text-5xl font-bold mb-4">
-              Join the Excitement With
-              <span className="text-orange-400"> TIKO</span>
-            </h2>
-            <p className="text-sm mb-5">
-              Register now and explore amazing events happening near you. Be the
-              first to know about exclusive offers and updates!
-            </p>
-          </div>
+        {/* Right Form Section */}
+        <div className="flex flex-col justify-center w-full lg:w-1/2 bg-gradient-to-r from-black/80 to-black/50 backdrop-blur-lg p-6 lg:p-10">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
+            Create a Promotor Account
+          </h2>
+          <p className="text-sm text-gray-400 mb-6">
+            Already have an account?{" "}
+            <Link href="/loginpromotor" className="text-orange-500 hover:underline">
+              Log in
+            </Link>
+          </p>
+
+          <Formik
+            initialValues={{
+              promotorName: "",
+              email: "",
+              password: "",
+              agreeToTerms: false,
+            }}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting }) => (
+              <Form className="space-y-4">
+                <div>
+                  <Field
+                    type="text"
+                    name="promotorName"
+                    placeholder="Promotor Name"
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                  />
+                  <ErrorMessage
+                    name="promotorName"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Field
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Field
+                    type="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Field
+                    type="checkbox"
+                    name="agreeToTerms"
+                    className="form-checkbox h-5 w-5 text-orange-500"
+                  />
+                  <span className="text-gray-400">
+                    I agree to the{" "}
+                    <Link
+                      href="/terms"
+                      className="text-orange-500 hover:underline"
+                    >
+                      Terms & Conditions
+                    </Link>
+                  </span>
+                </div>
+                <ErrorMessage
+                  name="agreeToTerms"
+                  component="div"
+                  className="text-red-500 text-sm mt-1"
+                />
+
+                <button
+                  type="submit"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-md transition"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Creating account..." : "Create account"}
+                </button>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
     </div>
