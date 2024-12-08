@@ -1,10 +1,9 @@
 import prisma from "../prisma";
 
-
-export const findPromotor = async (data: string) => {
-  return prisma.promotor.findFirst({
-    where: {
-      OR: [{ email: data }, { name: data }],
-    },
+export const findPromotor = async (name: string, email: string) => {
+  const promotor = await prisma.promotor.findFirst({
+    where: { OR: [{ name: name }, { email: email }] },
   });
+
+  return promotor;
 };

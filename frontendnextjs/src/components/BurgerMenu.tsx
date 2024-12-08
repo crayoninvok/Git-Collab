@@ -64,7 +64,7 @@ export default function BurgerMenu() {
             Login
           </Link>
           <Link
-            href="/register"
+            href="/registeruser"
             onClick={() => setIsMenuOpen(false)}
             className="text-lg hover:text-orange-400"
           >
@@ -83,6 +83,13 @@ export default function BurgerMenu() {
             className="text-lg hover:text-orange-400"
           >
             About Us
+          </Link>
+          <Link
+            href="/registerpromotor"
+            onClick={() => setIsMenuOpen(false)}
+            className="text-lg hover:text-orange-400"
+          >
+            Become a Promotor
           </Link>
         </nav>
       </div>

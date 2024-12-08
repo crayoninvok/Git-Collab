@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "../controller/auth.controller";
 import { verifyToken } from "../middleware/verify";
+import { verifyTokenPromotor } from "../middleware/verify.promotor";
 
 export class AuthRouter {
   private authController: AuthController;
@@ -13,13 +14,13 @@ export class AuthRouter {
   }
 
   private initializeRoutes() {
-    //FOR USER
+    //FOR USER // Nanti buatlagi /protected untuk route pembayaran
    this.router.post("/login",verifyToken, this.authController.loginUser)
    this.router.post("/register", this.authController.registerUser)
 
    //FOR PROMOTOR
-   this.router.post("/promotor/register", this.authController.registerPromotor)
-   this.router.post("/promotor/login",this.authController.loginPromotor)
+   this.router.post("/promotorRegister", this.authController.registerPromotor)
+   this.router.post("/promotorLogin", verifyTokenPromotor, this.authController.loginPromotor)
   }
 
   public getRouter(): Router {

@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
 import { genSalt, hash, compare } from "bcrypt";
-import { findUser} from "../services/user.service";
-import { findPromotor } from "../services/find.promotor";
+import { findUser } from "../services/user.service";
 import { sign, verify } from "jsonwebtoken";
 import path from "path";
 import fs from "fs";
 import handlebars from "handlebars";
 import { generateReferalCode } from "../utils/generateReferalCode";
 import { transporter } from "../services/mailer";
+import { findPromotor } from "../services/promotor.service";
 
 export class AuthController {
   async loginUser(req: Request, res: Response) {
@@ -33,7 +33,7 @@ export class AuthController {
           httpOnly: true,
           maxAge: 24 * 3600 * 1000,
           path: "/",
-          secure: process.env.NODE_ENV === 'production'
+          secure: process.env.NODE_ENV === "production",
         })
         .send({ massage: "Login Succesfully", user });
     } catch (err) {
@@ -60,7 +60,7 @@ export class AuthController {
           username,
           email,
           password: hashPassword,
-          refCode: generateReferalCode()
+          refCode: generateReferalCode(),
         },
       });
 
@@ -69,17 +69,17 @@ export class AuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
       const link = `http://localhost:3000/verify${token}`;
 
-      const templatePath = path.join(__dirname,"../templates","verify.hbs")
-      const templateSource = fs.readFileSync(templatePath, "utf-8")
-      const compiledTemplate = handlebars.compile(templateSource)
-      const html = compiledTemplate({username, link})
+      const templatePath = path.join(__dirname, "../templates", "verify.hbs");
+      const templateSource = fs.readFileSync(templatePath, "utf-8");
+      const compiledTemplate = handlebars.compile(templateSource);
+      const html = compiledTemplate({ username, link });
 
       await transporter.sendMail({
-        from:"dattariqf@gmail.com",
-        to:email,
+        from: "dattariqf@gmail.com",
+        to: email,
         subject: "Welcome To TIKO",
-        html
-      })
+        html,
+      });
 
       res.status(201).send("Registration Successful");
     } catch (err) {
@@ -103,20 +103,23 @@ export class AuthController {
     }
   }
 
-  
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////   PROMOTOR   /////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   async registerPromotor(req: Request, res: Response) {
     try {
       const { name, email, password, confirmPassword } = req.body;
       if (password != confirmPassword)
         throw { massage: "Password Not Match !" };
 
-      const promotor = await findPromotor(name, email)
+      const promotor = await findPromotor(name, email);
       if (promotor) throw { massage: "Name or Email has been used" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
 
-      const newUser = await prisma.promotor.create({
+      const newPromotor = await prisma.promotor.create({
         data: {
           name,
           email,
@@ -124,10 +127,22 @@ export class AuthController {
         },
       });
 
-      const payload = { id: newUser.id };
+      const payload = { id: newPromotor.id };
 
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
       const link = `http://localhost:3000/verify${token}`;
+
+      const templatePath = path.join(__dirname, "../templates", "verify.hbs");
+      const templateSource = fs.readFileSync(templatePath, "utf-8");
+      const compiledTemplate = handlebars.compile(templateSource);
+      const html = compiledTemplate({ name, link });
+
+      await transporter.sendMail({
+        from: "dattariqf@gmail.com",
+        to: email,
+        subject: "Welcome To TIKO",
+        html,
+      });
 
       res.status(201).send("Registration Successful");
     } catch (err) {
@@ -165,6 +180,4 @@ export class AuthController {
       res.status(400).send("Login Failed");
     }
   }
-
-
 }
