@@ -14,8 +14,8 @@ export class AuthRouter {
   }
 
   private initializeRoutes() {
-    //FOR USER // Nanti buatlagi /protected untuk route pembayaran
-   this.router.post("/login",verifyToken, this.authController.loginUser)
+    //FOR USER // Nanti buatlagi /protected untuk route pembayaran pakai verifyToken
+   this.router.post("/login", this.authController.loginUser)
    this.router.post("/register", this.authController.registerUser)
 
    //FOR PROMOTOR

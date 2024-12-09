@@ -24,7 +24,7 @@ export default function LoginStart() {
           muted
           loop
           className={`absolute w-full h-full object-cover ${
-            hoveredPanel === "right" ? "blur-lg scale-105" : ""
+            hoveredPanel === "right" ? "blur-lg scale-100" : ""
           }`}
         >
           <source src={leftVideoUrl} type="video/mp4" />
@@ -58,7 +58,7 @@ export default function LoginStart() {
           muted
           loop
           className={`absolute w-full h-full object-cover ${
-            hoveredPanel === "left" ? "blur-lg scale-105" : ""
+            hoveredPanel === "left" ? "blur-lg scale-100" : ""
           }`}
         >
           <source src={rightVideoUrl} type="video/mp4" />

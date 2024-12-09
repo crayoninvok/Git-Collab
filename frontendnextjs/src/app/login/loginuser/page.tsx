@@ -27,7 +27,7 @@ export default function LoginUser() {
     <div className="min-h-screen bg-transparent relative z-10">
       {/* BG */}
       <div
-        className="bg-cover bg-center absolute z-50"
+        className="bg-cover bg-center absolute inset-0 bg-black/50"
         style={{
           backgroundImage: "url('/concert1.jpg')",
           backgroundBlendMode: "overlay",

@@ -59,7 +59,7 @@ export default function PromoterRegister() {
       {/* Left Description Section */}
       <div className="relative z-10 flex flex-col items-center lg:items-start justify-center w-full lg:w-1/2 p-6 lg:p-20 text-center lg:text-left">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-          Find Amazing Events Happening With
+          Register to be an Event creator here With
           <span className="text-orange-400"> TIKO</span>
         </h2>
         <p className="text-gray-200 text-sm md:text-base mb-5">
