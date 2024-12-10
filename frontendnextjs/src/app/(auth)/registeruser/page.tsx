@@ -1,33 +1,60 @@
 "use client";
 
+import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-export default function RegisterPage() {
+// Validation schema
+const RegisterSchema = Yup.object().shape({
+  username: Yup.string().required("Username is required"),
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
+  password: Yup.string().min(3, "Password must be at least 3 characters"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords do not match!")
+    .required("Confirm password is required"),
+  refCode: Yup.string(), // Optional
+});
+
+// Form interface
+interface FormValues {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  refCode: string;
+}
+
+export default function RegisterUser() {
+  const initialValues: FormValues = {
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    refCode: "",
+  };
+
   const formik = useFormik({
-    initialValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      referralCode: "",
-    },
-    validationSchema: Yup.object({
-      username: Yup.string().required("Username is required"),
-      email: Yup.string()
-        .email("Invalid email address")
-        .required("Email is required"),
-      password: Yup.string()
-        .min(6, "Password must be at least 6 characters")
-        .required("Password is required"),
-      confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password"), undefined], "Passwords must match")
-        .required("Confirm password is required"),
-      referralCode: Yup.string(),
-    }),
-    onSubmit: (values) => {
-      alert("Registration successful! Redirecting...");
-      console.log(values);
+    initialValues,
+    validationSchema: RegisterSchema,
+    onSubmit: async (values) => {
+      try {
+        const res = await fetch("http://localhost:8000/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
+
+        const result = await res.json();
+        if (!res.ok) throw result;
+
+        alert("Registration successful!");
+      } catch (err: any) {
+        console.error("Registration failed:", err);
+      }
     },
   });
 
@@ -43,11 +70,11 @@ export default function RegisterPage() {
       ></div>
 
       {/* Layout */}
-      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[5%]">
+      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20">
         {/* Register Card */}
         <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[6rem]">
           <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
-            <h1 className="text-3xl font-bold mb-2">Signup</h1>
+            <h1 className="text-3xl font-bold mb-2">Sign Up</h1>
             <p className="text-sm mb-4">Create your account now!</p>
 
             {/* Form */}
@@ -89,7 +116,7 @@ export default function RegisterPage() {
                   </div>
                 )}
               </div>
-  
+
               {/* Password */}
               <div>
                 <label className="block mb-1">Password</label>
@@ -134,10 +161,11 @@ export default function RegisterPage() {
                 <label className="block mb-1">Referral Code</label>
                 <input
                   type="text"
-                  name="referralCode"
+                  name="refCode" // Matches initialValues key
                   placeholder="Referral Code (optional)"
-                  value={formik.values.referralCode}
+                  value={formik.values.refCode}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
               </div>

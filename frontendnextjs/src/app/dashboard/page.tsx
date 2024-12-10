@@ -34,7 +34,7 @@ export default function DashboardPage() {
               alt="Profile Picture"
               width={80}
               height={80}
-              className="rounded-full border-green-400 border-2 object-cover"
+              className="rounded-full border-green-400 shadow-lg border-2 object-cover"
             />
             <div>
               <h1 className="font-extrabold text-xl text-white">ISMAYA</h1>

@@ -42,7 +42,7 @@ export default function BurgerMenu() {
       {/* Side Panel Menu */}
       <div
         ref={menuRef}
-        className={`fixed top-0 right-0 w-80 h-[50vh] rounded-bl-2xl bg-sky-900 backdrop-blur-3xl text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 right-0 w-80 h-[50vh] rounded-bl-2xl bg-black/60 backdrop-blur-3xl text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -55,39 +55,39 @@ export default function BurgerMenu() {
         </button>
 
         {/* Menu Links */}
-        <nav className="mt-16 p-6 flex flex-col gap-6">
+        <nav className="mt-16 p-6 flex flex-col gap-6 justify-center text-end">
           <Link
             href="/login"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-2xl hover:text-orange-400"
           >
             Login
           </Link>
           <Link
             href="/registeruser"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-2xl hover:text-orange-400"
           >
             Register
           </Link>
           <Link
             href="/dashboard"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-2xl hover:text-orange-400 mt-10"
           >
-            Promotor Mode(swtich nya nanti pas sudah login sementara disini)
+            Promotor Mode
           </Link>
           <Link
             href="/about"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-2xl hover:text-orange-400"
           >
             About Us
           </Link>
           <Link
             href="/registerpromotor"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-2xl hover:text-orange-400"
           >
             Become a Promotor
           </Link>

@@ -4,6 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { CiMenuKebab } from "react-icons/ci";
+import { IoMdCloseCircleOutline } from "react-icons/io";
+
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -14,15 +17,19 @@ export default function AdminSidebar() {
   };
 
   return (
-    <div className={`flex ${isOpen ? "w-65" : "w-16"} transition-all`}>
+    <div
+      className={`${
+        isOpen ? "w-80 md:w-80 h-full" : "w-90 h-full"
+      } transition-all duration-300`}
+    >
       <div
-        className={`bg-gray-800 text-white min-h-screen p-4 transition-all ${
+        className={` text-white min-h-screen p-4 transition-all ${
           isOpen ? "block" : "hidden md:block"
         }`}
       >
         <Link href="/">
           <div className="cursor-pointer p-4 flex justify-center">
-            <Image src="/tiko.png" alt="Logo" width={110} height={40} />
+            <Image src="/tiko.png" alt="Logo" width={150} height={50} />
           </div>
         </Link>
 
@@ -92,7 +99,7 @@ export default function AdminSidebar() {
         onClick={toggleSidebar}
         className="md:hidden absolute top-4 left-4 bg-gray-800 text-white p-2 rounded"
       >
-        {isOpen ? "Close" : "Open"}
+        {isOpen ? <IoMdCloseCircleOutline /> : <CiMenuKebab className="text-2xl" />}
       </button>
     </div>
   );

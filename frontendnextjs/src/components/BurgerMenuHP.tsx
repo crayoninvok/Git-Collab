@@ -25,7 +25,7 @@ export default function BurgerHandphone() {
 
       {/* Side Panel Menu */}
       <div
-        className={`fixed top-0 right-0 w-80 h-[55vh] rounded-bl-2xl bg-sky-900 backdrop-blur-3xl text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 right-0 w-80 h-[55vh] rounded-bl-2xl bg-black/85 backdrop-blur-3xl text-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -42,49 +42,49 @@ export default function BurgerHandphone() {
           <Link
             href="/"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-xl hover:text-orange-400"
           >
             Homepage
           </Link>
           <Link
             href="/artist"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-xl hover:text-orange-400"
           >
             Artist
           </Link>
           <Link
             href="/event"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-xl hover:text-orange-400"
           >
             Event
           </Link>
           <Link
             href="/news"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-xl hover:text-orange-400"
           >
             News
           </Link>
           <Link
             href="/login"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-xl hover:text-orange-400"
           >
             Login
           </Link>
           <Link
             href="/register"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-xl hover:text-orange-400"
           >
             Register
           </Link>
           <Link
             href="/about"
             onClick={() => setIsMenuOpen(false)}
-            className="text-lg hover:text-orange-400"
+            className="text-xl hover:text-orange-400"
           >
             About Us
           </Link>
