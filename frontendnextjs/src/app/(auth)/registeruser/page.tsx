@@ -3,6 +3,7 @@
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2"; // Import SweetAlert
 
 // Validation schema
 const RegisterSchema = Yup.object().shape({
@@ -49,10 +50,23 @@ export default function RegisterUser() {
         });
 
         const result = await res.json();
-        if (!res.ok) throw result;
+        if (!res.ok) throw new Error(result.message || "Registration failed");
 
-        alert("Registration successful!");
+        // Display a success message using SweetAlert
+        Swal.fire({
+          title: "Success!",
+          text: "Registration successful!",
+          icon: "success",
+          confirmButtonText: "Great!",
+        });
       } catch (err: any) {
+        // Display an error message using SweetAlert
+        Swal.fire({
+          title: "Error!",
+          text: err.message || "Registration failed!",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         console.error("Registration failed:", err);
       }
     },
@@ -60,7 +74,6 @@ export default function RegisterUser() {
 
   return (
     <div className="min-h-screen bg-transparent relative">
-      {/* Background */}
       <div
         className="bg-cover bg-center absolute inset-0 bg-black/50"
         style={{
@@ -69,17 +82,12 @@ export default function RegisterUser() {
         }}
       ></div>
 
-      {/* Layout */}
       <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20">
-        {/* Register Card */}
         <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[6rem]">
           <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/90 to-black/50 text-white rounded-3xl shadow-xl border border-gray-400 backdrop-blur-sm">
             <h1 className="text-3xl font-bold mb-2">Sign Up</h1>
             <p className="text-sm mb-4">Create your account now!</p>
-
-            {/* Form */}
             <form onSubmit={formik.handleSubmit} className="space-y-4">
-              {/* Username */}
               <div>
                 <label className="block mb-1">Username</label>
                 <input
@@ -97,8 +105,6 @@ export default function RegisterUser() {
                   </div>
                 )}
               </div>
-
-              {/* Email */}
               <div>
                 <label className="block mb-1">Email</label>
                 <input
@@ -116,8 +122,6 @@ export default function RegisterUser() {
                   </div>
                 )}
               </div>
-
-              {/* Password */}
               <div>
                 <label className="block mb-1">Password</label>
                 <input
@@ -135,8 +139,6 @@ export default function RegisterUser() {
                   </div>
                 )}
               </div>
-
-              {/* Confirm Password */}
               <div>
                 <label className="block mb-1">Confirm Password</label>
                 <input
@@ -155,13 +157,11 @@ export default function RegisterUser() {
                     </div>
                   )}
               </div>
-
-              {/* Referral Code */}
               <div>
                 <label className="block mb-1">Referral Code</label>
                 <input
                   type="text"
-                  name="refCode" // Matches initialValues key
+                  name="refCode"
                   placeholder="Referral Code (optional)"
                   value={formik.values.refCode}
                   onChange={formik.handleChange}
@@ -169,8 +169,6 @@ export default function RegisterUser() {
                   className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
                 />
               </div>
-
-              {/* Submit Button */}
               <button
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-md text-white font-bold"
@@ -180,8 +178,6 @@ export default function RegisterUser() {
             </form>
           </div>
         </div>
-
-        {/* Right Text Section */}
         <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
           <div className="text-white text-center lg:text-left max-w-lg">
             <h2 className="text-5xl font-bold mb-4">
