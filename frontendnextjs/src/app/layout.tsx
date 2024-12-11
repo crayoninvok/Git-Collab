@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import { ToastContainer } from "react-toastify";
 import { Comfortaa } from "next/font/google";
 import NavbarWrapper from "@/components/NavbarWrapper";
-
+import { SessionProvider } from "@/context/useSessionPromotor";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,10 +40,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${comfortaa.className} antialiased`}
       >
-        {/* Use NavbarWrapper for conditional navbar rendering */}
-       <NavbarWrapper />
-        {children}
-        <Footer />
+        <SessionProvider>
+          {/* Use NavbarWrapper for conditional navbar rendering */}
+          <NavbarWrapper />
+          {children}
+          <ToastContainer
+            draggable
+            closeOnClick
+            autoClose={3000}
+            theme="dark"
+            position="bottom-right"
+          />
+          <Footer />
+        </SessionProvider>
       </body>
     </html>
   );

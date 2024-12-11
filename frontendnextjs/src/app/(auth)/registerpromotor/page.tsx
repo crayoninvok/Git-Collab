@@ -1,4 +1,5 @@
 "use client";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -8,44 +9,63 @@ import Image from "next/image";
 import Link from "next/link";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useState } from "react";
+import Swal from "sweetalert2";
+
+const slides = [
+  { src: "/entertaiment/ISMAYA.png", alt: "Ismaya logo", label: "Ismaya" },
+  { src: "/entertaiment/PKENT.png", alt: "PK logo", label: "PK ENTERTAINMENT" },
+  { src: "/entertaiment/AKSELERASI.png", alt: "Aksel logo", label: "AKSELERASI" },
+  { src: "/entertaiment/IME.jpg", alt: "Ime logo", label: "IME KOREAN ENTERTAINMENT" },
+];
+
+const RegisterSchema = Yup.object().shape({
+  name: Yup.string().required("Promotor name is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password")], "Passwords do not match!")
+    .required("Confirm password is required"),
+  agreeToTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
+});
 
 export default function PromoterRegister() {
-  const slides = [
-    { src: "/entertaiment/ISMAYA.png", alt: "Ismaya logo", label: "Ismaya" },
-    {
-      src: "/entertaiment/PKENT.png",
-      alt: "PK logo",
-      label: "PK ENTERTAIMENT",
-    },
-    {
-      src: "/entertaiment/AKSELERASI.png",
-      alt: "Aksel logo",
-      label: "AKSELERASI",
-    },
-    {
-      src: "/entertaiment/IME.jpg",
-      alt: "Ime logo",
-      label: "IME KOREAN ENTERTAIMENT",
-    },
-  ];
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Yup Validation Schema
-  const validationSchema = Yup.object({
-    promotorName: Yup.string().required("Promotor name is required"),
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
-    agreeToTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
-  });
+  const handleSubmit = async (values: any, actions: any) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/promotorRegister", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Registration failed");
 
-  const handleSubmit = (values: any, { setSubmitting }: any) => {
-    console.log("Form Data Submitted:", values);
-    setTimeout(() => {
-      setSubmitting(false);
-    }, 2000);
+      Swal.fire({
+        title: "Success!",
+        text: result.message || "Registration successful!",
+        icon: "success",
+        confirmButtonText: "Great!",
+      });
+      actions.resetForm();
+    } catch (err: any) {
+      Swal.fire({
+        title: "Error!",
+        text: err.message || "Registration failed!",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      console.error("Registration failed:", err);
+    } finally {
+      setIsLoading(false);
+      actions.setSubmitting(false);
+    }
   };
 
   return (
@@ -53,18 +73,16 @@ export default function PromoterRegister() {
       className="min-h-screen flex flex-col lg:flex-row items-center justify-center bg-cover bg-center relative"
       style={{ backgroundImage: "url('/concert1.jpg')" }}
     >
-      {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/60"></div>
 
       {/* Left Description Section */}
       <div className="relative z-10 flex flex-col items-center lg:items-start justify-center w-full lg:w-1/2 p-6 lg:p-20 text-center lg:text-left">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-          Register to be an Event creator here With
+          Register to be an Event Creator here With
           <span className="text-orange-400"> TIKO</span>
         </h2>
         <p className="text-gray-200 text-sm md:text-base mb-5">
-          Discover the best events in town and get exclusive access to tickets
-          and updates!
+          Discover the best events in town and get exclusive access to tickets and updates!
         </p>
       </div>
 
@@ -116,7 +134,10 @@ export default function PromoterRegister() {
           </h2>
           <p className="text-sm text-gray-400 mb-6">
             Already have an account?{" "}
-            <Link href="/loginpromotor" className="text-orange-500 hover:underline">
+            <Link
+              href="/loginpromotor"
+              className="text-orange-500 hover:underline"
+            >
               Log in
             </Link>
           </p>
@@ -126,9 +147,10 @@ export default function PromoterRegister() {
               promotorName: "",
               email: "",
               password: "",
+              confirmPassword: "",
               agreeToTerms: false,
             }}
-            validationSchema={validationSchema}
+            validationSchema={RegisterSchema}
             onSubmit={handleSubmit}
           >
             {({ isSubmitting }) => (
@@ -136,7 +158,7 @@ export default function PromoterRegister() {
                 <div>
                   <Field
                     type="text"
-                    name="promotorName"
+                    name="name"
                     placeholder="Promotor Name"
                     className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
                   />
@@ -175,6 +197,20 @@ export default function PromoterRegister() {
                   />
                 </div>
 
+                <div>
+                  <Field
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                  />
+                  <ErrorMessage
+                    name="confirmPassword"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+
                 <div className="flex items-center space-x-2">
                   <Field
                     type="checkbox"
@@ -200,9 +236,9 @@ export default function PromoterRegister() {
                 <button
                   type="submit"
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-md transition"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isLoading}
                 >
-                  {isSubmitting ? "Creating account..." : "Create account"}
+                  {isSubmitting || isLoading ? "Creating account..." : "Create account"}
                 </button>
               </Form>
             )}

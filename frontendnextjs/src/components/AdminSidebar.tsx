@@ -2,37 +2,51 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { CiMenuKebab } from "react-icons/ci";
 import { IoMdCloseCircleOutline } from "react-icons/io";
-
+import { deleteCookie } from "@/libs/action"; // Assuming you have this function
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
 
+  // Toggle Sidebar
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
-  return (
-    <div
-      className={`${
-        isOpen ? "w-80 md:w-80 h-full" : "w-90 h-full"
-      } transition-all duration-300`}
-    >
-      <div
-        className={` text-white min-h-screen p-4 transition-all ${
-          isOpen ? "block" : "hidden md:block"
-        }`}
-      >
-        <Link href="/">
-          <div className="cursor-pointer p-4 flex justify-center">
-            <Image src="/tiko.png" alt="Logo" width={150} height={50} />
-          </div>
-        </Link>
+  // Logout Function
+  const handleLogout = () => {
+    deleteCookie("token"); // Clear token
+    router.push("/login/loginpromotor"); // Redirect to login page
+    router.refresh(); // Refresh state (optional)
+  };
 
+  return (
+    <div className="relative">
+      {/* Sidebar */}
+      <div
+        className={`${
+          isOpen ? "w-80" : "w-20"
+        } bg-gray-900 text-white min-h-screen transition-all duration-300`}
+      >
+        {/* Logo */}
+        <div className="p-4 flex justify-center">
+          <Link href="/">
+            <Image
+              src="/tiko.png"
+              alt="Logo"
+              width={isOpen ? 150 : 50}
+              height={50}
+              className="transition-all"
+            />
+          </Link>
+        </div>
+
+        {/* Sidebar Menu */}
         {isOpen && (
           <div className="p-4 text-lg font-bold border-b border-gray-700">
             Admin Menu
@@ -81,25 +95,28 @@ export default function AdminSidebar() {
               </Link>
             </li>
             <li>
-              <Link href="/">
-                <span
-                  className={`block px-4 py-2 rounded ${
-                    pathname === "/" ? "bg-gray-700" : "hover:bg-gray-700"
-                  }`}
-                >
-                  Logout
-                </span>
-              </Link>
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 rounded hover:bg-gray-700"
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </nav>
       </div>
 
+      {/* Sidebar Toggle Button */}
       <button
         onClick={toggleSidebar}
         className="md:hidden absolute top-4 left-4 bg-gray-800 text-white p-2 rounded"
       >
-        {isOpen ? <IoMdCloseCircleOutline /> : <CiMenuKebab className="text-2xl" />}
+        {isOpen ? (
+          <IoMdCloseCircleOutline className="text-2xl" />
+        ) : (
+          <CiMenuKebab className="text-2xl" />
+        )}
       </button>
     </div>
   );

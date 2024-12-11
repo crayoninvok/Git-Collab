@@ -5,3 +5,8 @@ export interface IUser {
   password: string;
   refCode: string;
 }
+export interface IPromotor {
+  name: string;
+  email: string;
+  avatar: string;
+}

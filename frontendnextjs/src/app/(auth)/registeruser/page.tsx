@@ -1,24 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import Swal from "sweetalert2"; // Import SweetAlert
+import Swal from "sweetalert2";
 
-// Validation schema
+
 const RegisterSchema = Yup.object().shape({
   username: Yup.string().required("Username is required"),
   email: Yup.string()
     .email("Invalid email format")
     .required("Email is required"),
-  password: Yup.string().min(3, "Password must be at least 3 characters"),
+  password: Yup.string()
+    .min(3, "Password must be at least 3 characters")
+    .required("Password is required"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords do not match!")
     .required("Confirm password is required"),
   refCode: Yup.string(), // Optional
 });
 
-// Form interface
 interface FormValues {
   username: string;
   email: string;
@@ -28,6 +29,8 @@ interface FormValues {
 }
 
 export default function RegisterUser() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const initialValues: FormValues = {
     username: "",
     email: "",
@@ -40,6 +43,7 @@ export default function RegisterUser() {
     initialValues,
     validationSchema: RegisterSchema,
     onSubmit: async (values) => {
+      setIsLoading(true);
       try {
         const res = await fetch("http://localhost:8000/api/auth/register", {
           method: "POST",
@@ -52,15 +56,13 @@ export default function RegisterUser() {
         const result = await res.json();
         if (!res.ok) throw new Error(result.message || "Registration failed");
 
-        // Display a success message using SweetAlert
         Swal.fire({
           title: "Success!",
-          text: "Registration successful!",
+          text: result.message || "Registration successful!",
           icon: "success",
           confirmButtonText: "Great!",
         });
       } catch (err: any) {
-        // Display an error message using SweetAlert
         Swal.fire({
           title: "Error!",
           text: err.message || "Registration failed!",
@@ -68,6 +70,8 @@ export default function RegisterUser() {
           confirmButtonText: "OK",
         });
         console.error("Registration failed:", err);
+      } finally {
+        setIsLoading(false);
       }
     },
   });
@@ -171,23 +175,16 @@ export default function RegisterUser() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-md text-white font-bold"
+                className={`w-full py-2 rounded-md text-white font-bold ${
+                  isLoading
+                    ? "bg-indigo-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700"
+                }`}
+                disabled={isLoading}
               >
-                Register
+                {isLoading ? "Processing..." : "Register"}
               </button>
             </form>
-          </div>
-        </div>
-        <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
-          <div className="text-white text-center lg:text-left max-w-lg">
-            <h2 className="text-5xl font-bold mb-4">
-              Join the Excitement With
-              <span className="text-orange-400"> TIKO</span>
-            </h2>
-            <p className="text-sm mb-5">
-              Register now and explore amazing events happening near you. Be the
-              first to know about exclusive offers and updates!
-            </p>
           </div>
         </div>
       </div>
