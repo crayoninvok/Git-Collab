@@ -39,9 +39,9 @@ export default function LoginPromotor() {
 
 
       router.push("/dashboard");
-    } catch (err: any) {
-      console.error("Login error:", err);
-      alert(err.message || "Login failed!");
+    } catch (err) {
+      console.error(err);
+      alert(err);
     } finally {
       setIsLoading(false);
     }
