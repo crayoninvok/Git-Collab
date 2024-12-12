@@ -6,7 +6,7 @@ import * as Yup from "yup";
 import { FaFacebook, FaTimes } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
-export default function LoginPage() {
+export default function LoginUser() {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   const validationSchema = Yup.object().shape({
@@ -34,7 +34,7 @@ export default function LoginPage() {
         }}
       ></div>
 
-      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[3%] ">
+      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[3%]">
         {/* LOGIN PINDAHIN KE COMPONENT */}
         <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[12rem]">
           <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/80 to-black/50 text-white rounded-3xl shadow-2xl border border-gray-300 backdrop-blur-lg">
@@ -44,7 +44,7 @@ export default function LoginPage() {
             {/* ALERT MASSAGE */}
             {alertMessage && (
               <div className="flex items-center bg-red-500 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-md space-x-3 mb-4">
-                <FaTimes className="text-xl" />
+                <FaTimes className="text-xl"/>
                 <span>{alertMessage}</span>
               </div>
             )}
@@ -131,7 +131,7 @@ export default function LoginPage() {
 
             <div className="text-center text-sm mt-4">
               Don't have an account?{" "}
-              <a href="/register" className="text-indigo-400 ml-1">
+              <a href="/registeruser" className="text-indigo-400 ml-1">
                 Signup
               </a>
             </div>

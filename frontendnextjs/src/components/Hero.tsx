@@ -29,7 +29,7 @@ export default function Hero({ targetDate }: HeroProps) {
   return (
     <section
       className="relative bg-center bg-transparent flex flex-col justify-center items-center text-white h-[47vh] p-10"
-      style={{ backgroundImage: "url('/path-to-background.jpg')" }}
+     
     >
       <div className="text-center">
         <p className="uppercase text-sm tracking-wide mb-4 mt-[7rem]">
