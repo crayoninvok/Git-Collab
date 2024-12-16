@@ -3,6 +3,7 @@ export interface IUser {
   email: string;
   avatar: string;
   refCode: string;
+  percentage: number
 }
 export interface IPromotor {
   name: string;

@@ -6,32 +6,31 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { CiMenuKebab } from "react-icons/ci";
 import { IoMdCloseCircleOutline } from "react-icons/io";
-import { deleteCookie } from "@/libs/action"; // Assuming you have this function
+import { deleteCookie } from "@/libs/action";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); 
 
-  // Toggle Sidebar
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
-  // Logout Function
   const handleLogout = () => {
-    deleteCookie("token"); // Clear token
-    router.push("/login/loginpromotor"); // Redirect to login page
-    router.refresh(); // Refresh state (optional)
+    deleteCookie("token");
+    window.location.assign("/login/loginpromotor");
+    router.refresh();
   };
 
   return (
-    <div className="relative">
+    <div className="relative w-0">
+      
       {/* Sidebar */}
       <div
-        className={`${
-          isOpen ? "w-80" : "w-20"
-        } bg-gray-900 text-white min-h-screen transition-all duration-300`}
+        className={`fixed top-0 left-0 z-50 bg-gray-900 text-white min-h-screen transition-transform duration-300 ${
+          isOpen ? "translate-x-0 w-80" : "-translate-x-full w-80"
+        }`}
       >
         {/* Logo */}
         <div className="p-4 flex justify-center">
@@ -39,7 +38,7 @@ export default function AdminSidebar() {
             <Image
               src="/tiko.png"
               alt="Logo"
-              width={isOpen ? 150 : 50}
+              width={150}
               height={50}
               className="transition-all"
             />
@@ -47,11 +46,9 @@ export default function AdminSidebar() {
         </div>
 
         {/* Sidebar Menu */}
-        {isOpen && (
-          <div className="p-4 text-lg font-bold border-b border-gray-700">
-            Admin Menu
-          </div>
-        )}
+        <div className="p-4 text-lg font-bold border-b border-gray-700">
+          Admin Menu
+        </div>
 
         <nav className="p-4">
           <ul className="space-y-2">
@@ -110,14 +107,22 @@ export default function AdminSidebar() {
       {/* Sidebar Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className="md:hidden absolute top-4 left-4 bg-gray-800 text-white p-2 rounded"
+        className="relative top-4 left-4 z-50 bg-transparent text-orange-500 p-2 rounded"
       >
         {isOpen ? (
-          <IoMdCloseCircleOutline className="text-2xl" />
+          <IoMdCloseCircleOutline className="text-3xl" />
         ) : (
-          <CiMenuKebab className="text-2xl" />
+          <CiMenuKebab className="text-3xl mt-5 font-bold " />
         )}
       </button>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={toggleSidebar} // Close sidebar when overlay is clicked
+        ></div>
+      )}
     </div>
   );
 }

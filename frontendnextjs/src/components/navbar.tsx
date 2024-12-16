@@ -6,31 +6,24 @@ import BurgerHandphone from "./BurgerMenuHP";
 import Image from "next/image";
 import { BiSearchAlt } from "react-icons/bi";
 import BurgerMenu from "./BurgerMenu";
+import Avatar from "./Avatar";
 import { FaSearch, FaTimes } from "react-icons/fa";
+import { useSession } from "@/context/useSession";
 
 export default function Navbar() {
+  const { isAuth } = useSession();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-  // Handle scroll hiding
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
-    if (currentScrollY > lastScrollY && currentScrollY > 100) {
-      setIsVisible(false);
-    } else {
-      setIsVisible(true);
-    }
+    setIsVisible(currentScrollY <= lastScrollY || currentScrollY <= 100);
     setLastScrollY(currentScrollY);
   };
 
-  const toggleSearchModal = () => {
-    setIsSearchModalOpen((prevState) => !prevState);
-  };
-
-  const closeModal = () => {
-    setIsSearchModalOpen(false);
-  };
+  const toggleSearchModal = () => setIsSearchModalOpen((prev) => !prev);
+  const closeModal = () => setIsSearchModalOpen(false);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
@@ -64,60 +57,49 @@ export default function Navbar() {
 
       {/* Mobile Search and Menu */}
       <div className="lg:hidden flex items-center gap-4">
-        {/* Mobile Search Icon */}
         <button
           onClick={toggleSearchModal}
           className="text-2xl text-white hover:text-orange-400"
         >
           <FaSearch />
         </button>
-
-        {/* Mobile Menu */}
-        <BurgerHandphone />
+        {isAuth ? <Avatar /> : <BurgerHandphone />}
       </div>
 
       {/* Desktop Menu */}
       <div className="hidden lg:flex gap-8 text-xl">
-        <div>
-          <Link href="/">
-            <div className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%] hover:text-black text-white">
-              Homepage
-            </div>
-          </Link>
-        </div>
-        <div>
-          <Link href="/event">
-            <div className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%] hover:text-black text-white">
-              Event
-            </div>
-          </Link>
-        </div>
-        <div>
-          <Link href="/artist">
-            <div className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%] hover:text-black text-white">
-              Artist
-            </div>
-          </Link>
-        </div>
-        <div>
-          <Link href="/news">
-            <div className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%] hover:text-black text-white">
-              News
-            </div>
-          </Link>
-        </div>
-        <BurgerMenu />
+        {isAuth ? (
+          // If authenticated, show Avatar
+          <Avatar />
+        ) : (
+          // If not authenticated, show navigation links and BurgerMenu
+          <>
+            {[
+              { href: "/", label: "Homepage" },
+              { href: "/event", label: "Event" },
+              { href: "/artist", label: "Artist" },
+              { href: "/news", label: "News" },
+            ].map((link) => (
+              <Link href={link.href} key={link.label}>
+                <div className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%] hover:text-black text-white">
+                  {link.label}
+                </div>
+              </Link>
+            ))}
+            <BurgerMenu />
+          </>
+        )}
       </div>
 
       {/* Mobile Search Modal */}
       {isSearchModalOpen && (
         <div
           className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center h-[30vh]"
-          onClick={closeModal} 
+          onClick={closeModal}
         >
           <div
             className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[90vw] max-w-md"
-            onClick={(e) => e.stopPropagation()} 
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">Search</h2>
