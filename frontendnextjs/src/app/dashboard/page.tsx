@@ -4,23 +4,27 @@ import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import Image from "next/image";
 import TableGraph from "@/components/TableGraph";
-import { useSession } from "@/context/useSessionPromotor";
+import { useSession } from "@/context/useSession";
+import { formatPrice } from "@/helpers/formatPrice";
 
 export default function DashboardPage() {
-  const { promotor, checkSession } = useSession(); // Ensure `checkSession` is exposed in the context
-  const [loading, setLoading] = useState(true); // Local loading state
+  const { promotor, checkSession } = useSession();
+  const [loading, setLoading] = useState(true);
 
-  // Fetch session data on component mount
   useEffect(() => {
     const fetchData = async () => {
-      await checkSession(); // Refresh session state
-      setLoading(false); // Disable loading after data is fetched
+      try {
+        await checkSession();
+      } catch (err) {
+        console.error("Failed to fetch promotor session:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
-  }, [checkSession]);
+  }, []);
 
-  // Handle loading state
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
@@ -29,7 +33,6 @@ export default function DashboardPage() {
     );
   }
 
-  // If `promotor` is still not available, display an error
   if (!promotor) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
@@ -39,21 +42,15 @@ export default function DashboardPage() {
   }
 
   const analyticsData = [
-    { title: "Your Event", value: "10", color: "text-orange-500" },
-    { title: "Total Ticket Sold", value: "345", color: "text-orange-500" },
-    {
-      title: "Total Revenue",
-      value: "Rp.450000000",
-      color: "text-orange-500",
-    },
-    { title: "Profit", value: "90%", color: "text-orange-500" },
+    { title: "Your Event", value: "10", color: "text-orange-500" }, // Count of events
+    { title: "Total Ticket Sold", value: "345", color: "text-orange-500" }, // Count of tickets
+    { title: "Total Revenue", value: 450000000, color: "text-orange-500" }, // Revenue (price)
+    { title: "Profit", value: "90%", color: "text-orange-500" }, // Profit as percentage
   ];
 
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row bg-gray-900 text-white">
-      {/* Sidebar */}
+    <div className="flex min-h-screen lg:flex-row bg-gray-900 text-white">
       <AdminSidebar />
-
       <div className="flex-1 px-6 bg-gray-800">
         <div className="mb-6 flex justify-between items-center flex-col lg:flex-row p-10">
           <div className="text-center lg:text-left">
@@ -63,13 +60,14 @@ export default function DashboardPage() {
             <p className="text-gray-400 mt-2">Your summary at a glance</p>
           </div>
           <div className="flex items-center space-x-5 mt-4 lg:mt-0">
-            <Image
-              src={promotor.avatar || "/placeholder.png"}
-              alt={promotor.name || "profile picture"}
-              width={80}
-              height={80}
-              className="rounded-full border-green-400 shadow-lg border-2 object-cover"
-            />
+            <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-green-400 shadow-lg relative">
+              <Image
+                src={promotor.avatar || "/placeholder.png"}
+                alt={promotor.name || "profile picture"}
+                layout="fill" // Makes the image fill the parent container
+                objectFit="cover" // Ensures the image covers the container proportionally
+              />
+            </div>
             <div>
               <h1 className="font-extrabold text-xl text-white">
                 {promotor.name}
@@ -89,7 +87,11 @@ export default function DashboardPage() {
             >
               <h2 className="text-xl font-bold text-white">{data.title}</h2>
               <p className={`mt-2 text-4xl font-bold ${data.color}`}>
-                {data.value}
+                {data.title === "Total Revenue" &&
+                typeof data.value === "number"
+                  ? formatPrice(data.value) // Format price for Total Revenue
+                  : data.value}{" "}
+                {/* Display value as is for other fields */}
               </p>
             </div>
           ))}

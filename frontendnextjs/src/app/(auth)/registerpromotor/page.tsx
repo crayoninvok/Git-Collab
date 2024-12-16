@@ -75,7 +75,7 @@ export default function PromoterRegister() {
     >
       <div className="absolute inset-0 bg-black/60"></div>
 
-      {/* Left Description Section */}
+   
       <div className="relative z-10 flex flex-col items-center lg:items-start justify-center w-full lg:w-1/2 p-6 lg:p-20 text-center lg:text-left">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
           Register to be an Event Creator here With
@@ -86,9 +86,9 @@ export default function PromoterRegister() {
         </p>
       </div>
 
-      {/* Right Form Section */}
+
       <div className="relative z-10 bg-transparent shadow-xl rounded-xl flex flex-col lg:flex-row w-full max-w-6xl overflow-hidden lg:h-[65vh]">
-        {/* Left Swiper Section */}
+
         <div className="hidden md:flex w-full lg:w-1/2 bg-gradient-to-r from-orange-400 to-black/80 backdrop-blur-lg items-center justify-center text-white p-6 lg:p-10">
           <Swiper
             modules={[Pagination, EffectCoverflow, Autoplay]}
@@ -127,7 +127,6 @@ export default function PromoterRegister() {
           </Swiper>
         </div>
 
-        {/* Right Form Section */}
         <div className="flex flex-col justify-center w-full lg:w-1/2 bg-gradient-to-r from-black/80 to-black/50 backdrop-blur-lg p-6 lg:p-10">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
             Create a Promotor Account

@@ -70,17 +70,11 @@ export default function BurgerMenu() {
           >
             Register
           </Link>
-          <Link
-            href="/dashboard"
-            onClick={() => setIsMenuOpen(false)}
-            className="text-2xl hover:text-orange-400 mt-10"
-          >
-            Promotor Mode
-          </Link>
+         
           <Link
             href="/about"
             onClick={() => setIsMenuOpen(false)}
-            className="text-2xl hover:text-orange-400"
+            className="text-2xl hover:text-orange-400 mt-12"
           >
             About Us
           </Link>
