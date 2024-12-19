@@ -12,6 +12,7 @@
       points: number
       userCouponId: number
       percentage: number
+      userCoupon: string
     }
 
     interface IPromotor {
@@ -39,10 +40,11 @@
       const [type, setType] = useState<UserType | null>(null);
       const [user, setUser] = useState<IUser | null>(null);
       const [promotor, setPromotor] = useState<IPromotor | null>(null);
+      const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
 
       const checkSession = async () => {
         try {
-          const res = await fetch("http://localhost:8000/api/auth/session", {
+          const res = await fetch(`${base_url}/auth/session`, {
             method: "GET",
             credentials: "include",
           });

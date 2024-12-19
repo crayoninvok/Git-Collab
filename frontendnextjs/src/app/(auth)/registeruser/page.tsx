@@ -29,11 +29,11 @@ interface FormValues {
 
 export default function RegisterUser() {
   const [isLoading, setIsLoading] = useState(false);
-
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
   const handleAdd = async (user: FormValues) => {
     try {
       setIsLoading(true);
-      const res = await fetch("http://localhost:8000/api/auth/register", {
+      const res = await fetch(`${base_url}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,7 +42,6 @@ export default function RegisterUser() {
       });
       const result = await res.json();
       if (!res.ok) throw result;
-      
 
       Swal.fire({
         title: "Registration Successful!",
@@ -51,7 +50,6 @@ export default function RegisterUser() {
         confirmButtonText: "OK",
         confirmButtonColor: "#f97316", // Tailwind orange-500 color
       });
-    
     } catch (err: any) {
       console.error(err);
       Swal.fire({

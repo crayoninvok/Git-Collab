@@ -1,27 +1,21 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/shadui/chart";
+import { chartData } from "./data";
 
 // Data for the chart
-const chartData = [
-  { month: "January", desktop: 250, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
+
 
 // Configuration for the chart
 //Birutua desktop
 //Biru muda mobile
 const chartConfig = {
-  desktop: {
+  mobil: {
     label: "Desktop",
     color: "#2563eb",
   },
-  mobile: {
+  motor: {
     label: "Mobile",
     color: "#60a5fa",
   },
@@ -31,7 +25,7 @@ const chartConfig = {
 export default function TableGraph() {
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
+      <LineChart accessibilityLayer data={chartData}>
         {/* Grid lines for better readability */}
         <CartesianGrid vertical={false} />
 
@@ -53,9 +47,9 @@ export default function TableGraph() {
         />
 
         {/* Bars for Desktop and Mobile data */}
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-        <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
-      </BarChart>
+        <Line dataKey="mobil" fill="var(--color-desktop)" radius={4} />
+        <Line dataKey="motor" fill="var(--color-mobile)" radius={4} />
+      </LineChart>
     </ChartContainer>
   );
 }

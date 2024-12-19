@@ -7,25 +7,26 @@ import { useState } from "react";
 import { CiMenuKebab } from "react-icons/ci";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import { deleteCookie } from "@/libs/action";
+import { useSession } from "@/context/useSession";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false); 
+  const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useSession();
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
   const handleLogout = () => {
-    deleteCookie("token");
-    window.location.assign("/login/loginpromotor");
-    router.refresh();
+    logout();
+    router.push("/login/loginpromotor")
   };
+  
 
   return (
     <div className="relative w-0">
-      
       {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 z-50 bg-gray-900 text-white min-h-screen transition-transform duration-300 ${
@@ -107,12 +108,12 @@ export default function AdminSidebar() {
       {/* Sidebar Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className="relative top-4 left-4 z-50 bg-transparent text-orange-500 p-2 rounded"
+        className="relative top-4 left-4 z-50 bg-transparent text-slate-100 p-2 rounded"
       >
         {isOpen ? (
-          <IoMdCloseCircleOutline className="text-3xl" />
+          <IoMdCloseCircleOutline className="text-[35px]" />
         ) : (
-          <CiMenuKebab className="text-3xl mt-5 font-bold " />
+          <CiMenuKebab className="text-[35px] mt-5 font-bold " />
         )}
       </button>
 

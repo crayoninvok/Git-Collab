@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import Image from "next/image";
-import TableGraph from "@/components/TableGraph";
+import TableGraph from "@/components/graph/tableGraph";
 import { useSession } from "@/context/useSession";
 import { formatPrice } from "@/helpers/formatPrice";
 
