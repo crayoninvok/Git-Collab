@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function VerifyPage({ params }: { params?: { token?: string } }) {
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
 
   const onVerify = async () => {
     if (isVerifying) return;
@@ -21,7 +22,7 @@ export default function VerifyPage({ params }: { params?: { token?: string } }) 
 
     try {
       const res = await fetch(
-        `http://localhost:8000/api/auth/verifypromotor/${params.token}`,
+        `${base_url}/auth/verifypromotor/${params.token}`,
         {
           method: "PATCH",
           headers: {

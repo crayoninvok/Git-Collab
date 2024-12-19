@@ -19,7 +19,10 @@ interface FormValues {
   password: string;
 }
 
+
+const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
 export default function LoginPromotor() {
+ 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,7 +30,7 @@ export default function LoginPromotor() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/auth/promotorLogin", {
+      const res = await fetch(`${base_url}/auth/promotorLogin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,7 +44,7 @@ export default function LoginPromotor() {
 
       // Display success toast
       toast.success("Login successful! Redirecting to dashboard...", {
-        position: "top-right",
+        position: "bottom-right",
         autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,

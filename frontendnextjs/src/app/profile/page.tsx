@@ -3,12 +3,20 @@
 import { useSession } from "@/context/useSession";
 import { formatPrice } from "@/helpers/formatPrice";
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { FaStar, FaTicketAlt, FaUser } from "react-icons/fa";
+import Swal from "sweetalert2";
+import { RiDiscountPercentFill } from "react-icons/ri";
+import { formatDate } from "@/helpers/formatDate";
 
 export default function ProfilePage() {
-  const { isAuth, type, user } = useSession(); // Access user session directly
+  const { isAuth, type, user } = useSession();
+
   const [uploading, setUploading] = useState(false);
+  const background =
+    "https://res.cloudinary.com/dxpeofir6/video/upload/v1734510609/Blue_Dark_Blue_Gradient_Color_and_Style_Video_Background_d9g5ts.mp4";
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const tickets = [
     {
@@ -47,61 +55,75 @@ export default function ProfilePage() {
       eventName: "Cigarette After Sex Tour",
       date: "2024-12-30",
       venue: "GBK Sport Complex Senayan",
-      seat: "B22",
+      seat: "A12",
       price: 950000,
+      status: "SUCCEED",
+    },
+    {
+      id: 5,
+      logo: "/orchestra.jpg",
+      eventName: "Classic Musical Concert",
+      date: "2024-12-30",
+      venue: "Balai Resital Kartanegara",
+      seat: "D45",
+      price: 1000000,
       status: "SUCCEED",
     },
   ];
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      Swal.fire({
+        title: "Error!",
+        text: "No file selected. Please choose a file to upload.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", file);
 
     try {
       setUploading(true);
-      const response = await fetch(
-        "http://localhost:8000/api/users/avatar-cloud",
-        {
-          method: "PATCH",
-          body: formData,
-          credentials: "include", // Include authentication cookies
-        }
-      );
+      const response = await fetch("http://localhost:8000/api/users/avatar-cloud", {
+        method: "PATCH",
+        body: formData,
+        credentials: "include",
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to upload avatar");
-      }
-
-      const data = await response.json();
-
-      if (data.avatar) {
-        toast.success("Your profile picture has been updated successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-
-        // Reload the page to fetch the updated user information
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
+      if (response.ok) {
+        Swal.fire({
+          title: "Success!",
+          text: "Your profile picture has been updated successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => window.location.reload());
+      } else {
+        throw new Error(`Failed to upload. Status: ${response.status}`);
       }
     } catch (error) {
-      console.error("Error updating avatar:", error);
-      toast.error(
-        "Failed to update your profile picture. Please try again later.",
-        {
-          position: "top-right",
-          autoClose: 3000,
-        }
-      );
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to update your profile picture. Please try again later.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
       setUploading(false);
     }
+  };
+
+  const openModal = (image: string) => {
+    setSelectedImage(image);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedImage(null);
+    setIsModalOpen(false);
   };
 
   if (!isAuth) {
@@ -122,44 +144,38 @@ export default function ProfilePage() {
 
   return (
     <>
-      <ToastContainer />
-      <div
-        className="min-h-screen flex flex-col lg:flex-row py-10 px-6"
-        style={{
-          backgroundImage: "url('/stage.jpeg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          transition: "filter 0.3s ease",
-        }}
-      >
-        {/* Left Column: Ticket List */}
-        <div className="flex flex-col w-full lg:w-1/2 bg-gray-800 bg-opacity-90 p-8 rounded-xl shadow-lg mt-[9vh]">
-          <h2 className="text-2xl font-bold mb-6 text-gray-100">
-            Your Tickets
-          </h2>
+      {/* Video Background */}
+      <video
+        className="fixed top-0 left-0 w-full h-full object-cover -z-10"
+        src={background}
+        autoPlay
+        loop
+        muted
+      />
+
+      {/* Main Content */}
+      <div className="min-h-screen py-10 mt-5 flex flex-col lg:flex-row px-6 relative">
+        {/* Left Section */}
+        <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-5 rounded-xl shadow-lg mt-10">
+          <h2 className="text-2xl font-bold mb-6 text-gray-100">Your Tickets</h2>
           <div className="space-y-4">
             {tickets.map((ticket) => (
               <div key={ticket.id} className="p-4 bg-gray-700 rounded-lg shadow">
-                <div className="flex items-center justify-between space-x-4">
+                <div className="flex flex-col md:flex-row items-center justify-between space-x-4">
                   {/* Logo */}
                   <img
                     src={ticket.logo}
                     alt={`${ticket.eventName} Logo`}
-                    className="w-16 h-16 rounded-md"
+                    className="w-16 h-16 rounded-md cursor-pointer"
+                    onClick={() => openModal(ticket.logo)}
                   />
-
-                  {/* Event Details */}
                   <div className="flex-1">
                     <p className="font-semibold text-white">{ticket.eventName}</p>
                     <p className="text-gray-400 text-sm">Date: {ticket.date}</p>
                     <p className="text-gray-400 text-sm">Venue: {ticket.venue}</p>
                     <p className="text-gray-400 text-sm">Seat: {ticket.seat}</p>
-                    <p className="text-gray-400 text-sm">
-                      Price: {formatPrice(ticket.price)}
-                    </p>
+                    <p className="text-gray-400 text-sm">Price: {formatPrice(ticket.price)}</p>
                   </div>
-
-                  {/* Action Button */}
                   <div className="flex flex-col items-end">
                     <p className="text-white mb-2">{ticket.status}</p>
                     <button className="text-black bg-orange-500 hover:bg-orange-600 rounded-md px-4 py-2">
@@ -172,13 +188,14 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Right Column: Profile */}
-        <div className="flex flex-col w-full lg:w-1/2 bg-gray-800 bg-opacity-90 p-8 lg:ml-8 rounded-xl shadow-lg mt-[9vh]">
+        {/* Right Section */}
+        <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-8 lg:ml-8 rounded-xl shadow-lg mt-10">
           <div className="flex flex-col items-center w-full mb-8">
             <img
               src={user?.avatar || "https://via.placeholder.com/150"}
               alt="User Avatar"
-              className="w-24 h-24 rounded-full border-4 border-green-500 shadow-md mb-4"
+              className="w-24 h-24 rounded-full border-4 border-green-500 shadow-md mb-4 cursor-pointer"
+              onClick={() => openModal(user?.avatar || "https://via.placeholder.com/150")}
             />
             <label className="text-white text-[10px] bg-slate-500 p-1 rounded-3xl hover:bg-yellow-500 hover:text-orange-600 cursor-pointer">
               {uploading ? "Uploading..." : "Change profile picture"}
@@ -190,42 +207,91 @@ export default function ProfilePage() {
                 disabled={uploading}
               />
             </label>
-            <h2 className="text-2xl font-bold text-white mt-10">
-              {user?.username || "Guest"}
-            </h2>
-            <p className="text-sm text-gray-400">
-              {user?.email || "No Email Available"}
-            </p>
+            <h2 className="text-2xl font-bold text-white mt-4">{user?.username || "Guest"}</h2>
+            <p className="text-sm text-gray-400">{user?.email || "No Email Available"}</p>
           </div>
 
+          {/* User Info */}
           <div className="space-y-6 bg-gray-900 bg-opacity-30 rounded-lg p-6">
             <div className="flex justify-between items-center">
-              <p className="text-gray-400">User ID:</p>
-              <p className="font-semibold text-white">{user?.id}</p>
+              <div className="flex items-center">
+                <FaUser className="text-yellow-700 text-3xl mr-3" />
+                <p className="text-gray-400">Your ID :</p>
+              </div>
+              <p className="font-semibold text-white">{user?.id || "N/A"}</p>
             </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-400">Your RefCode:</p>
-              <p className="font-semibold text-white">{user?.refCode}</p>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-400">Your Points:</p>
-              <div className="inline-block px-4 py-2 bg-gray-800 text-orange-500 font-bold rounded-lg border border-orange-500">
-                {user?.points !== undefined
-                  ? `${user.points} pts`
-                  : "No points available"}
+            {/* Coupon */}
+            <div className="flex items-center justify-between bg-yellow-400 rounded-lg p-4 shadow-lg">
+              <div className="flex items-center">
+                <FaTicketAlt className="text-yellow-700 text-3xl mr-3" />
+                <div>
+                  <p className="text-gray-800 font-semibold">Your Ref Code :</p>
+                  <p className="text-gray-600 text-lg font-bold">
+                    {user?.refCode || "No coupon available"}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-400">Your Coupon:</p>
-              <p className="font-semibold text-white">
-                {user?.percentage !== undefined
-                  ? `${user.percentage} %`
-                  : "You don’t have any coupon"}
-              </p>
+
+            {/* Points */}
+            <div className="flex items-center justify-between bg-green-500 rounded-lg p-4 shadow-lg">
+              <div className="flex items-center">
+                <FaStar className="text-white text-3xl mr-3" />
+                <div>
+                  <p className="text-white font-semibold">Your Points :</p>
+                  <p className="text-white text-lg font-bold">
+                    {user?.points !== undefined
+                      ? `${formatPrice(user.points)} pts`
+                      : "No points"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Coupon Percentage */}
+            <div className="flex items-center justify-between bg-blue-500 rounded-lg p-4 shadow-lg">
+              <div className="flex items-center">
+                <RiDiscountPercentFill className="text-white text-3xl mr-3" />
+                {user?.percentage ? (
+                  <div className="flex flex-col">
+                    <p className="text-white font-semibold">Your Coupon:</p>
+                    <p className="text-white text-lg font-bold">
+                      {`${user.percentage}% off`}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-white font-semibold">You have no coupon yet.</p>
+                )}
+              </div>
+              {user?.percentage && (
+                <div className="flex text-end space-x-3">
+                  <p className="text-white">Expired At:</p>
+                  <p className="text-white">{formatDate(user.userCoupon)}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="relative">
+            <img
+              src={selectedImage!}
+              alt="Full View"
+              className="max-w-full max-h-screen rounded-lg"
+            />
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-white text-3xl"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

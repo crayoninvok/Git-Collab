@@ -5,10 +5,14 @@ import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function VerifyPage({ params }: { params?: { token?: string } }) {
+export default function VerifyPage({
+  params,
+}: {
+  params?: { token?: string };
+}) {
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false); // Prevent multiple API calls
-
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
   const onVerify = async () => {
     if (isVerifying) return; // Prevent duplicate calls
     setIsVerifying(true);
@@ -21,7 +25,7 @@ export default function VerifyPage({ params }: { params?: { token?: string } }) 
 
     try {
       const res = await fetch(
-        `http://localhost:8000/api/auth/verifyuser/${params.token}`,
+        `${base_url}/auth/verifyuser/${params.token}`,
         {
           method: "PATCH",
           headers: {

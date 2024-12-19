@@ -12,6 +12,7 @@ import * as Yup from "yup";
 import { useState } from "react";
 import Swal from "sweetalert2";
 
+
 const slides = [
   { src: "/entertaiment/ISMAYA.png", alt: "Ismaya logo", label: "Ismaya" },
   { src: "/entertaiment/PKENT.png", alt: "PK logo", label: "PK ENTERTAINMENT" },
@@ -22,24 +23,25 @@ const slides = [
 const RegisterSchema = Yup.object().shape({
   name: Yup.string().required("Promotor name is required"),
   email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
+  .email("Invalid email address")
+  .required("Email is required"),
   password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
+  .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
-  confirmPassword: Yup.string()
+    confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords do not match!")
     .required("Confirm password is required"),
-  agreeToTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
-});
-
-export default function PromoterRegister() {
+    agreeToTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
+  });
+  
+  export default function PromoterRegister() {
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values: any, actions: any) => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/auth/promotorRegister", {
+      const res = await fetch(`${base_url}/auth/promotorRegister`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -49,7 +51,7 @@ export default function PromoterRegister() {
 
       Swal.fire({
         title: "Success!",
-        text: result.message || "Registration successful!",
+        text:"Welcome to TIKO! Please check your email for verification.",
         icon: "success",
         confirmButtonText: "Great!",
       });

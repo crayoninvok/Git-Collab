@@ -18,7 +18,10 @@ export default function Avatar() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -44,7 +47,7 @@ export default function Avatar() {
 
     setTimeout(() => {
       router.push("/login/loginuser");
-    }, 2000); 
+    }, 2000);
   };
 
   // Render nothing if not authenticated
@@ -66,8 +69,10 @@ export default function Avatar() {
           />
         </button>
         <div className="flex flex-col">
-          <h1 className="text-sm font-semibold">{user.username || "User"}</h1>
-          <h1 className="text-sm">{user.email}</h1>
+          <h1 className="text-sm hidden md:block font-semibold">
+            {user.username || "User"}
+          </h1>
+          <h1 className="text-sm hidden md:block">{user.email}</h1>
         </div>
       </div>
 

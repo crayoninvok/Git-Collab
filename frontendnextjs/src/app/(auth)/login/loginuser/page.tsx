@@ -23,13 +23,13 @@ export default function LoginUser() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
     setAlertMessage(null);
 
     try {
-      const res = await fetch("http://localhost:8000/api/auth/login", {
+      const res = await fetch(`${base_url}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,8 +84,8 @@ export default function LoginUser() {
         }}
       ></div>
 
-      <div className="relative flex flex-col lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[3%]">
-        <div className="flex items-center justify-center w-full lg:w-1/2 mt-[5rem] md:mt-[12rem]">
+      <div className="relative flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[3%]">
+        <div className="flex items-center justify-center w-full lg:w-1/2 mt-[1rem] md:mt-[12rem]">
           <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/80 to-black/50 text-white rounded-3xl shadow-2xl border border-gray-300 backdrop-blur-lg">
             <h1 className="text-3xl font-bold mb-2">Login</h1>
             <p className="text-sm mb-4">Welcome back!</p>
@@ -198,7 +198,7 @@ export default function LoginUser() {
         </div>
 
         <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
-          <div className="text-white text-center lg:text-left max-w-lg">
+          <div className="text-white text-center mt-8  lg:text-left max-w-lg">
             <h2 className="text-5xl font-bold mb-4 md:mt-[10rem]">
               Find Amazing Events Happening With
               <span className="text-orange-400"> TIKO</span>
