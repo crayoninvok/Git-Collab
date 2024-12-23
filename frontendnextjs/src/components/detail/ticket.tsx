@@ -1,16 +1,21 @@
-// src/app/event/[slug]/_components/EventTickets.tsx
+// components/detail/ticket.tsx
 import { useState } from "react";
-import { Ticket } from "@/types/event";
+import { Ticket } from "../../types/event";
 import { formatPrice } from "@/helpers/formatPrice";
 import { Minus, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface EventTicketsProps {
   tickets: Ticket[];
+  eventId: number;
 }
 
-export default function EventTickets({ tickets }: EventTicketsProps) {
+export default function EventTickets({ tickets, eventId }: EventTicketsProps) {
+  const router = useRouter();
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const MAX_TICKETS = 4;
 
   const selectedTicket = tickets.find((t) => t.id === selectedTicketId);
 
@@ -18,8 +23,94 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
     if (!selectedTicket) return;
     
     const newQuantity = quantity + change;
-    if (newQuantity >= 1 && newQuantity <= selectedTicket.quantity) {
+    if (newQuantity >= 1 && newQuantity <= Math.min(selectedTicket.quantity, MAX_TICKETS)) {
       setQuantity(newQuantity);
+    }
+  };
+
+  const handleBuyTickets = async () => {
+    if (!selectedTicket) return;
+
+    try {
+      // Session check using your existing auth endpoint
+      const session = await axios.get('http://localhost:8000/api/auth/session', {
+        withCredentials: true
+      });
+
+      if (!session.data) {
+        sessionStorage.setItem('pendingPurchase', JSON.stringify({
+          eventId,
+          ticketId: selectedTicketId,
+          quantity
+        }));
+        router.push('/login');
+        return;
+      }
+
+      if (session.data.type !== 'user') {
+        alert('Only registered users can purchase tickets');
+        return;
+      }
+
+      // Load Midtrans script dynamically
+      const script = document.createElement('script');
+      script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+      script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY!);
+      document.head.appendChild(script);
+
+      script.onload = async () => {
+        try {
+          const response = await axios.post(
+            'http://localhost:8000/api/payment/token',
+            {
+              eventId,
+              ticketId: selectedTicketId,
+              quantity,
+              totalPrice: selectedTicket.price * quantity
+            },
+            {
+              withCredentials: true
+            }
+          );
+
+          // @ts-ignore
+          window.snap.pay(response.data.token, {
+            onSuccess: async (result: any) => {
+              await axios.post(
+                'http://localhost:8000/api/payment/success',
+                {
+                  orderId: result.order_id,
+                  paymentId: result.transaction_id
+                },
+                {
+                  withCredentials: true
+                }
+              );
+              router.push('/orders');
+            },
+            onPending: () => {
+              router.push('/orders');
+            },
+            onError: () => {
+              alert('Payment failed. Please try again.');
+            },
+            onClose: () => {
+              // Handle when customer closes the popup
+            }
+          });
+        } catch (error) {
+          console.error('Payment token error:', error);
+          alert('Failed to initiate payment. Please try again.');
+        }
+      };
+
+      script.onerror = () => {
+        alert('Failed to load payment system. Please try again.');
+      };
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Failed to process payment. Please try again.');
     }
   };
 
@@ -62,7 +153,7 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
         <div className="space-y-4">
           <div className="rounded-lg bg-zinc-800 p-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-300">Quantity</span>
+              <span className="text-gray-300">Quantity (Max 4)</span>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleQuantityChange(-1)}
@@ -74,7 +165,7 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
                 <span className="w-8 text-center">{quantity}</span>
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= selectedTicket.quantity}
+                  disabled={quantity >= Math.min(selectedTicket.quantity, MAX_TICKETS)}
                   className="p-1 rounded-full hover:bg-zinc-700 disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4" />
@@ -91,7 +182,10 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
               </span>
             </div>
             
-            <button className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors">
+            <button 
+              onClick={handleBuyTickets}
+              className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            >
               Buy Tickets
             </button>
           </div>

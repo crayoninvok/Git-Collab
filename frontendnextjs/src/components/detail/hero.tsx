@@ -24,7 +24,7 @@ export default function EventHero({ event }: EventHeroProps) {
   };
 
   return (
-    <div className="relative h-[500px] w-full overflow-hidden">
+    <div className="relative h-[900px] w-full overflow-hidden">
       <img
         src={event.thumbnail || "/default-event.jpg"}
         alt={event.title}
