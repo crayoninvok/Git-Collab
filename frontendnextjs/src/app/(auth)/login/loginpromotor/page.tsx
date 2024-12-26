@@ -12,9 +12,9 @@ const LoginSchema = Yup.object().shape({
   password: Yup.string().required("Password is required"),
 });
 
-const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
-
+const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
 export default function LoginPromotor() {
+ 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 

@@ -1,11 +1,18 @@
 "use client";
 
 import AdminSidebar from "@/components/AdminSidebar";
+<<<<<<< HEAD
 import { useSession } from "@/context/useSessionHook";
 import { useEffect, useRef, useState } from "react";
 import { formatDate } from "@/helpers/formatDate";
 import { useRouter } from "next/navigation";
 import { dummyDataForPromotor } from "@/components/dummydata/dummyDataPromotor";
+=======
+import { useSession } from "@/context/useSession";
+import { useEffect, useRef, useState } from "react";
+import { formatDate } from "@/helpers/formatDate";
+import { useRouter } from "next/navigation";
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
 import Swal from "sweetalert2";
 
 export default function AdminProfile() {
@@ -50,6 +57,7 @@ export default function AdminProfile() {
     try {
       setIsLoading(true);
       console.log("Uploading file...");
+<<<<<<< HEAD
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
@@ -64,6 +72,13 @@ export default function AdminProfile() {
         },
         body: formData,
         // credentials: "include", buat kukis takutnya mau ganti lagi
+=======
+
+      const response = await fetch(`${base_url}/promotors/avatar-cloud`, {
+        method: "PATCH",
+        body: formData,
+        credentials: "include",
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
       });
 
       console.log("Response Status:", response.status);
@@ -123,7 +138,11 @@ export default function AdminProfile() {
 
   if (!promotor) {
     return (
+<<<<<<< HEAD
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white">
+=======
+      <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
         <h1 className="text-3xl font-bold">No Promotor Data Found</h1>
       </div>
     );
@@ -145,6 +164,7 @@ export default function AdminProfile() {
 
   return (
     <>
+<<<<<<< HEAD
       <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
         <AdminSidebar />
         <div className="flex-1 px-6 py-6">
@@ -166,6 +186,29 @@ export default function AdminProfile() {
                 />
               </div>
 
+=======
+      <div className="flex min-h-screen  bg-gray-900 text-white">
+        <AdminSidebar />
+        <div className="flex-1 px-6 py-6">
+          <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h1 className="text-3xl font-bold mb-4 text-center">
+              Admin Profile
+            </h1>
+            
+            <div className="flex items-center lg:gap-8 justify-center">
+              {/* Profile Avatar */}
+              <div className="flex-shrink-0">
+                <img
+                  src={avatar || "https://via.placeholder.com/150"}
+                  alt="Admin Avatar"
+                  className="w-[20vw] h-60 rounded-lg border-2 border-glow shadow-lg cursor-pointer"
+                  onClick={() =>
+                    openModal(avatar || "https://via.placeholder.com/150")
+                  }
+                />
+              </div>
+
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
               {/* Input foto */}
               <input
                 ref={fileInputRef}
@@ -178,6 +221,7 @@ export default function AdminProfile() {
               {/* Profil */}
               <div className="mt-4 lg:mt-0 flex-col items-center">
                 <div className="mb-4 text-center">
+<<<<<<< HEAD
                   <h2 className="text-xl font-semibold text-gray-100">
                     Promotor Name
                   </h2>
@@ -192,6 +236,18 @@ export default function AdminProfile() {
                     Last Login
                   </h2>
                   <p className="text-gray-300">
+=======
+                  <h2 className="text-xl font-semibold">Promotor Name</h2>
+                  <p className="text-gray-400">{name || "Not Available"}</p>
+                </div>
+                <div className="mb-4 text-center">
+                  <h2 className="text-xl font-semibold">Email</h2>
+                  <p className="text-gray-400">{email || "Not Available"}</p>
+                </div>
+                <div className="mb-4 text-center">
+                  <h2 className="text-xl font-semibold">Last Login</h2>
+                  <p className="text-gray-400">
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
                     {lastLogin || "Not Available"}
                   </p>
                 </div>
@@ -220,6 +276,7 @@ export default function AdminProfile() {
                 Logout
               </button>
             </div>
+<<<<<<< HEAD
           </div>
           <div className="rounded-lg bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 mt-5 p-6">
             <h1 className="text-2xl font-bold text-white mb-4">Your Events</h1>
@@ -266,6 +323,8 @@ export default function AdminProfile() {
                 </div>
               ))}
             </div>
+=======
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
           </div>
         </div>
       </div>

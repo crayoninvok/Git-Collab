@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import Image from "next/image";
+<<<<<<< HEAD
 import { useSession } from "@/context/useSessionHook";
+=======
+import TableGraph from "@/components/graph/tableGraph";
+import { useSession } from "@/context/useSession";
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
 import { formatPrice } from "@/helpers/formatPrice";
 import StatisticChart from "@/components/graph/statistiChart";
 import { graphDataDaily } from "@/components/graph/dayData";

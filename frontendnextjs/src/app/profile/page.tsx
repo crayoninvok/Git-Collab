@@ -10,6 +10,16 @@ import { formatDate } from "@/helpers/formatDate";
 
 export default function ProfilePage() {
   const { isAuth, type, user } = useSession();
+<<<<<<< HEAD
+=======
+
+  const [uploading, setUploading] = useState(false);
+  const background =
+    "https://res.cloudinary.com/dxpeofir6/video/upload/v1734510609/Blue_Dark_Blue_Gradient_Color_and_Style_Video_Background_d9g5ts.mp4";
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
 
   const [uploading, setUploading] = useState(false);
   const background =
@@ -71,9 +81,7 @@ export default function ProfilePage() {
     },
   ];
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       Swal.fire({
@@ -96,6 +104,7 @@ export default function ProfilePage() {
 
     try {
       setUploading(true);
+<<<<<<< HEAD
       const response = await fetch(`${base_url}/users/avatar-cloud`, {
         method: "PATCH",
         headers: {
@@ -103,6 +112,12 @@ export default function ProfilePage() {
         },
         body: formData,
         // credentials: "include",
+=======
+      const response = await fetch("http://localhost:8000/api/users/avatar-cloud", {
+        method: "PATCH",
+        body: formData,
+        credentials: "include",
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
       });
 
       if (response.ok) {
@@ -168,6 +183,7 @@ export default function ProfilePage() {
       <div className="min-h-screen py-10 mt-5 flex flex-col lg:flex-row px-6 relative">
         {/* Left Section */}
         <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-5 rounded-xl shadow-lg mt-10">
+<<<<<<< HEAD
           <h2 className="text-2xl font-bold mb-6 text-gray-100">
             Your Tickets
           </h2>
@@ -177,6 +193,12 @@ export default function ProfilePage() {
                 key={ticket.id}
                 className="p-4 bg-gray-700 rounded-lg shadow"
               >
+=======
+          <h2 className="text-2xl font-bold mb-6 text-gray-100">Your Tickets</h2>
+          <div className="space-y-4">
+            {tickets.map((ticket) => (
+              <div key={ticket.id} className="p-4 bg-gray-700 rounded-lg shadow">
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
                 <div className="flex flex-col md:flex-row items-center justify-between space-x-4">
                   {/* Logo */}
                   <img
@@ -194,9 +216,7 @@ export default function ProfilePage() {
                       Venue: {ticket.venue}
                     </p>
                     <p className="text-gray-400 text-sm">Seat: {ticket.seat}</p>
-                    <p className="text-gray-400 text-sm">
-                      Price: {formatPrice(ticket.price)}
-                    </p>
+                    <p className="text-gray-400 text-sm">Price: {formatPrice(ticket.price)}</p>
                   </div>
                   <div className="flex flex-col items-end">
                     <p className="text-white mb-2">{ticket.status}</p>
@@ -216,10 +236,15 @@ export default function ProfilePage() {
             <img
               src={user?.avatar || "https://via.placeholder.com/150"}
               alt="User Avatar"
+<<<<<<< HEAD
               className="w-24 h-24 rounded-full border-4 border-orange-500 shadow-md mb-4 cursor-pointer"
               onClick={() =>
                 openModal(user?.avatar || "https://via.placeholder.com/150")
               }
+=======
+              className="w-24 h-24 rounded-full border-4 border-green-500 shadow-md mb-4 cursor-pointer"
+              onClick={() => openModal(user?.avatar || "https://via.placeholder.com/150")}
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
             />
             <label className="text-white text-[10px] bg-slate-500 p-1 rounded-3xl hover:bg-yellow-500 hover:text-orange-600 cursor-pointer">
               {uploading ? "Uploading..." : "Change profile picture"}
@@ -231,12 +256,17 @@ export default function ProfilePage() {
                 disabled={uploading}
               />
             </label>
+<<<<<<< HEAD
             <h2 className="text-2xl font-bold text-white mt-4">
               {user?.username || "Guest"}
             </h2>
             <p className="text-sm text-gray-400">
               {user?.email || "No Email Available"}
             </p>
+=======
+            <h2 className="text-2xl font-bold text-white mt-4">{user?.username || "Guest"}</h2>
+            <p className="text-sm text-gray-400">{user?.email || "No Email Available"}</p>
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
           </div>
 
           {/* User Info */}
@@ -288,9 +318,13 @@ export default function ProfilePage() {
                     </p>
                   </div>
                 ) : (
+<<<<<<< HEAD
                   <p className="text-white font-semibold">
                     You have no coupon yet.
                   </p>
+=======
+                  <p className="text-white font-semibold">You have no coupon yet.</p>
+>>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
                 )}
               </div>
               {user?.percentage && (
