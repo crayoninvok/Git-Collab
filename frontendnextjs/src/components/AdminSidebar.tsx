@@ -6,12 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { CiMenuKebab } from "react-icons/ci";
 import { IoMdCloseCircleOutline } from "react-icons/io";
-<<<<<<< HEAD
 import { useSession } from "@/context/useSessionHook";
-=======
-import { deleteCookie } from "@/libs/action";
-import { useSession } from "@/context/useSession";
->>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -25,11 +20,7 @@ export default function AdminSidebar() {
 
   const handleLogout = () => {
     logout();
-<<<<<<< HEAD
     router.push("/login/loginpromotor");
-=======
-    router.push("/login/loginpromotor")
->>>>>>> 42f54e4701b470bcadc7731f8bdeb58e7f491df0
   };
   
 
