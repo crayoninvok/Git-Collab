@@ -1,28 +1,29 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useSession } from "@/context/useSession";
+import { useSession } from "@/context/useSessionHook";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { TbMenuDeep } from "react-icons/tb";
+import { FaUserCircle, FaSignOutAlt, FaMicroblog } from "react-icons/fa";
+import { FiChevronRight } from "react-icons/fi";
+import { RiHomeSmileFill } from "react-icons/ri";
+import { SiEventbrite } from "react-icons/si";
 
 export default function Avatar() {
   const { isAuth, user, logout } = useSession();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Toggle dropdown menu
-  const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
       }
     };
 
@@ -30,8 +31,8 @@ export default function Avatar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle logout with toast
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     toast.success("You have been logged out successfully.", {
       position: "top-right",
       autoClose: 3000,
@@ -46,95 +47,143 @@ export default function Avatar() {
     logout();
 
     setTimeout(() => {
-      router.push("/login/loginuser");
-    }, 2000);
+      window.location.assign("/login/");
+    }, 1000);
   };
 
-  // Render nothing if not authenticated
+  const navigateTo = (path: string) => {
+    setIsMenuOpen(false);
+    router.push(path);
+  };
+
   if (!isAuth || !user) {
     return null;
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative" ref={menuRef}>
       <ToastContainer />
 
-      {/* Avatar and User Info */}
-      <div className="flex space-x-3 items-center">
-        <button onClick={toggleDropdown} className="focus:outline-none">
-          <img
-            src={user.avatar || "/default-user-avatar.png"}
-            alt="User Avatar"
-            className="w-14 h-14 rounded-full border-2 border-green-300"
-          />
-        </button>
-        <div className="flex flex-col">
-          <h1 className="text-sm hidden md:block font-semibold">
-            {user.username || "User"}
-          </h1>
-          <h1 className="text-sm hidden md:block">{user.email}</h1>
+      {/* Avatar Button */}
+      <button
+        onClick={toggleMenu}
+        className="flex items-center justify-between h-[50px] px-3 py-1 bg-gray-700/40 rounded-full shadow-md hover:shadow-glow transition duration-500 focus:outline-none border border-yellow-500"
+        aria-expanded={isMenuOpen}
+        aria-controls="menu"
+      >
+        <span className="text-white font-semibold">
+          {user.username?.slice(0, 3).toUpperCase() || "username"}
+        </span>
+        <div className="ml-2 w-8 h-8 flex justify-center items-center bg-gray-700 rounded-full">
+          <TbMenuDeep className="w-8" />
+        </div>
+      </button>
+
+      {/* Sliding Menu */}
+      <div
+        className={`fixed top-0 right-0 w-[350px] h-screen bg-gray-800/80 text-white rounded-l-2xl shadow-lg transform transition-all duration-500 ease-in-out z-50 ${
+          isMenuOpen
+            ? "translate-x-0 opacity-100"
+            : "translate-x-full opacity-0"
+        }`}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-400 bg-gray-900">
+          <img src="/nrvnkurt.png" alt="Menu Logo" className="h-10 w-auto" />
+          Navigtion Menu
+          <button
+            onClick={toggleMenu}
+            className="text-gray-400 hover:text-gray-200 transition duration-200"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Menu Content */}
+        <div className="px-6 py-6 space-y-6 h-full">
+          {/* Welcome Section */}
+          <div>
+            <h1 className="text-[22px] font-semibold text-gray-300">
+              Hello{" "}
+              <span className="text-yellow-500">
+                {user.username.toLocaleUpperCase()}{" "}
+              </span>
+              🌟,
+            </h1>
+          </div>
+
+          {/* Avatar */}
+          <div className="flex justify-center items-center">
+            <img
+              src={user.avatar || "/default-avatar.png"}
+              alt="avatar"
+              className="rounded-full w-32 h-32 border-4 border-orange-500 shadow-lg"
+            />
+          </div>
+
+          {/* Menu Items */}
+          <div className="space-y-4">
+            {/* Profile */}
+            <MenuItem
+              icon={<FaUserCircle className="text-white text-xl" />}
+              label="Profile"
+              onClick={() => navigateTo("/profile")}
+            />
+
+            {/* Homepage */}
+            <MenuItem
+              icon={<RiHomeSmileFill className="text-white text-xl" />}
+              label="Homepage"
+              onClick={() => navigateTo("/")}
+            />
+
+            {/* Event */}
+            <MenuItem
+              icon={<SiEventbrite className="text-white text-xl" />}
+              label="Event"
+              onClick={() => navigateTo("/event")}
+            />
+
+            {/* Artist */}
+            <MenuItem
+              icon={<FaMicroblog className="text-white text-xl" />}
+              label="Artist"
+              onClick={() => navigateTo("/artist")}
+            />
+
+            {/* Logout */}
+            <MenuItem
+              icon={<FaSignOutAlt className="text-red-500 text-xl" />}
+              label="Logout"
+              onClick={handleLogout}
+              highlight
+            />
+          </div>
         </div>
       </div>
-
-      {/* Dropdown Menu */}
-      {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-black/50 border border-gray-800 rounded-lg shadow-lg backdrop-blur-md z-50">
-          <ul className="py-2">
-            <li>
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  router.push("/profile");
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-sky-200 hover:text-orange-300"
-              >
-                Profile
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  router.push("/");
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-sky-200 hover:text-orange-300"
-              >
-                Home
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  router.push("/event");
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-sky-200 hover:text-orange-300"
-              >
-                Event
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  router.push("/artist");
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-sky-200 hover:text-orange-300"
-              >
-                About Us
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:text-red-700"
-              >
-                Logout
-              </button>
-            </li>
-          </ul>
-        </div>
-      )}
     </div>
   );
 }
+
+interface MenuItemProps {
+  icon: JSX.Element;
+  label: string;
+  onClick: () => void;
+  highlight?: boolean;
+}
+
+const MenuItem = ({ icon, label, onClick, highlight }: MenuItemProps) => (
+  <div
+    onClick={onClick}
+    className={`flex items-center justify-between px-4 py-3 rounded-lg shadow-md hover:scale-105 transform transition-all duration-300 cursor-pointer ${
+      highlight
+        ? "bg-red-500 hover:bg-red-600"
+        : "bg-gray-900 hover:bg-gray-700"
+    }`}
+  >
+    <div className="flex items-center space-x-4">
+      {icon}
+      <span className="text-white text-sm font-semibold">{label}</span>
+    </div>
+    <FiChevronRight className="text-gray-400 text-lg" />
+  </div>
+);

@@ -1,10 +1,11 @@
 "use client";
 
 import AdminSidebar from "@/components/AdminSidebar";
-import { useSession } from "@/context/useSession";
+import { useSession } from "@/context/useSessionHook";
 import { useEffect, useRef, useState } from "react";
 import { formatDate } from "@/helpers/formatDate";
 import { useRouter } from "next/navigation";
+import { dummyDataForPromotor } from "@/components/dummydata/dummyDataPromotor";
 import Swal from "sweetalert2";
 
 export default function AdminProfile() {
@@ -49,11 +50,20 @@ export default function AdminProfile() {
     try {
       setIsLoading(true);
       console.log("Uploading file...");
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      if (tokenPayload.exp * 1000 < Date.now())
+        throw new Error("Token expired");
 
       const response = await fetch(`${base_url}/promotors/avatar-cloud`, {
         method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
         body: formData,
-        credentials: "include",
+        // credentials: "include", buat kukis takutnya mau ganti lagi
       });
 
       console.log("Response Status:", response.status);
@@ -113,7 +123,7 @@ export default function AdminProfile() {
 
   if (!promotor) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white">
         <h1 className="text-3xl font-bold">No Promotor Data Found</h1>
       </div>
     );
@@ -135,14 +145,14 @@ export default function AdminProfile() {
 
   return (
     <>
-      <div className="flex min-h-screen  bg-gray-900 text-white">
+      <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
         <AdminSidebar />
         <div className="flex-1 px-6 py-6">
-          <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+          <div className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-lg shadow-lg p-6">
             <h1 className="text-3xl font-bold mb-4 text-center">
               Admin Profile
             </h1>
-            
+
             <div className="flex items-center lg:gap-8 justify-center">
               {/* Profile Avatar */}
               <div className="flex-shrink-0">
@@ -168,16 +178,20 @@ export default function AdminProfile() {
               {/* Profil */}
               <div className="mt-4 lg:mt-0 flex-col items-center">
                 <div className="mb-4 text-center">
-                  <h2 className="text-xl font-semibold">Promotor Name</h2>
-                  <p className="text-gray-400">{name || "Not Available"}</p>
+                  <h2 className="text-xl font-semibold text-gray-100">
+                    Promotor Name
+                  </h2>
+                  <p className="text-gray-300">{name || "Not Available"}</p>
                 </div>
                 <div className="mb-4 text-center">
-                  <h2 className="text-xl font-semibold">Email</h2>
-                  <p className="text-gray-400">{email || "Not Available"}</p>
+                  <h2 className="text-xl font-semibold text-gray-100">Email</h2>
+                  <p className="text-gray-300">{email || "Not Available"}</p>
                 </div>
                 <div className="mb-4 text-center">
-                  <h2 className="text-xl font-semibold">Last Login</h2>
-                  <p className="text-gray-400">
+                  <h2 className="text-xl font-semibold text-gray-100">
+                    Last Login
+                  </h2>
+                  <p className="text-gray-300">
                     {lastLogin || "Not Available"}
                   </p>
                 </div>
@@ -205,6 +219,52 @@ export default function AdminProfile() {
               >
                 Logout
               </button>
+            </div>
+          </div>
+          <div className="rounded-lg bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 mt-5 p-6">
+            <h1 className="text-2xl font-bold text-white mb-4">Your Events</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {dummyDataForPromotor.map((event) => (
+                <div
+                  key={event.id}
+                  className="p-4 bg-gradient-to-tl from-gray-800 to-gray-700 rounded-lg shadow-lg hover:scale-105 transition-transform"
+                >
+                  <img
+                    src={event.bannerImage}
+                    alt={event.title}
+                    className="w-full h-40 object-cover rounded-md mb-4"
+                  />
+                  <h2 className="text-sm font-bold text-gray-300">
+                    Category: {event.category}
+                  </h2>
+                  <h2 className="text-xl font-bold text-white">
+                    {event.title}
+                  </h2>
+                  <p className="text-gray-400 text-sm">{event.description}</p>
+                  <p className="text-gray-400 mt-2">
+                    <span className="font-bold">Date:</span>{" "}
+                    {new Date(event.date).toLocaleDateString()}
+                  </p>
+                  <p className="text-gray-400">
+                    <span className="font-bold">Location:</span>{" "}
+                    {event.location}
+                  </p>
+                  <p className="text-gray-400">
+                    <span className="font-bold">Tickets Sold:</span>{" "}
+                    {event.ticketSold}
+                  </p>
+                  <p className="text-orange-500 font-bold">
+                    Revenue:{" "}
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(event.totalRevenue)}
+                  </p>
+                  <p className="text-green-500 font-bold">
+                    Profit: {event.profit}%
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

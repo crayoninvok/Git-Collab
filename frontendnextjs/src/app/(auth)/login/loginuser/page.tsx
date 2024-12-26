@@ -5,7 +5,6 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { FaFacebook, FaTimes } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -20,10 +19,10 @@ interface FormValues {
 }
 
 export default function LoginUser() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
+
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
     setAlertMessage(null);
@@ -35,22 +34,21 @@ export default function LoginUser() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-        credentials: "include",
       });
 
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Login failed!");
+
+      // Save token to localStorage
+      localStorage.setItem("token", result.token);
+
       toast.success("Login successful! Redirecting...", {
         position: "bottom-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "colored",
       });
 
+      // Redirect
       setTimeout(() => {
         window.location.assign("/");
       }, 1000);
@@ -60,11 +58,6 @@ export default function LoginUser() {
       toast.error(err.message || "An error occurred", {
         position: "bottom-right",
         autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "colored",
       });
     } finally {
@@ -73,140 +66,130 @@ export default function LoginUser() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent relative z-10">
+    <div className="min-h-screen bg-gray-900 text-white relative flex items-center justify-center">
       <ToastContainer />
 
+      {/* Background Image */}
       <div
-        className="bg-cover bg-center absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-cover bg-center z-0"
         style={{
           backgroundImage: "url('/concert1.jpg')",
-          backgroundBlendMode: "overlay",
+          filter: "brightness(0.4)",
         }}
       ></div>
 
-      <div className="relative flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-between h-full px-6 sm:px-8 md:px-12 lg:px-20 p-10 lg:p-[3%]">
-        <div className="flex items-center justify-center w-full lg:w-1/2 mt-[1rem] md:mt-[12rem]">
-          <div className="p-6 md:w-[60vw] w-[70vw] sm:p-8 md:p-12 max-w-md lg:max-w-lg bg-gradient-to-r from-black/80 to-black/50 text-white rounded-3xl shadow-2xl border border-gray-300 backdrop-blur-lg">
-            <h1 className="text-3xl font-bold mb-2">Login</h1>
-            <p className="text-sm mb-4">Welcome back!</p>
-
-            {alertMessage && (
-              <div className="flex items-center bg-red-500 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-md space-x-3 mb-4">
-                <FaTimes className="text-xl" />
-                <span>{alertMessage}</span>
-              </div>
-            )}
-
-            <Formik
-              initialValues={{ data: "", password: "" }}
-              validationSchema={LoginSchema}
-              onSubmit={handleSubmit}
-            >
-              {() => (
-                <Form className="space-y-4">
-                  <div>
-                    <label className="block mb-1">Username / Email</label>
-                    <Field
-                      name="data"
-                      type="text"
-                      placeholder="Username or Email"
-                      className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                    />
-                    <ErrorMessage
-                      name="data"
-                      component="div"
-                      className="text-red-500 text-sm mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1">Password</label>
-                    <Field
-                      name="password"
-                      type="password"
-                      placeholder="Password"
-                      className="w-full p-2 rounded-md bg-black/70 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
-                    />
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      className="text-red-500 text-sm mt-1"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Field
-                        type="checkbox"
-                        name="rememberMe"
-                        className="mr-2"
-                      />
-                      <label htmlFor="rememberMe" className="text-sm">
-                        Remember me
-                      </label>
-                    </div>
-                    <a href="?" className="text-sm text-indigo-400">
-                      Forgot password?
-                    </a>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-md text-white font-bold"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Loading..." : "Login"}
-                  </button>
-                </Form>
-              )}
-            </Formik>
-
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-gray-600"></div>
-              <span className="mx-2 text-gray-400">Or</span>
-              <div className="flex-grow border-t border-gray-600"></div>
-            </div>
-
-            <div className="flex sm:flex-row justify-between gap-4">
-              <button className="w-full bg-transparent py-2 rounded-full flex items-center justify-end">
-                <FcGoogle className="text-5xl" />
-              </button>
-              <button className="w-full bg-transparent py-2 rounded-full flex items-center justify-start">
-                <FaFacebook className="text-5xl text-blue-600" />
-              </button>
-            </div>
-
-            <div className="text-center text-sm mt-4">
-              Don&apos;t have an account?{" "}
-              <a href="/registeruser" className="text-indigo-400 ml-1">
-                Signup
-              </a>
-            </div>
-
-            <div className="mt-4 text-xs text-center space-x-2">
-              <a href="?" className="text-gray-400 hover:text-gray-300">
-                Terms & Conditions
-              </a>
-              <a href="?" className="text-gray-400 hover:text-gray-300">
-                Support
-              </a>
-              <a href="?" className="text-gray-400 hover:text-gray-300">
-                Customer Care
-              </a>
-            </div>
-          </div>
+      {/* Login */}
+      <div className="relative z-10 w-full lg:w-[70%] xl:w-[60%] flex flex-col lg:flex-row items-center justify-between space-y-10 lg:space-y-0 lg:space-x-10">
+        {/* Info Section */}
+        <div className="text-center lg:text-left max-w-lg">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 mt-[10vh] md:mt-0 lg:mt-0">
+            Find Amazing Events with{" "}
+            <span className="text-orange-400">TIKO</span>
+          </h1>
+          <p className="text-gray-300 text-sm sm:text-base">
+            Discover the best events in town and get exclusive access to tickets
+            and updates!
+          </p>
         </div>
 
-        <div className="flex items-center justify-center lg:justify-start w-full lg:w-1/2 mt-8 lg:mt-0 px-4 lg:px-0">
-          <div className="text-white text-center mt-8  lg:text-left max-w-lg">
-            <h2 className="text-5xl font-bold mb-4 md:mt-[10rem]">
-              Find Amazing Events Happening With
-              <span className="text-orange-400"> TIKO</span>
-            </h2>
-            <p className="text-sm mb-5">
-              Discover the best events in town and get exclusive access to
-              tickets and updates!
-            </p>
+        {/* Login  */}
+        <div className="w-full sm:w-[90%] lg:w-[50%] bg-gray-900/70 bg-opacity-90 rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-600 backdrop-blur-lg">
+          <h1 className="text-3xl font-bold mb-2">Login</h1>
+          <p className="text-sm text-gray-400 mb-6">Welcome back!</p>
+
+          {alertMessage && (
+            <div className="flex items-center bg-red-500 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-md space-x-3 mb-4">
+              <FaTimes className="text-xl" />
+              <span>{alertMessage}</span>
+            </div>
+          )}
+
+          <Formik
+            initialValues={{ data: "", password: "" }}
+            validationSchema={LoginSchema}
+            onSubmit={handleSubmit}
+          >
+            {() => (
+              <Form className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Username / Email
+                  </label>
+                  <Field
+                    name="data"
+                    type="text"
+                    placeholder="Enter your username or email"
+                    className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
+                  />
+                  <ErrorMessage
+                    name="data"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Password
+                  </label>
+                  <Field
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-500 focus:ring focus:ring-indigo-500"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center">
+                    <Field type="checkbox" className="mr-2" />
+                    Remember me
+                  </label>
+                  <a href="?" className="text-sm text-indigo-400">
+                    Forgot password?
+                  </a>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg text-white font-bold flex items-center justify-center transition-transform transform hover:scale-105"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="spinner-border animate-spin w-5 h-5 border-4 border-t-transparent rounded-full"></div>
+                  ) : (
+                    "Login"
+                  )}
+                </button>
+              </Form>
+            )}
+          </Formik>
+
+          <div className="flex items-center my-6">
+            <div className="flex-grow border-t border-gray-600"></div>
+            <span className="mx-4 text-gray-400">Or</span>
+            <div className="flex-grow border-t border-gray-600"></div>
+          </div>
+
+          <div className="flex gap-4">
+            <button className="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg flex items-center justify-center transition-transform transform hover:scale-105">
+              <FcGoogle className="text-2xl" />
+            </button>
+            <button className="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg flex items-center justify-center text-white transition-transform transform hover:scale-105">
+              <FaFacebook className="text-2xl" />
+            </button>
+          </div>
+
+
+          <div className="text-center text-sm mt-6">
+            Don&apos;t have an account?{" "}
+            <a href="/registeruser" className="text-indigo-400">
+              Sign up
+            </a>
           </div>
         </div>
       </div>

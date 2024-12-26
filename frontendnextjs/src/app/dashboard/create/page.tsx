@@ -1,193 +1,333 @@
-"use client";
+'use client'
 
-import AdminSidebar from "@/components/AdminSidebar";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import Image from "next/image";
+import AdminSidebar from "@/components/AdminSidebar";
 
-interface Ticket {
-  id: number;
+type EventForm = {
   title: string;
+  category: string;
+  location: string;
+  venue: string;
   description: string;
-  status: "Open" | "In Progress" | "Closed";
-}
+  date: string;
+  time: string;
+  eventType: "free" | "paid";
+  bannerImage?: FileList;
+};
 
-export default function TicketingPage() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [formTicket, setFormTicket] = useState<Ticket>({
-    id: 0,
-    title: "",
-    description: "",
-    status: "Open",
+type TicketType = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+};
+
+export default function CreateEventPage() {
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
+    { id: "free", name: "Free", price: 0, quantity: 1 }
+  ]);
+  const [loading, setLoading] = useState(false);
+  
+  const { register, handleSubmit, setValue, watch, reset } = useForm<EventForm>({
+    defaultValues: {
+      eventType: "free"
+    }
   });
-  const [isEditing, setIsEditing] = useState(false);
 
-  const handleSubmitTicket = () => {
-    if (!formTicket.title || !formTicket.description) {
-      alert("Please fill in all fields");
-      return;
-    }
+  const eventType = watch("eventType");
 
-    if (isEditing) {
-      setTickets((prev) =>
-        prev.map((ticket) =>
-          ticket.id === formTicket.id
-            ? {
-                ...formTicket,
-                status: formTicket.status as "Open" | "In Progress" | "Closed",
-              }
-            : ticket
-        )
-      );
-      setIsEditing(false);
+  // Update ticket types when event type changes
+  const handleEventTypeChange = (type: "free" | "paid") => {
+    if (type === "free") {
+      setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
     } else {
-      const newTicket: Ticket = {
-        id: Date.now(),
-        title: formTicket.title,
-        description: formTicket.description,
-        status: formTicket.status as "Open" | "In Progress" | "Closed",
-      };
-      setTickets([...tickets, newTicket]);
+      setTicketTypes([{ id: Date.now().toString(), name: "", price: 0, quantity: 1 }]);
     }
-
-    setFormTicket({ id: 0, title: "", description: "", status: "Open" });
   };
 
-  const handleEditTicket = (ticket: Ticket) => {
-    setFormTicket(ticket);
-    setIsEditing(true);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setValue("bannerImage", e.target.files as FileList);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleDeleteTicket = (id: number) => {
-    setTickets((prev) => prev.filter((ticket) => ticket.id !== id));
+  const addTicketType = () => {
+    setTicketTypes([
+      ...ticketTypes,
+      { id: Date.now().toString(), name: "", price: 0, quantity: 1 },
+    ]);
   };
 
-  const statusColor = (status: Ticket["status"]) => {
-    switch (status) {
-      case "Open":
-        return "text-green-500";
-      case "In Progress":
-        return "text-yellow-500";
-      case "Closed":
-        return "text-red-500";
-      default:
-        return "";
+  const handleTicketChange = (
+    index: number,
+    field: keyof TicketType,
+    value: string | number
+  ) => {
+    const updatedTickets = [...ticketTypes];
+    updatedTickets[index] = { ...updatedTickets[index], [field]: value };
+    setTicketTypes(updatedTickets);
+  };
+
+  const onSubmit = async (data: EventForm) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("category", data.category);
+      formData.append("location", data.location);
+      formData.append("venue", data.venue);
+      formData.append("description", data.description);
+      formData.append("date", data.date);
+      formData.append("time", data.time);
+      formData.append("eventType", data.eventType);
+
+      const formattedTickets = ticketTypes.map((ticket) => ({
+        category: ticket.name,
+        price: Number(ticket.price),
+        quantity: Number(ticket.quantity),
+      }));
+
+      formData.append("tickets", JSON.stringify(formattedTickets));
+
+      if (data.bannerImage?.[0]) {
+        formData.append("banner", data.bannerImage[0]);
+      }
+
+      const response = await fetch("http://localhost:8000/api/events/create", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || result.error);
+      }
+
+      alert("Event created successfully!");
+      reset();
+      setImagePreview("");
+      setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
+    } catch (error: any) {
+      console.error("Error:", error);
+      alert(error.message || "An error occurred while creating the event.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Sidebar */}
-      <div className="w-auto bg-gray-900 text-white">
-        <AdminSidebar />
-      </div>
+    <div className="min-h-screen bg-black text-white py-12">
+      <AdminSidebar/>
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto bg-zinc-900 rounded-xl p-8 shadow-lg">
+          <h1 className="text-3xl font-bold text-orange-500 mb-8 text-center">
+            Create New Event
+          </h1>
 
-      {/* Main Content */}
-      <div className="flex-1 p-10 w-auto bg-gray-100">
-        <h1 className="text-3xl font-bold mb-6">Ticketing System</h1>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Event Type Selection */}
+            <div className="mb-4">
+              <label className="block mb-2 font-medium">Event Type</label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    {...register("eventType")}
+                    value="free"
+                    onChange={() => handleEventTypeChange("free")}
+                    className="mr-2"
+                  />
+                  Free Event
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    {...register("eventType")}
+                    value="paid"
+                    onChange={() => handleEventTypeChange("paid")}
+                    className="mr-2"
+                  />
+                  Paid Event
+                </label>
+              </div>
+            </div>
 
-        {/* Add/Edit Ticket Form */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {isEditing ? "Edit Ticket" : "Add Ticket"}
-          </h2>
-          <input
-            type="text"
-            placeholder="Title"
-            value={formTicket.title}
-            onChange={(e) =>
-              setFormTicket({ ...formTicket, title: e.target.value })
-            }
-            className="w-full p-3 mb-4 border rounded-md focus:ring focus:ring-blue-300"
-          />
-          <textarea
-            placeholder="Description"
-            value={formTicket.description}
-            onChange={(e) =>
-              setFormTicket({ ...formTicket, description: e.target.value })
-            }
-            className="w-full p-3 mb-4 border rounded-md focus:ring focus:ring-blue-300"
-          />
-          <select
-            value={formTicket.status}
-            onChange={(e) =>
-              setFormTicket({
-                ...formTicket,
-                status: e.target.value as "Open" | "In Progress" | "Closed",
-              })
-            }
-            className="w-full p-3 mb-4 border rounded-md focus:ring focus:ring-blue-300"
-          >
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Closed">Closed</option>
-          </select>
-          <div className="flex space-x-4">
-            <button
-              onClick={handleSubmitTicket}
-              className={`${
-                isEditing
-                  ? "bg-green-500 hover:bg-green-600"
-                  : "bg-blue-500 hover:bg-blue-600"
-              } text-white px-4 py-2 rounded-md transition`}
-            >
-              {isEditing ? "Update Ticket" : "Add Ticket"}
-            </button>
-            {isEditing && (
-              <button
-                onClick={() => {
-                  setFormTicket({ id: 0, title: "", description: "", status: "Open" });
-                  setIsEditing(false);
-                }}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition"
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-        </div>
+            {/* Banner Upload */}
+            <div>
+              <label className="block mb-2 font-medium">Event Banner</label>
+              <div className="border-2 border-dashed border-gray-600 rounded-lg p-4">
+                {imagePreview ? (
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    width={300}
+                    height={200}
+                  />
+                ) : (
+                  <span className="text-gray-500">No image selected</span>
+                )}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mt-2"
+              />
+            </div>
 
-        {/* Tickets List */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Tickets</h2>
-          {tickets.length === 0 ? (
-            <p className="text-gray-600">No tickets available.</p>
-          ) : (
-            <ul className="space-y-4">
-              {tickets.map((ticket) => (
-                <li
-                  key={ticket.id}
-                  className="border-b last:border-b-0 py-4 flex justify-between items-center"
+            {/* Event Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1 font-medium">Event Title</label>
+                <input
+                  {...register("title")}
+                  placeholder="Enter Event Title"
+                  className="p-3 bg-zinc-800 rounded-lg w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Category</label>
+                <select
+                  {...register("category")}
+                  className="p-3 bg-zinc-800 rounded-lg w-full"
+                  required
                 >
-                  <div>
-                    <h3 className="text-lg font-bold">{ticket.title}</h3>
-                    <p className="text-sm text-gray-600">
-                      {ticket.description}
-                    </p>
-                    <p
-                      className={`text-sm font-semibold ${statusColor(
-                        ticket.status
-                      )}`}
-                    >
-                      {ticket.status}
-                    </p>
+                  <option value="Music">Music</option>
+                  <option value="Orchestra">Orchestra</option>
+                  <option value="Opera">Opera</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Location</label>
+                <select
+                  {...register("location")}
+                  className="p-3 bg-zinc-800 rounded-lg w-full"
+                  required
+                >
+                  <option value="Bandung">Bandung</option>
+                  <option value="Bali">Bali</option>
+                  <option value="Surabaya">Surabaya</option>
+                  <option value="Jakarta">Jakarta</option>
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Venue</label>
+                <input
+                  {...register("venue")}
+                  placeholder="Enter Venue"
+                  className="p-3 bg-zinc-800 rounded-lg w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Date</label>
+                <input
+                  type="date"
+                  {...register("date")}
+                  className="p-3 bg-zinc-800 rounded-lg w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Time</label>
+                <input
+                  type="time"
+                  {...register("time")}
+                  className="p-3 bg-zinc-800 rounded-lg w-full"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block mb-1 font-medium">Description</label>
+              <textarea
+                {...register("description")}
+                placeholder="Enter Event Description"
+                className="p-3 bg-zinc-800 rounded-lg w-full h-32"
+                required
+              />
+            </div>
+
+            {/* Tickets */}
+            <div>
+              <h2 className="text-lg font-bold mb-2 text-orange-500">Tickets</h2>
+              <div className="space-y-4">
+                {ticketTypes.map((ticket, index) => (
+                  <div
+                    key={ticket.id}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-zinc-800 rounded-lg"
+                  >
+                    <div>
+                      <label className="block mb-1 font-medium">Ticket Name</label>
+                      <input
+                        type="text"
+                        value={ticket.name}
+                        onChange={(e) => handleTicketChange(index, "name", e.target.value)}
+                        className="p-3 bg-zinc-700 rounded-lg w-full"
+                        disabled={eventType === "free"}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 font-medium">Price</label>
+                      <input
+                        type="number"
+                        value={ticket.price}
+                        onChange={(e) => handleTicketChange(index, "price", parseInt(e.target.value))}
+                        className="p-3 bg-zinc-700 rounded-lg w-full"
+                        disabled={eventType === "free"}
+                        min="0"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1 font-medium">Quantity</label>
+                      <input
+                        type="number"
+                        value={ticket.quantity}
+                        onChange={(e) => handleTicketChange(index, "quantity", parseInt(e.target.value))}
+                        className="p-3 bg-zinc-700 rounded-lg w-full"
+                        min="1"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div className="space-x-2">
-                    <button
-                      onClick={() => handleEditTicket(ticket)}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteTicket(ticket.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                ))}
+                {eventType === "paid" && (
+                  <button
+                    type="button"
+                    onClick={addTicketType}
+                    className="px-4 py-2 bg-orange-500 rounded-lg text-white mt-2"
+                  >
+                    Add Ticket Type
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-orange-500 py-3 rounded-lg text-white font-medium hover:bg-orange-600 transition-colors"
+            >
+              {loading ? "Creating Event..." : "Create Event"}
+            </button>
+          </form>
         </div>
       </div>
     </div>

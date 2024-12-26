@@ -13,7 +13,7 @@ export default function Lineup() {
           LINE UP
         </h2>
         <p className="uppercase text-sm tracking-wide mb-6">
-          In Alphabetical Order
+          In Alphabetical Order 
         </p>
         <a href="#view-all" className="text-green-500 mb-6 inline-block">
           View All
