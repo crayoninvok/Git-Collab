@@ -2,37 +2,63 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import BurgerHandphone from "./BurgerMenuHP";
 import Image from "next/image";
 import { BiSearchAlt } from "react-icons/bi";
+import { FaSearch, FaTimes } from "react-icons/fa";
+import BurgerHandphone from "./BurgerMenuHP";
 import BurgerMenu from "./BurgerMenu";
 import Avatar from "./Avatar";
-import { FaSearch, FaTimes } from "react-icons/fa";
-import { useSession } from "@/context/useSession";
+import { useSession } from "@/context/useSessionHook";
 
 export default function Navbar() {
   const { isAuth } = useSession();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
-    setIsVisible(currentScrollY <= lastScrollY || currentScrollY <= 100);
-    setLastScrollY(currentScrollY);
+
+    window.requestAnimationFrame(() => {
+      setIsVisible(currentScrollY <= lastScrollY || currentScrollY <= 100);
+      setLastScrollY(currentScrollY);
+    });
   };
 
   const toggleSearchModal = () => setIsSearchModalOpen((prev) => !prev);
-  const closeModal = () => setIsSearchModalOpen(false);
+  const closeModal = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsSearchModalOpen(false);
+  };
+
+  const performSearch = async () => {
+    setIsSearching(true);
+    // Simulate search action
+    setTimeout(() => {
+      setIsSearching(false);
+      closeModal();
+    }, 1000);
+  };
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isSearchModalOpen) {
+        setIsSearchModalOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isSearchModalOpen]);
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 bg-gray-800/60 backdrop-blur-md text-white py-4 px-4 md:px-8 flex justify-between items-center shadow-md transition-transform duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 bg-gray-800/30 backdrop-blur-md text-white py-4 px-4 md:px-8 flex justify-between items-center shadow-md transition-transform duration-300 ${
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
@@ -69,10 +95,8 @@ export default function Navbar() {
       {/* Desktop Menu */}
       <div className="hidden lg:flex gap-8 text-xl">
         {isAuth ? (
-          // If authenticated, show Avatar
           <Avatar />
         ) : (
-          // If not authenticated, show navigation links and BurgerMenu
           <>
             {[
               { href: "/", label: "Homepage" },
@@ -116,8 +140,12 @@ export default function Navbar() {
                 placeholder="Type to search..."
                 className="w-full px-4 py-2 rounded-md bg-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-[#f9a205]"
               />
-              <button className="w-full mt-4 bg-[#f9a205] text-white px-4 py-2 rounded-md hover:bg-[#e09104] transition duration-300">
-                Search
+              <button
+                onClick={performSearch}
+                disabled={isSearching}
+                className="w-full mt-4 bg-[#f9a205] text-white px-4 py-2 rounded-md hover:bg-[#e09104] transition duration-300 disabled:opacity-50"
+              >
+                {isSearching ? "Searching..." : "Search"}
               </button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@/context/useSession";
+import { useSession } from "@/context/useSessionHook";
 import { formatPrice } from "@/helpers/formatPrice";
 import { useState } from "react";
 import { FaStar, FaTicketAlt, FaUser } from "react-icons/fa";
@@ -17,7 +17,7 @@ export default function ProfilePage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
   const tickets = [
     {
       id: 1,
@@ -85,13 +85,22 @@ export default function ProfilePage() {
 
     const formData = new FormData();
     formData.append("file", file);
+    const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      if (tokenPayload.exp * 1000 < Date.now())
+        throw new Error("Token expired");
 
     try {
       setUploading(true);
-      const response = await fetch("http://localhost:8000/api/users/avatar-cloud", {
+      const response = await fetch(`${base_url}/users/avatar-cloud`, {
         method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
         body: formData,
-        credentials: "include",
+        // credentials: "include",
       });
 
       if (response.ok) {
@@ -157,10 +166,15 @@ export default function ProfilePage() {
       <div className="min-h-screen py-10 mt-5 flex flex-col lg:flex-row px-6 relative">
         {/* Left Section */}
         <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-5 rounded-xl shadow-lg mt-10">
-          <h2 className="text-2xl font-bold mb-6 text-gray-100">Your Tickets</h2>
+          <h2 className="text-2xl font-bold mb-6 text-gray-100">
+            Your Tickets
+          </h2>
           <div className="space-y-4">
             {tickets.map((ticket) => (
-              <div key={ticket.id} className="p-4 bg-gray-700 rounded-lg shadow">
+              <div
+                key={ticket.id}
+                className="p-4 bg-gray-700 rounded-lg shadow"
+              >
                 <div className="flex flex-col md:flex-row items-center justify-between space-x-4">
                   {/* Logo */}
                   <img
@@ -170,9 +184,13 @@ export default function ProfilePage() {
                     onClick={() => openModal(ticket.logo)}
                   />
                   <div className="flex-1">
-                    <p className="font-semibold text-white">{ticket.eventName}</p>
+                    <p className="font-semibold text-white">
+                      {ticket.eventName}
+                    </p>
                     <p className="text-gray-400 text-sm">Date: {ticket.date}</p>
-                    <p className="text-gray-400 text-sm">Venue: {ticket.venue}</p>
+                    <p className="text-gray-400 text-sm">
+                      Venue: {ticket.venue}
+                    </p>
                     <p className="text-gray-400 text-sm">Seat: {ticket.seat}</p>
                     <p className="text-gray-400 text-sm">Price: {formatPrice(ticket.price)}</p>
                   </div>
@@ -194,8 +212,10 @@ export default function ProfilePage() {
             <img
               src={user?.avatar || "https://via.placeholder.com/150"}
               alt="User Avatar"
-              className="w-24 h-24 rounded-full border-4 border-green-500 shadow-md mb-4 cursor-pointer"
-              onClick={() => openModal(user?.avatar || "https://via.placeholder.com/150")}
+              className="w-24 h-24 rounded-full border-4 border-orange-500 shadow-md mb-4 cursor-pointer"
+              onClick={() =>
+                openModal(user?.avatar || "https://via.placeholder.com/150")
+              }
             />
             <label className="text-white text-[10px] bg-slate-500 p-1 rounded-3xl hover:bg-yellow-500 hover:text-orange-600 cursor-pointer">
               {uploading ? "Uploading..." : "Change profile picture"}
@@ -207,8 +227,12 @@ export default function ProfilePage() {
                 disabled={uploading}
               />
             </label>
-            <h2 className="text-2xl font-bold text-white mt-4">{user?.username || "Guest"}</h2>
-            <p className="text-sm text-gray-400">{user?.email || "No Email Available"}</p>
+            <h2 className="text-2xl font-bold text-white mt-4">
+              {user?.username || "Guest"}
+            </h2>
+            <p className="text-sm text-gray-400">
+              {user?.email || "No Email Available"}
+            </p>
           </div>
 
           {/* User Info */}
@@ -260,7 +284,9 @@ export default function ProfilePage() {
                     </p>
                   </div>
                 ) : (
-                  <p className="text-white font-semibold">You have no coupon yet.</p>
+                  <p className="text-white font-semibold">
+                    You have no coupon yet.
+                  </p>
                 )}
               </div>
               {user?.percentage && (

@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { ToastContainer } from "react-toastify";
 import { Comfortaa } from "next/font/google";
 import NavbarWrapper from "@/components/NavbarWrapper";
-import { SessionProvider } from "@/context/useSession";
+import { SessionProvider } from "@/context/sessionProvider";
 import "react-toastify/dist/ReactToastify.css";
 
 const geistSans = localFont({
@@ -42,10 +42,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${comfortaa.className} antialiased`}
       >
         <SessionProvider>
- 
           <NavbarWrapper />
           {children}
-          <ToastContainer/>
+          <ToastContainer />
           <Footer />
         </SessionProvider>
       </body>
