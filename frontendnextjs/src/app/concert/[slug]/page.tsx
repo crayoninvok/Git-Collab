@@ -88,7 +88,7 @@ export default function EventDetailPage({
           </div>
           <div>
             <div className="lg:sticky lg:top-4">
-              <EventTickets tickets={event.tickets} />
+              <EventTickets tickets={event.tickets} eventId={event.id}/>
             </div>
           </div>
         </div>

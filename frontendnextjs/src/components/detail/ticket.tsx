@@ -1,14 +1,16 @@
-// src/app/event/[slug]/_components/EventTickets.tsx
-import { useState } from "react";
-import { Ticket } from "@/types/event";
-import { formatPrice } from "@/helpers/formatPrice";
-import { Minus, Plus } from "lucide-react";
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Ticket } from '@/types/event';
+import { formatPrice } from '@/helpers/formatPrice';
+import { Minus, Plus } from 'lucide-react';
 
 interface EventTicketsProps {
   tickets: Ticket[];
+  eventId: number;
 }
 
-export default function EventTickets({ tickets }: EventTicketsProps) {
+export default function EventTickets({ tickets, eventId }: EventTicketsProps) {
+  const router = useRouter();
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
 
@@ -18,12 +20,37 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
     if (!selectedTicket) return;
     
     const newQuantity = quantity + change;
-    if (newQuantity >= 1 && newQuantity <= selectedTicket.quantity) {
+    // Limit to maximum 4 tickets and available quantity
+    const maxQuantity = Math.min(4, selectedTicket.quantity);
+    if (newQuantity >= 1 && newQuantity <= maxQuantity) {
       setQuantity(newQuantity);
     }
   };
 
   const total = selectedTicket ? selectedTicket.price * quantity : 0;
+
+  const handleBuyTickets = () => {
+    if (!selectedTicket) return;
+
+    // Prepare order details for payment page
+    const orderDetails = {
+      eventId,
+      tickets: [{
+        id: selectedTicket.id,
+        category: selectedTicket.category,
+        price: selectedTicket.price,
+        quantity: quantity
+      }],
+      quantity: quantity,
+      totalPrice: total
+    };
+    
+    // Store order details in localStorage for payment page
+    localStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
+    
+    // Redirect to payment page
+    router.push('/payment');
+  };
 
   return (
     <div className="rounded-xl bg-zinc-900 p-6 text-white">
@@ -62,7 +89,7 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
         <div className="space-y-4">
           <div className="rounded-lg bg-zinc-800 p-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-300">Quantity</span>
+              <span className="text-gray-300">Quantity (Max 4)</span>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleQuantityChange(-1)}
@@ -74,13 +101,18 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
                 <span className="w-8 text-center">{quantity}</span>
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= selectedTicket.quantity}
+                  disabled={quantity >= Math.min(4, selectedTicket.quantity)}
                   className="p-1 rounded-full hover:bg-zinc-700 disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
             </div>
+            {quantity >= 4 && (
+              <p className="text-xs text-orange-400 mt-2">
+                Maximum 4 tickets per purchase
+              </p>
+            )}
           </div>
 
           <div className="border-t border-zinc-800 pt-4">
@@ -91,7 +123,10 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
               </span>
             </div>
             
-            <button className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors">
+            <button 
+              onClick={handleBuyTickets}
+              className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            >
               Buy Tickets
             </button>
           </div>
