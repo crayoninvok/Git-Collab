@@ -28,7 +28,6 @@ export interface SessionContext {
   loading: boolean;
 }
 
-
 export interface Event {
   id: number;
   title: string;
@@ -52,10 +51,28 @@ export interface Ticket {
   orderDetailId?: number;
 }
 
+export interface Order {
+  id: number;
+  totalPrice: number;
+  finalPrice: number;
+  status: "PENDING" | "PAID" | "CANCELED";
+  createdAt: string;
+  updatedAt: string;
+  event: Event;
+  details: OrderDetail[];
+}
+
 export interface OrderDetail {
   id: number;
   quantity: number;
-  orderId?: number;
   tickets: Ticket[];
-  userCouponId?: number;
+}
+
+export interface PaymentData {
+  ticketId: number;
+  quantity: number;
+  totalPrice: number;
+  finalPrice: number;
+  pointsRedeemed?: number;
+  percentage?: number;
 }

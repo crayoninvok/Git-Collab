@@ -1,16 +1,18 @@
-// src/app/event/[slug]/_components/EventTickets.tsx
 import { useState } from "react";
 import { Ticket } from "@/types/event";
 import { formatPrice } from "@/helpers/formatPrice";
 import { Minus, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface EventTicketsProps {
   tickets: Ticket[];
 }
 
 export default function EventTickets({ tickets }: EventTicketsProps) {
+  const router = useRouter();
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [error, setError] = useState<string>("");
 
   const selectedTicket = tickets.find((t) => t.id === selectedTicketId);
 
@@ -18,12 +20,26 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
     if (!selectedTicket) return;
     
     const newQuantity = quantity + change;
+    // Check for max 4 tickets
+    if (newQuantity > 4) {
+      setError("Maximum 4 tickets allowed per purchase");
+      return;
+    }
+    // Check against available quantity and minimum of 1
     if (newQuantity >= 1 && newQuantity <= selectedTicket.quantity) {
       setQuantity(newQuantity);
+      setError("");
     }
   };
 
   const total = selectedTicket ? selectedTicket.price * quantity : 0;
+
+  const handleBuyTickets = () => {
+    if (!selectedTicket) return;
+
+    // Navigate to payment page with selected ticket info
+    router.push(`/payment?ticketId=${selectedTicket.id}&quantity=${quantity}&total=${total}`);
+  };
 
   return (
     <div className="rounded-xl bg-zinc-900 p-6 text-white">
@@ -36,6 +52,7 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
             onClick={() => {
               setSelectedTicketId(ticket.id);
               setQuantity(1);
+              setError("");
             }}
             className={`cursor-pointer rounded-lg p-4 transition-all ${
               selectedTicketId === ticket.id
@@ -74,7 +91,7 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
                 <span className="w-8 text-center">{quantity}</span>
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= selectedTicket.quantity}
+                  disabled={quantity >= 4 || quantity >= selectedTicket.quantity}
                   className="p-1 rounded-full hover:bg-zinc-700 disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4" />
@@ -82,6 +99,12 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
               </div>
             </div>
           </div>
+
+          {error && (
+            <div className="text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="border-t border-zinc-800 pt-4">
             <div className="flex justify-between items-center mb-4">
@@ -91,7 +114,10 @@ export default function EventTickets({ tickets }: EventTicketsProps) {
               </span>
             </div>
             
-            <button className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors">
+            <button 
+              onClick={handleBuyTickets}
+              className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+            >
               Buy Tickets
             </button>
           </div>

@@ -5,6 +5,7 @@ import { Event } from "@/types/event";
 import EventTickets from "@/components/detail/ticket";
 import EventDetails from "@/components/detail/desc";
 import EventHero from "@/components/detail/hero";
+import ReviewRating from "@/components/reviewRatings/makeReview";
 
 export default function EventDetailPage({
   params,
@@ -93,6 +94,8 @@ export default function EventDetailPage({
           </div>
         </div>
       </div>
+      <ReviewRating/>
     </main>
   );
+
 }
