@@ -101,10 +101,14 @@ export default function CreateEventPage() {
       if (data.bannerImage?.[0]) {
         formData.append("banner", data.bannerImage[0]);
       }
-
+      const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:8000/api/events/create", {
         method: "POST",
-        credentials: "include",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+
+        // credentials: "include",
         body: formData,
       });
 
