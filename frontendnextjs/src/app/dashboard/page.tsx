@@ -8,7 +8,9 @@ import { formatPrice } from "@/helpers/formatPrice";
 import StatisticChart from "@/components/graph/statistiChart";
 import { graphDataDaily } from "@/components/graph/dayData";
 import { graphDataMonth } from "@/components/graph/monthData";
+
 import withGuard from "@/hoc/pageGuard";
+
 
 const graphOptions = ["By Month", "By Year", "Per 5 Years"];
 
@@ -71,6 +73,9 @@ function DashboardPage() {
     <div className="flex min-h-screen bg-gray-900 text-white">
       <AdminSidebar />
       <main className="flex-1 px-6 bg-gradient-to-b from-gray-800 to-gray-950">
+
+        {/* Header */}
+
         <header className="mb-6 flex flex-col lg:flex-row justify-between items-center p-10">
           <div className="text-center lg:text-left">
             <h1 className="text-3xl font-bold text-white">
@@ -96,6 +101,10 @@ function DashboardPage() {
             </div>
           </div>
         </header>
+
+
+        {/* Analytics Section */}
+
         <section className="mb-10">
           <h1 className="text-3xl font-bold text-white">Overview</h1>
           <hr className="border-gray-700 my-4" />
@@ -105,11 +114,20 @@ function DashboardPage() {
             ))}
           </div>
         </section>
+
+
+        {/* Graph Section */}
+
         <section>
           <h1 className="text-center text-3xl font-bold text-white">
             Statistic Graph
           </h1>
           <div className="my-6 text-center">
+
+            <label htmlFor="graphSelector" className="sr-only">
+              Select Graph
+            </label>
+
             <select
               id="graphSelector"
               value={selectedGraph}

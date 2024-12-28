@@ -8,9 +8,11 @@ import {
   IPromotor,
 } from "@/types/event";
 
+
 export const SessionContext = createContext<ISessionContext | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+
   const [isAuth, setIsAuth] = useState(false);
   const [type, setType] = useState<UserType | null>(null);
   const [user, setUser] = useState<IUser | null>(null);
@@ -98,7 +100,9 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (token) {
       checkSession();
     } else {
+
       setLoading(false); // Skip session check if no token
+
     }
   }, [checkSession]);
 
