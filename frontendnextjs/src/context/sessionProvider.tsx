@@ -8,9 +8,11 @@ import {
   IPromotor,
 } from "@/types/event";
 
+
 export const SessionContext = createContext<ISessionContext | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+
   const [isAuth, setIsAuth] = useState(false);
   const [type, setType] = useState<UserType | null>(null);
   const [user, setUser] = useState<IUser | null>(null);
@@ -18,6 +20,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [loading, setLoading] = useState(true);
 
   const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
+
 
   const resetSession = useCallback(() => {
     console.log("Resetting session state...");
@@ -27,10 +30,12 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     setPromotor(null);
   }, []);
 
+
   const checkSession = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+
         console.error("No token found in localStorage");
         throw new Error("No token found");
       }
@@ -69,11 +74,13 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
         setPromotor(null); // Ensure promotor is null if user is logged in
       } else {
         throw new Error("Invalid session type received from the server");
+
       }
 
       setIsAuth(true);
     } catch (error) {
       console.error("Session check failed:", error);
+
       resetSession(); // Clear session on error
     } finally {
       setLoading(false);
@@ -93,12 +100,15 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     window.location.href = "/login"; // Redirect to login page
   }, [resetSession]);
 
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       checkSession();
     } else {
+
       setLoading(false); // Skip session check if no token
+
     }
   }, [checkSession]);
 

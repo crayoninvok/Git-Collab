@@ -43,7 +43,10 @@ export default function LoginPromotor() {
       toast.success("Login successful! Redirecting to dashboard...", {
         position: "bottom-right",
         autoClose: 3000,
+
         onClose: () => window.location.assign("/dashboard"),
+
+
       });
     } catch (err: any) {
       toast.error(err.message || "An error occurred during login.", {
@@ -143,12 +146,14 @@ export default function LoginPromotor() {
             </a>
           </p>
           <p className="mt-3 text-gray-400">
+
             Start register here{" "}
             <a href="/registerpromotor" className="text-indigo-400">
               Register promotor
             </a>
           </p>
           <p className="mt-3 text-gray-400">
+
             Not a Promotor?{" "}
             <a href="/login" className="text-indigo-400">
               Login here
