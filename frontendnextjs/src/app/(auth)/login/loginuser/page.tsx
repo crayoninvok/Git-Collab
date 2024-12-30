@@ -52,10 +52,10 @@ export default function LoginUser() {
       setTimeout(() => {
         window.location.assign("/");
       }, 1000);
-    } catch (err: any) {
-      console.error(err);
-      setAlertMessage(err.message || "An error occurred");
-      toast.error(err.message || "An error occurred", {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An error occurred during login.";
+      setAlertMessage(errorMessage || "An error occurred");
+      toast.error(errorMessage || "An error occurred", {
         position: "bottom-right",
         autoClose: 5000,
         theme: "colored",

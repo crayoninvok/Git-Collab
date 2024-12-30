@@ -82,11 +82,6 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, [base_url, resetSession]);
 
-  const refreshSession = useCallback(() => {
-    console.log("Refreshing session...");
-    setLoading(true);
-    checkSession(); // Re-run session check
-  }, [checkSession]);
 
   const logout = useCallback(() => {
     console.log("Logging out...");

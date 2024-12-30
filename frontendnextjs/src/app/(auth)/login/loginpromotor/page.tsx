@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
@@ -15,7 +14,7 @@ const LoginSchema = Yup.object().shape({
 const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
 export default function LoginPromotor() {
  
-  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values: { data: string; password: string }) => {
@@ -48,8 +47,9 @@ export default function LoginPromotor() {
 
 
       });
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred during login.", {
+    } catch (err:unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An error occurred during login.";
+      toast.error(errorMessage || "An error occurred during login.", {
         position: "top-right",
         autoClose: 3000,
       });
