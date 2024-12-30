@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { SessionContext } from "./sessionProvider";
 import { SessionContext as ISessionContext } from "@/types/event";
 
-
 export const useSession = (): ISessionContext => {
   const context = useContext(SessionContext);
 

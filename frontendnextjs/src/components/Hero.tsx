@@ -16,7 +16,6 @@ interface HeroProps {
 export default function Hero({
   title,
   highlightedText,
-  searchPlaceholder,
   videoId = 'Fpn1imb9qZg' 
 }: HeroProps) {
   const [isHovered, setIsHovered] = useState(false);

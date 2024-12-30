@@ -1,4 +1,4 @@
-import { Event } from "@/types/event";
+
 import Link from "next/link";
 
 interface EventCardProps {

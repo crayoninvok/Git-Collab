@@ -50,11 +50,13 @@ export default function RegisterUser() {
         confirmButtonText: "OK",
         confirmButtonColor: "#f97316", // Tailwind orange-500 color
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage =
+      err instanceof Error ? err.message : "An unexpected error occurred.";
       console.error(err);
       Swal.fire({
         title: "Registration Failed",
-        text: err.message || "Something went wrong. Please try again later.",
+        text: errorMessage || "Something went wrong. Please try again later.",
         icon: "error",
         confirmButtonText: "OK",
         confirmButtonColor: "#dc2626", // Tailwind red-600 color

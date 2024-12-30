@@ -144,14 +144,7 @@ function DashboardPage() {
           <div className="flex justify-center">
             <div className="w-full max-w-[1700px] h-[600px] mx-auto">
               {selectedGraph === "By Year" && (
-
                 <StatisticChart data={graphDataMonth} selectedGraph="By Year" />
-
-                <StatisticChart
-                  data={graphDataMonth}
-                  selectedGraph="By Year"
-                />
-
               )}
               {selectedGraph === "By Month" && (
                 <StatisticChart
@@ -171,4 +164,3 @@ export default withGuard(DashboardPage, {
   requiredRole: "promotor",
   redirectTo: "/login",
 });
-

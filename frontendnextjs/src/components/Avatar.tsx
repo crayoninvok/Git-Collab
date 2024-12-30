@@ -14,7 +14,7 @@ import { SiEventbrite } from "react-icons/si";
 export default function Avatar() {
   const { isAuth, user, logout } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [,setIsLoggingOut] = useState(false);
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 

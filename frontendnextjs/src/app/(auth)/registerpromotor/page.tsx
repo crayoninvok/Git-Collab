@@ -7,11 +7,10 @@ import "swiper/css/effect-coverflow";
 import { Pagination, EffectCoverflow, Autoplay } from "swiper/modules";
 import Image from "next/image";
 import Link from "next/link";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
 import Swal from "sweetalert2";
-
 
 const slides = [
   { src: "/entertaiment/ISMAYA.png", alt: "Ismaya logo", label: "Ismaya" },
@@ -23,22 +22,33 @@ const slides = [
 const RegisterSchema = Yup.object().shape({
   name: Yup.string().required("Promotor name is required"),
   email: Yup.string()
-  .email("Invalid email address")
-  .required("Email is required"),
+    .email("Invalid email address")
+    .required("Email is required"),
   password: Yup.string()
-  .min(6, "Password must be at least 6 characters")
+    .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
-    confirmPassword: Yup.string()
+  confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords do not match!")
     .required("Confirm password is required"),
-    agreeToTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
-  });
-  
-  export default function PromoterRegister() {
-  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
+  agreeToTerms: Yup.boolean().oneOf([true], "You must agree to the terms"),
+});
+
+interface RegisterFormValues {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreeToTerms: boolean;
+}
+
+export default function PromoterRegister() {
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (values: any, actions: any) => {
+  const handleSubmit = async (
+    values: RegisterFormValues,
+    actions: FormikHelpers<RegisterFormValues>
+  ) => {
     setIsLoading(true);
     try {
       const res = await fetch(`${base_url}/auth/promotorRegister`, {
@@ -51,15 +61,17 @@ const RegisterSchema = Yup.object().shape({
 
       Swal.fire({
         title: "Success!",
-        text:"Welcome to TIKO! Please check your email for verification.",
+        text: "Welcome to TIKO! Please check your email for verification.",
         icon: "success",
         confirmButtonText: "Great!",
       });
       actions.resetForm();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred.";
       Swal.fire({
         title: "Error!",
-        text: err.message || "Registration failed!",
+        text: errorMessage,
         icon: "error",
         confirmButtonText: "OK",
       });
@@ -77,7 +89,6 @@ const RegisterSchema = Yup.object().shape({
     >
       <div className="absolute inset-0 bg-black/60"></div>
 
-   
       <div className="relative z-10 flex flex-col items-center lg:items-start justify-center w-full lg:w-1/2 p-6 lg:p-20 text-center lg:text-left">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
           Register to be an Event Creator here With
@@ -88,9 +99,7 @@ const RegisterSchema = Yup.object().shape({
         </p>
       </div>
 
-
       <div className="relative z-10 bg-transparent shadow-xl rounded-xl flex flex-col lg:flex-row w-full max-w-6xl overflow-hidden lg:h-[65vh]">
-
         <div className="hidden md:flex w-full lg:w-1/2 bg-gradient-to-r from-orange-400 to-black/80 backdrop-blur-lg items-center justify-center text-white p-6 lg:p-10">
           <Swiper
             modules={[Pagination, EffectCoverflow, Autoplay]}
@@ -145,7 +154,7 @@ const RegisterSchema = Yup.object().shape({
 
           <Formik
             initialValues={{
-              promotorName: "",
+              name: "",
               email: "",
               password: "",
               confirmPassword: "",
@@ -164,7 +173,7 @@ const RegisterSchema = Yup.object().shape({
                     className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
                   />
                   <ErrorMessage
-                    name="promotorName"
+                    name="name"
                     component="div"
                     className="text-red-500 text-sm mt-1"
                   />

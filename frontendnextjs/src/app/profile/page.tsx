@@ -114,6 +114,7 @@ export default function ProfilePage() {
         throw new Error(`Failed to upload. Status: ${response.status}`);
       }
     } catch (error) {
+      console.error("Upload Error:", error)
       Swal.fire({
         title: "Error!",
         text: "Failed to update your profile picture. Please try again later.",
