@@ -7,7 +7,7 @@ import { BiSearchAlt } from "react-icons/bi";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import BurgerHandphone from "./BurgerMenuHP";
 import BurgerMenu from "./BurgerMenu";
-import Avatar from "./Avatar";;
+import Avatar from "./avatar";
 import { useSession } from "@/context/useSessionHook";
 
 export default function Navbar() {
