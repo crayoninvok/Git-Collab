@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminSidebar from "@/components/adminSidebarDashboard";
 
 type EventForm = {
   title: string;
@@ -27,15 +27,17 @@ type TicketType = {
 export default function CreateEventPage() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
-    { id: "free", name: "Free", price: 0, quantity: 1 }
+    { id: "free", name: "Free", price: 0, quantity: 1 },
   ]);
   const [loading, setLoading] = useState(false);
-  
-  const { register, handleSubmit, setValue, watch, reset } = useForm<EventForm>({
-    defaultValues: {
-      eventType: "free"
+
+  const { register, handleSubmit, setValue, watch, reset } = useForm<EventForm>(
+    {
+      defaultValues: {
+        eventType: "free",
+      },
     }
-  });
+  );
 
   const eventType = watch("eventType");
 
@@ -44,7 +46,9 @@ export default function CreateEventPage() {
     if (type === "free") {
       setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
     } else {
-      setTicketTypes([{ id: Date.now().toString(), name: "", price: 0, quantity: 1 }]);
+      setTicketTypes([
+        { id: Date.now().toString(), name: "", price: 0, quantity: 1 },
+      ]);
     }
   };
 
@@ -105,7 +109,7 @@ export default function CreateEventPage() {
       const response = await fetch("http://localhost:8000/api/events/create", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
 
         // credentials: "include",
@@ -124,9 +128,9 @@ export default function CreateEventPage() {
       setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
     } catch (err: unknown) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Error while Creating an event.";
+
+        err instanceof Error ? err.message : "Error while Creating an event.";
+
       console.error("Error:", err);
       alert(errorMessage || "An error occurred while creating the event.");
     } finally {
@@ -136,7 +140,7 @@ export default function CreateEventPage() {
 
   return (
     <div className="min-h-screen bg-black text-white py-12">
-      <AdminSidebar/>
+      <AdminSidebar />
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto bg-zinc-900 rounded-xl p-8 shadow-lg">
           <h1 className="text-3xl font-bold text-orange-500 mb-8 text-center">
@@ -273,7 +277,9 @@ export default function CreateEventPage() {
 
             {/* Tickets */}
             <div>
-              <h2 className="text-lg font-bold mb-2 text-orange-500">Tickets</h2>
+              <h2 className="text-lg font-bold mb-2 text-orange-500">
+                Tickets
+              </h2>
               <div className="space-y-4">
                 {ticketTypes.map((ticket, index) => (
                   <div
@@ -281,11 +287,15 @@ export default function CreateEventPage() {
                     className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-zinc-800 rounded-lg"
                   >
                     <div>
-                      <label className="block mb-1 font-medium">Ticket Name</label>
+                      <label className="block mb-1 font-medium">
+                        Ticket Name
+                      </label>
                       <input
                         type="text"
                         value={ticket.name}
-                        onChange={(e) => handleTicketChange(index, "name", e.target.value)}
+                        onChange={(e) =>
+                          handleTicketChange(index, "name", e.target.value)
+                        }
                         className="p-3 bg-zinc-700 rounded-lg w-full"
                         disabled={eventType === "free"}
                         required
@@ -296,7 +306,13 @@ export default function CreateEventPage() {
                       <input
                         type="number"
                         value={ticket.price}
-                        onChange={(e) => handleTicketChange(index, "price", parseInt(e.target.value))}
+                        onChange={(e) =>
+                          handleTicketChange(
+                            index,
+                            "price",
+                            parseInt(e.target.value)
+                          )
+                        }
                         className="p-3 bg-zinc-700 rounded-lg w-full"
                         disabled={eventType === "free"}
                         min="0"
@@ -308,7 +324,13 @@ export default function CreateEventPage() {
                       <input
                         type="number"
                         value={ticket.quantity}
-                        onChange={(e) => handleTicketChange(index, "quantity", parseInt(e.target.value))}
+                        onChange={(e) =>
+                          handleTicketChange(
+                            index,
+                            "quantity",
+                            parseInt(e.target.value)
+                          )
+                        }
                         className="p-3 bg-zinc-700 rounded-lg w-full"
                         min="1"
                         required
