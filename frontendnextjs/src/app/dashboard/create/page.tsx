@@ -128,7 +128,9 @@ export default function CreateEventPage() {
       setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
     } catch (err: unknown) {
       const errorMessage =
+
         err instanceof Error ? err.message : "Error while Creating an event.";
+
       console.error("Error:", err);
       alert(errorMessage || "An error occurred while creating the event.");
     } finally {
