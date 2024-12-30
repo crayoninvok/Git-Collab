@@ -1,6 +1,6 @@
 "use client";
 
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminSidebar from "@/components/adminSidebarDashboard";
 import { useSession } from "@/context/useSessionHook";
 import { useEffect, useRef, useState } from "react";
 import { formatDate } from "@/helpers/formatDate";
@@ -60,7 +60,7 @@ export default function AdminProfile() {
       const response = await fetch(`${base_url}/promotors/avatar-cloud`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
         // credentials: "include", buat kukis takutnya mau ganti lagi
