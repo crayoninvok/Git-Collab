@@ -5,10 +5,14 @@ import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function VerifyPage({ params }: { params?: { token?: string } }) {
+export default function VerifyPage({
+  params,
+}: {
+  params?: { token?: string };
+}) {
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
-  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
   const onVerify = async () => {
     if (isVerifying) return;
@@ -39,9 +43,13 @@ export default function VerifyPage({ params }: { params?: { token?: string } }) 
       const result = await res.json();
       toast.success(result.message || "Account successfully verified!");
       router.push("/login/loginpromotor");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Verification failed! Please try again.";
       console.error("Verification Error:", err);
-      toast.error(err.message || "Verification failed! Please try again.");
+      toast.error(errorMessage);
       router.push("/");
     } finally {
       setIsVerifying(false);

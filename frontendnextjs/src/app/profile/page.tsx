@@ -7,6 +7,7 @@ import { FaStar, FaTicketAlt, FaUser } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { RiDiscountPercentFill } from "react-icons/ri";
 import { formatDate } from "@/helpers/formatDate";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const { isAuth, type, user } = useSession();
@@ -114,6 +115,7 @@ export default function ProfilePage() {
         throw new Error(`Failed to upload. Status: ${response.status}`);
       }
     } catch (error) {
+      console.error("Upload Error:", error)
       Swal.fire({
         title: "Error!",
         text: "Failed to update your profile picture. Please try again later.",
@@ -227,6 +229,8 @@ export default function ProfilePage() {
                 disabled={uploading}
               />
             </label>
+            <Link href={"/profile/editprofile"}>
+            <button className="p-1 mt-3 text-white bg-slate-800 rounded-xl hover:bg-yellow-500 hover:text-orange-600">Edit Profile</button></Link>
             <h2 className="text-2xl font-bold text-white mt-4">
               {user?.username || "Guest"}
             </h2>

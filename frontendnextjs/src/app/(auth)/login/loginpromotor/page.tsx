@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
@@ -15,7 +14,7 @@ const LoginSchema = Yup.object().shape({
 const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
 export default function LoginPromotor() {
  
-  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (values: { data: string; password: string }) => {
@@ -43,10 +42,14 @@ export default function LoginPromotor() {
       toast.success("Login successful! Redirecting to dashboard...", {
         position: "bottom-right",
         autoClose: 3000,
-        onClose: () => router.push("/dashboard"),
+
+        onClose: () => window.location.assign("/dashboard"),
+
+
       });
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred during login.", {
+    } catch (err:unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An error occurred during login.";
+      toast.error(errorMessage || "An error occurred during login.", {
         position: "top-right",
         autoClose: 3000,
       });
@@ -138,11 +141,19 @@ export default function LoginPromotor() {
         <div className="mt-6 text-sm text-center">
           <p className="text-gray-400">
             Forgot password?{" "}
-            <a href="/reset-password" className="text-indigo-400">
+            <a href="/login/loginpromotor/forgotpasswordpromotor" className="text-indigo-400">
               Reset here
             </a>
           </p>
           <p className="mt-3 text-gray-400">
+
+            Start register here{" "}
+            <a href="/registerpromotor" className="text-indigo-400">
+              Register promotor
+            </a>
+          </p>
+          <p className="mt-3 text-gray-400">
+
             Not a Promotor?{" "}
             <a href="/login" className="text-indigo-400">
               Login here

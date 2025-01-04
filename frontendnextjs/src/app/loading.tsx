@@ -1,17 +1,19 @@
 "use client";
 
-import * as React from "react";
-import { Stack } from "@mui/material";
-import LinearProgress from "@mui/material/LinearProgress";
 
-export default function Loading() {
+import React from "react";
+
+const Loading: React.FC<{ message?: string }> = ({ message }) => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <Stack sx={{ width: "50%", color: "grey.500" }} spacing={2}>
-        <LinearProgress color="secondary" />
-        <LinearProgress color="success" />
-        <LinearProgress color="inherit" />
-      </Stack>
+    <div className="custom-loading-container flex flex-col">
+      <div className="custom-loader">
+        <div className="custom-loader-text space-x-2">TI<span className="text-orange-500">KO</span></div>
+      </div>
+      {message && (
+        <h1 className="text-3xl font-bold text-white mt-4">{message}</h1>
+      )}
     </div>
   );
-}
+};
+
+export default Loading;

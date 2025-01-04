@@ -24,15 +24,12 @@ export default function VerifyPage({
     }
 
     try {
-      const res = await fetch(
-        `${base_url}/auth/verifyuser/${params.token}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await fetch(`${base_url}/auth/verifyuser/${params.token}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!res.ok) {
         const errorResponse = await res.json();
@@ -44,9 +41,13 @@ export default function VerifyPage({
       setTimeout(() => {
         router.push("/login/loginuser");
       }, 3000); // Redirect after 3 seconds
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Verification failed! Please try again.";
       console.error("Verification Error:", err);
-      toast.error(err.message || "Verification failed! Please try again.");
+      toast.error(errorMessage || "Verification failed! Please try again.");
       setTimeout(() => {
         router.push("/");
       }, 3000); // Redirect after 3 seconds
