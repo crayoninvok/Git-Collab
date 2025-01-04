@@ -141,7 +141,7 @@ export default function LoginPromotor() {
         <div className="mt-6 text-sm text-center">
           <p className="text-gray-400">
             Forgot password?{" "}
-            <a href="/reset-password" className="text-indigo-400">
+            <a href="/login/loginpromotor/forgotpasswordpromotor" className="text-indigo-400">
               Reset here
             </a>
           </p>

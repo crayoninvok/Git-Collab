@@ -65,6 +65,36 @@ export default function LoginUser() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`${base_url}/oauth/login/google`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to initiate Google login");
+      }
+
+      // Redirecting the user to Google's OAuth URL
+      const result = await res.json();
+      window.location.href = result.url; // Ensure backend sends the redirect URL
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred during Google login.";
+      toast.error(errorMessage, {
+        position: "bottom-right",
+        autoClose: 5000,
+        theme: "colored",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white relative flex items-center justify-center">
       <ToastContainer />
@@ -92,7 +122,7 @@ export default function LoginUser() {
           </p>
         </div>
 
-        {/* Login  */}
+        {/* Login Section */}
         <div className="w-full sm:w-[90%] lg:w-[50%] bg-gray-900/70 bg-opacity-90 rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-600 backdrop-blur-lg">
           <h1 className="text-3xl font-bold mb-2">Login</h1>
           <p className="text-sm text-gray-400 mb-6">Welcome back!</p>
@@ -149,7 +179,7 @@ export default function LoginUser() {
                     <Field type="checkbox" className="mr-2" />
                     Remember me
                   </label>
-                  <a href="?" className="text-sm text-indigo-400">
+                  <a href="/login/loginuser/forgotpassworduser" className="text-sm text-indigo-400">
                     Forgot password?
                   </a>
                 </div>
@@ -176,14 +206,16 @@ export default function LoginUser() {
           </div>
 
           <div className="flex gap-4">
-            <button className="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg flex items-center justify-center transition-transform transform hover:scale-105">
+            <button
+              className="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg flex items-center justify-center transition-transform transform hover:scale-105"
+              onClick={handleGoogleLogin}
+            >
               <FcGoogle className="text-2xl" />
             </button>
             <button className="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg flex items-center justify-center text-white transition-transform transform hover:scale-105">
               <FaFacebook className="text-2xl" />
             </button>
           </div>
-
 
           <div className="text-center text-sm mt-6">
             Don&apos;t have an account?{" "}

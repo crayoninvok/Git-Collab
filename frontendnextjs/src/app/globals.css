@@ -93,5 +93,93 @@ body {
   }
 }
 
+/* Loading Blizzard oren */
+.custom-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: black;
+  position: relative;
+  overflow: hidden;
+}
+
+.custom-loading-container .custom-loader {
+  transform: rotateZ(45deg);
+  perspective: 1000px;
+  border-radius: 50%;
+  width: 120px; 
+  height: 120px; 
+  color: #fff;
+  position: relative;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+}
+
+.custom-loading-container .custom-loader:before,
+.custom-loading-container .custom-loader:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: inherit;
+  height: inherit;
+  border-radius: 50%;
+  transform: rotateX(70deg);
+  animation: custom-spin 1s linear infinite;
+}
+
+.custom-loading-container .custom-loader:after {
+  color: #FF3D00; 
+  transform: rotateY(70deg);
+  animation-delay: 0.4s;
+}
+
+/* Text Dalam Loading Blizzard */
+.custom-loading-container .custom-loader-text {
+  position: absolute;
+  font-family: Arial, sans-serif;
+  font-size: 1.5rem; 
+  font-weight: bold;
+  color: #fff; 
+  text-transform: uppercase;
+  z-index: 10; 
+  transform: rotateZ(-45deg); 
+  text-align: center;
+}
+
+
+/* Keyframes Loading BLizzard */
+@keyframes custom-spin {
+  0%,
+  100% {
+    box-shadow: 0.2em 0px 0 0px currentcolor;
+  }
+  12% {
+    box-shadow: 0.2em 0.2em 0 0 currentcolor;
+  }
+  25% {
+    box-shadow: 0 0.2em 0 0px currentcolor;
+  }
+  37% {
+    box-shadow: -0.2em 0.2em 0 0 currentcolor;
+  }
+  50% {
+    box-shadow: -0.2em 0 0 0 currentcolor;
+  }
+  62% {
+    box-shadow: -0.2em -0.2em 0 0 currentcolor;
+  }
+  75% {
+    box-shadow: 0px -0.2em 0 0 currentcolor;
+  }
+  87% {
+    box-shadow: 0.2em -0.2em 0 0 currentcolor;
+  }
+}
+
+
 
 
