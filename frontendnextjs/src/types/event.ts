@@ -28,7 +28,6 @@ export interface SessionContext {
   loading: boolean;
 }
 
-
 export interface Event {
   id: number;
   title: string;
@@ -41,6 +40,7 @@ export interface Event {
   date: Date;
   time: Date;
   tickets: Ticket[];
+  isPurchased?: boolean;
 }
 
 export interface Ticket {
@@ -52,10 +52,50 @@ export interface Ticket {
   orderDetailId?: number;
 }
 
+export interface Order {
+  id: number;
+  totalPrice: number;
+  finalPrice: number;
+  status: "PENDING" | "PAID" | "CANCELED";
+  createdAt: string;
+  updatedAt: string;
+  event: Event;
+  details: OrderDetail[];
+}
+
 export interface OrderDetail {
   id: number;
   quantity: number;
-  orderId?: number;
   tickets: Ticket[];
-  userCouponId?: number;
 }
+
+export interface PaymentData {
+  ticketId: number;
+  quantity: number;
+  totalPrice: number;
+  finalPrice: number;
+  pointsRedeemed?: number;
+  percentage?: number;
+}
+
+// interface UserTicket {
+//   id: number;
+//   eventId: number;
+//   event: {
+//     title: string;
+//     thumbnail: string;
+//     date: string;
+//     venue: string;
+//   };
+//   status: "PENDING" | "PAID" | "CANCELED";
+//   details: {
+//     tickets: {
+//       category: string;
+//       price: number;
+//     }[];
+//     quantity: number;
+//   }[];
+//   totalPrice: number;
+//   finalPrice: number;
+//   createdAt: string;
+// }

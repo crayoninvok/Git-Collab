@@ -1,4 +1,4 @@
-// src/app/event/[slug]/_components/EventHero.tsx
+// src/components/detail/hero.tsx
 import { Event } from "@/types/event";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 

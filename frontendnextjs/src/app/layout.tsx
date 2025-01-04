@@ -42,13 +42,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${comfortaa.className} antialiased`}
       >
         <SessionProvider>
-          <NavbarWrapper />
-          {children}
-          <ToastContainer />
-          <Footer />
+          <div className="min-h-screen flex flex-col">
+            <NavbarWrapper />
+            <main className="flex-1">{children}</main>
+            <ToastContainer />
+            <Footer />
+          </div>
         </SessionProvider>
       </body>
     </html>
   );
 }
-

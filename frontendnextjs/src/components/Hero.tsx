@@ -24,7 +24,7 @@ export default function Hero({
 
   return (
     <section 
-      className="relative h-screen"
+      className="relative h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] lg:h-screen"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -82,7 +82,7 @@ export default function Hero({
 
       <div className={`relative z-10 h-full flex items-center justify-center transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
         <div className="text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white">
             {title}
             <span className="text-orange-500"> {highlightedText}</span>
           </h1>

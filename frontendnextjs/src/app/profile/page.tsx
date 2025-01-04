@@ -2,76 +2,102 @@
 
 import { useSession } from "@/context/useSessionHook";
 import { formatPrice } from "@/helpers/formatPrice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaStar, FaTicketAlt, FaUser } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { RiDiscountPercentFill } from "react-icons/ri";
 import { formatDate } from "@/helpers/formatDate";
+import ReviewModal from "@/components/review/showReview";
+
+interface UserTicket {
+  id: number;
+  eventId: number;
+  event: {
+    title: string;
+    thumbnail: string;
+    date: string;
+    venue: string;
+  };
+  status: "PENDING" | "PAID" | "CANCELED";
+  details: {
+    tickets: {
+      category: string;
+      price: number;
+    }[];
+    quantity: number;
+  }[];
+  totalPrice: number;
+  finalPrice: number;
+  createdAt: string;
+}
+
+interface Review {
+  id: number;
+  userId: string;
+}
 
 export default function ProfilePage() {
   const { isAuth, type, user } = useSession();
-
+  const [tickets, setTickets] = useState<UserTicket[]>([]);
+  const [reviewedTickets, setReviewedTickets] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [loadingTickets, setLoadingTickets] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const background =
-    "https://res.cloudinary.com/dxpeofir6/video/upload/v1734510609/Blue_Dark_Blue_Gradient_Color_and_Style_Video_Background_d9g5ts.mp4";
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
-  const tickets = [
-    {
-      id: 1,
-      logo: "/WTFLOGOPROFILE.png",
-      eventName: "We The Fest",
-      date: "2024-12-25",
-      venue: "GBK Sport Complex Senayan",
-      seat: "A12",
-      price: 1000000,
-      status: "ON-GOING",
-    },
-    {
-      id: 2,
-      logo: "/DWPLOGOPROFILE.png",
-      eventName: "Djakarta Warehouse Project",
-      venue: "GBK Sport Complex Senayan",
-      date: "2024-12-30",
-      seat: "B22",
-      price: 1500000,
-      status: "SUCCEED",
-    },
-    {
-      id: 3,
-      logo: "/AM.png",
-      eventName: "Arctic Monkeys World Tour",
-      date: "2024-12-30",
-      venue: "Jakarta International Expo",
-      seat: "B22",
-      price: 960000,
-      status: "SUCCEED",
-    },
-    {
-      id: 4,
-      logo: "/CAS.png",
-      eventName: "Cigarette After Sex Tour",
-      date: "2024-12-30",
-      venue: "GBK Sport Complex Senayan",
-      seat: "A12",
-      price: 950000,
-      status: "SUCCEED",
-    },
-    {
-      id: 5,
-      logo: "/orchestra.jpg",
-      eventName: "Classic Musical Concert",
-      date: "2024-12-30",
-      venue: "Balai Resital Kartanegara",
-      seat: "D45",
-      price: 1000000,
-      status: "SUCCEED",
-    },
-  ];
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<UserTicket | null>(null);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const background =
+    "https://res.cloudinary.com/dxpeofir6/video/upload/v1734510609/Blue_Dark_Blue_Gradient_Color_and_Style_Video_Background_d9g5ts.mp4";
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await fetch(`${base_url}/orders/history/user`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const data = await response.json();
+        setTickets(data.orders);
+
+        // Check for reviews for each ticket
+        const reviewStatuses: { [key: number]: boolean } = {};
+        await Promise.all(
+          data.orders.map(async (ticket: UserTicket) => {
+            const reviewResponse = await fetch(
+              `${base_url}/reviews/event/${ticket.eventId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+            const reviews = await reviewResponse.json();
+            reviewStatuses[ticket.eventId] = reviews.some(
+              (review: Review) => review.userId === user?.id
+            );
+          })
+        );
+        setReviewedTickets(reviewStatuses);
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+      } finally {
+        setLoadingTickets(false);
+      }
+    };
+
+    if (isAuth && user) {
+      fetchTickets();
+    }
+  }, [isAuth, user, base_url]);
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) {
       Swal.fire({
@@ -86,21 +112,16 @@ export default function ProfilePage() {
     const formData = new FormData();
     formData.append("file", file);
     const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
-
-      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-      if (tokenPayload.exp * 1000 < Date.now())
-        throw new Error("Token expired");
+    if (!token) throw new Error("No token found");
 
     try {
       setUploading(true);
       const response = await fetch(`${base_url}/users/avatar-cloud`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
-        // credentials: "include",
       });
 
       if (response.ok) {
@@ -113,7 +134,7 @@ export default function ProfilePage() {
       } else {
         throw new Error(`Failed to upload. Status: ${response.status}`);
       }
-    } catch (error) {
+    } catch {
       Swal.fire({
         title: "Error!",
         text: "Failed to update your profile picture. Please try again later.",
@@ -151,9 +172,12 @@ export default function ProfilePage() {
     );
   }
 
+  const filteredTickets = tickets.filter(
+    (ticket) => !reviewedTickets[ticket.eventId]
+  );
+
   return (
     <>
-      {/* Video Background */}
       <video
         className="fixed top-0 left-0 w-full h-full object-cover -z-10"
         src={background}
@@ -162,51 +186,94 @@ export default function ProfilePage() {
         muted
       />
 
-      {/* Main Content */}
       <div className="min-h-screen py-10 mt-5 flex flex-col lg:flex-row px-6 relative">
-        {/* Left Section */}
+        {/* Left Section - Tickets */}
         <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-5 rounded-xl shadow-lg mt-10">
           <h2 className="text-2xl font-bold mb-6 text-gray-100">
             Your Tickets
           </h2>
           <div className="space-y-4">
-            {tickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="p-4 bg-gray-700 rounded-lg shadow"
-              >
-                <div className="flex flex-col md:flex-row items-center justify-between space-x-4">
-                  {/* Logo */}
-                  <img
-                    src={ticket.logo}
-                    alt={`${ticket.eventName} Logo`}
-                    className="w-16 h-16 rounded-md cursor-pointer"
-                    onClick={() => openModal(ticket.logo)}
-                  />
-                  <div className="flex-1">
-                    <p className="font-semibold text-white">
-                      {ticket.eventName}
-                    </p>
-                    <p className="text-gray-400 text-sm">Date: {ticket.date}</p>
-                    <p className="text-gray-400 text-sm">
-                      Venue: {ticket.venue}
-                    </p>
-                    <p className="text-gray-400 text-sm">Seat: {ticket.seat}</p>
-                    <p className="text-gray-400 text-sm">Price: {formatPrice(ticket.price)}</p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <p className="text-white mb-2">{ticket.status}</p>
-                    <button className="text-black bg-orange-500 hover:bg-orange-600 rounded-md px-4 py-2">
-                      Look
-                    </button>
+            {loadingTickets ? (
+              <div className="text-center text-white">Loading tickets...</div>
+            ) : filteredTickets.length > 0 ? (
+              filteredTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className="p-4 bg-gray-700 rounded-lg shadow"
+                >
+                  <div className="flex flex-col md:flex-row items-center justify-between space-x-4">
+                    <img
+                      src={ticket.event.thumbnail || "/concert1.jpg"}
+                      alt={`${ticket.event.title} Thumbnail`}
+                      className="w-16 h-16 object-cover rounded-md cursor-pointer"
+                      onClick={() =>
+                        openModal(ticket.event.thumbnail || "/concert1.jpg")
+                      }
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold text-white">
+                        {ticket.event.title}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Date: {formatDate(ticket.event.date)}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Venue: {ticket.event.venue}
+                      </p>
+                      {ticket.details[0]?.tickets.map((t, index) => (
+                        <p key={index} className="text-gray-400 text-sm">
+                          {t.category}: {ticket.details[0].quantity}x
+                        </p>
+                      ))}
+                      <p className="text-gray-400 text-sm">
+                        Price: {formatPrice(ticket.finalPrice)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span
+                        className={`mb-2 px-2 py-1 rounded text-xs ${
+                          ticket.status === "PAID"
+                            ? "bg-green-500"
+                            : ticket.status === "PENDING"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        } text-white`}
+                      >
+                        {ticket.status}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const eventDate = new Date(ticket.event.date);
+                          const isFinished = eventDate < new Date();
+                          if (!isFinished) {
+                            Swal.fire({
+                              title: "Cannot Review Yet",
+                              text: "You can only review events after they have concluded.",
+                              icon: "warning",
+                              confirmButtonText: "OK",
+                            });
+                            return;
+                          }
+                          setSelectedTicket(ticket);
+                          setReviewModalOpen(true);
+                        }}
+                        className="text-black bg-orange-500 hover:bg-orange-600 rounded-md px-4 py-2 transition-colors"
+                      >
+                        Rate Us
+                      </button>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-400">
+                No tickets available for review.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
-        {/* Right Section */}
+        {/* Right Section - User Profile */}
         <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-8 lg:ml-8 rounded-xl shadow-lg mt-10">
           <div className="flex flex-col items-center w-full mb-8">
             <img
@@ -240,16 +307,16 @@ export default function ProfilePage() {
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                 <FaUser className="text-yellow-700 text-3xl mr-3" />
-                <p className="text-gray-400">Your ID :</p>
+                <p className="text-gray-400">Your ID:</p>
               </div>
               <p className="font-semibold text-white">{user?.id || "N/A"}</p>
             </div>
-            {/* Coupon */}
+
             <div className="flex items-center justify-between bg-yellow-400 rounded-lg p-4 shadow-lg">
               <div className="flex items-center">
                 <FaTicketAlt className="text-yellow-700 text-3xl mr-3" />
                 <div>
-                  <p className="text-gray-800 font-semibold">Your Ref Code :</p>
+                  <p className="text-gray-800 font-semibold">Your Ref Code:</p>
                   <p className="text-gray-600 text-lg font-bold">
                     {user?.refCode || "No coupon available"}
                   </p>
@@ -257,12 +324,11 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Points */}
             <div className="flex items-center justify-between bg-green-500 rounded-lg p-4 shadow-lg">
               <div className="flex items-center">
                 <FaStar className="text-white text-3xl mr-3" />
                 <div>
-                  <p className="text-white font-semibold">Your Points :</p>
+                  <p className="text-white font-semibold">Your Points:</p>
                   <p className="text-white text-lg font-bold">
                     {user?.points !== undefined
                       ? `${formatPrice(user.points)} pts`
@@ -272,7 +338,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Coupon Percentage */}
             <div className="flex items-center justify-between bg-blue-500 rounded-lg p-4 shadow-lg">
               <div className="flex items-center">
                 <RiDiscountPercentFill className="text-white text-3xl mr-3" />
@@ -300,7 +365,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Image Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="relative">
@@ -317,6 +382,20 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Review Modal */}
+      {selectedTicket && (
+        <ReviewModal
+          isOpen={reviewModalOpen}
+          onClose={() => {
+            setReviewModalOpen(false);
+            setSelectedTicket(null);
+          }}
+          eventId={selectedTicket.eventId}
+          userId={user?.id || ""}
+          isEventFinished={new Date(selectedTicket.event.date) < new Date()}
+        />
       )}
     </>
   );
