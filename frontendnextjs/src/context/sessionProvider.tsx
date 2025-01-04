@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, ReactNode, useEffect, useState, useCallback } from "react";
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import {
   SessionContext as ISessionContext,
   UserType,
@@ -25,6 +31,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
 
   const checkSession = useCallback(async () => {
     try {
+      console.log("Starting session check...");
+
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("No token found");
@@ -32,6 +40,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
 
       // Decode token and check expiration
       const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+      console.log("Token Payload:", tokenPayload);
+
       if (tokenPayload.exp * 1000 < Date.now()) {
         throw new Error("Token expired");
       }
@@ -48,7 +58,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       const result = await res.json();
-
+      console.log("Session API Response:", result);
 
       if (result.type === "promotor") {
         setPromotor(result);
@@ -72,12 +82,14 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
   }, [base_url]);
 
   const logout = useCallback(() => {
+    console.log("Logging out...");
     localStorage.removeItem("token");
     resetSession();
     window.location.href = "/login";
   }, []);
 
   const resetSession = useCallback(() => {
+    console.log("Resetting session...");
     setIsAuth(false);
     setType(null);
     setUser(null);
@@ -85,6 +97,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   useEffect(() => {
+    console.log("Initializing session provider...");
     const token = localStorage.getItem("token");
     if (token) {
       checkSession();
