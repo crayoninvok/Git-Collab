@@ -5,7 +5,6 @@ import { Event } from "@/types/event";
 import EventTickets from "@/components/detail/ticket";
 import EventDetails from "@/components/detail/desc";
 import EventHero from "@/components/detail/hero";
-import { useRouter } from "next/navigation";
 
 
 export default function EventDetailPage({
