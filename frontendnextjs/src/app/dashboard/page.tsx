@@ -117,9 +117,9 @@ function DashboardPage() {
   if (!promotor) return <ErrorState message="No Promotor Data Found" />;
 
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
+    <div className="flex min-h-screen bg-gradient-to-r from-black via-gray-800 to-gray-950 text-white">
       <AdminSidebar />
-      <main className="flex-1 px-6 bg-gradient-to-b from-gray-800 to-gray-950">
+      <main className="flex-1 px-6bg-gradient-to-r from-black via-gray-800 to-gray-900">
         {/* Header */}
 
         <header className="mb-6 flex flex-col lg:flex-row justify-between items-center p-10">
@@ -139,7 +139,9 @@ function DashboardPage() {
               />
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-white">{promotor.name}</h1>
+              <h1 className="text-xl font-extrabold text-white">
+                {promotor.name}
+              </h1>
               <p className="text-gray-400">{promotor.email}</p>
               <p className="text-gray-400">Event Promotor</p>
             </div>
@@ -149,9 +151,9 @@ function DashboardPage() {
         {/* Analytics Section */}
 
         <section className="mb-10">
-          <h1 className="text-3xl font-bold text-white">Overview</h1>
+          <h1 className="text-3xl font-bold text-white ml-5">Overview</h1>
           <hr className="border-gray-700 my-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mx-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {analyticsData.map((data, index) => (
               <AnalyticsCard key={index} {...data} />
             ))}

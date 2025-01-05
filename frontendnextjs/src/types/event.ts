@@ -7,8 +7,9 @@ export interface IUser {
   points: number;
   userCouponId: number;
   percentage: number;
-  userCoupon: string;
+  expiredAt: string;
 }
+
 export interface IPromotor {
   id: string;
   name: string;

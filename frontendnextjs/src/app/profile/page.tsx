@@ -360,7 +360,7 @@ export default function ProfilePage() {
               {user?.percentage && (
                 <div className="flex text-end space-x-3">
                   <p className="text-white">Expired At:</p>
-                  <p className="text-white">{formatDate(user.userCoupon)}</p>
+                  <p className="text-white">{formatDate(user.expiredAt)}</p>
                 </div>
               )}  
             </div>

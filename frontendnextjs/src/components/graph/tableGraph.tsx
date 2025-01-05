@@ -24,7 +24,7 @@ const chartConfig = {
 // Main component for rendering the chart
 export default function TableGraph() {
   return (
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+    <ChartContainer config={chartConfig} className="min-h-[200px] w-full items-center">
       <LineChart accessibilityLayer data={chartData}>
         {/* Grid lines for better readability */}
         <CartesianGrid vertical={false} />
@@ -35,7 +35,7 @@ export default function TableGraph() {
           tickLine={false}
           tickMargin={10}
           axisLine={false}
-          tickFormatter={(value) => value.slice(0, 3)} // Shorten month names
+          tickFormatter={(value) => value.slice(0, 3)} 
         />
 
         {/* Y-axis configuration */}

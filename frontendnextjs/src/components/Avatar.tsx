@@ -139,8 +139,8 @@ export default function Avatar() {
             {/* Event */}
             <MenuItem
               icon={<SiEventbrite className="text-white text-xl" />}
-              label="Event"
-              onClick={() => navigateTo("/event")}
+              label="Events"
+              onClick={() => navigateTo("/events")}
             />
 
             {/* Artist */}
