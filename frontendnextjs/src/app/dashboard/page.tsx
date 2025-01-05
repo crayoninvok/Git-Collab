@@ -151,9 +151,9 @@ function DashboardPage() {
         {/* Analytics Section */}
 
         <section className="mb-10">
-          <h1 className="text-3xl font-bold text-white ml-5">Overview</h1>
+          <h1 className="text-3xl font-bold text-white ml-[5rem]">Overview</h1>
           <hr className="border-gray-700 my-4" />
-          <div className="mx-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mx-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {analyticsData.map((data, index) => (
               <AnalyticsCard key={index} {...data} />
             ))}

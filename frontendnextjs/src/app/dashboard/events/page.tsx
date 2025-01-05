@@ -28,7 +28,7 @@ export default function MyEventsPage() {
     const [events, setEvents] = useState<Event[]>([]);
     const [showPastEvents, setShowPastEvents] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [, setError] = useState('');
 
     useEffect(() => {
         const fetchEvents = async () => {

@@ -31,7 +31,7 @@ export default function PaymentFailedPage() {
             Payment Failed
           </h1>
           <p className="text-gray-400 mb-8">
-            We're sorry, but your payment could not be processed. Please try
+            We re sorry, but your payment could not be processed. Please try
             again or contact support if the problem persists.
           </p>
 

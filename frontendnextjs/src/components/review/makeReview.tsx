@@ -58,6 +58,7 @@ const ReviewForm = ({ eventId, userId, isEventFinished, onSuccess }: ReviewFormP
       setRating(0);
       onSuccess?.();
     } catch (err) {
+      console.log(err);
       setError('Failed to submit review. Please try again.');
     } finally {
       setIsSubmitting(false);

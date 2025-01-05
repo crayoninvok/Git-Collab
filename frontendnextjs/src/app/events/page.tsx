@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar} from "lucide-react";
 import EventCard from "@/components/home/EventCard";
 import SearchEvent from "@/components/search";
 import { Event } from "@/types/event";
@@ -83,7 +83,7 @@ export default function ViewAllEvents() {
   };
 
   const filteredAndSortedEvents = useMemo(() => {
-    let filtered = events.filter((event) => {
+    const filtered = events.filter((event) => {
       const matchesCategory = activeCategory === "all" || event.category === activeCategory;
       const matchesLocation = activeLocation === "all" || event.location === activeLocation;
       const matchesSearch = 

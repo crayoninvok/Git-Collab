@@ -5,15 +5,16 @@ import { useSession } from "@/context/useSessionHook";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { Event } from "@/types/event";
 
 export default function AdminProfile() {
   const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
   const { promotor, logout } = useSession();
-  const [lastLogin, setLastLogin] = useState<string | null>(null);
+  const [lastLogin] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [events, setEvents] = useState<any[]>([]); // State for real events
+  const [events, setEvents] = useState<Event[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [eventsPerPage] = useState(6); // Set events per page to 6
+  const [eventsPerPage] = useState(6); 
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -121,7 +122,10 @@ export default function AdminProfile() {
           confirmButtonText: "OK",
         });
       }
-    } catch (error) {
+    } catch (err:unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred.";
+        console.log(errorMessage);
       Swal.fire({
         title: "Error!",
         text: "Failed to update your profile picture. Please try again later.",
