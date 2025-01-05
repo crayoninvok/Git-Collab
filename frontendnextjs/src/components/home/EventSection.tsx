@@ -5,48 +5,55 @@ import { Autoplay, Navigation } from "swiper/modules";
 import { useState, useEffect } from "react";
 import EventCard from "./EventCard";
 import Link from "next/link";
-import { Event } from "@/types/event";
 import "swiper/css";
 import "swiper/css/navigation";
 
-interface CategoryOption {
-  value: "all" | "Music" | "Orchestra" | "Opera" | "Other";
-  label: string;
+interface Event {
+  id: number;
+  title: string;
+  slug: string;
+  thumbnail: string;
+  category: "Music" | "Orchestra" | "Opera" | "Other";
+  location: "Bandung" | "Bali" | "Surabaya" | "Jakarta";
+  venue: string;
+  description: string;
+  date: string;
+  time: string;
+  tickets: Array<{
+    id: number;
+    category: string;
+    price: number;
+    quantity: number;
+  }>;
 }
-
-interface LocationOption {
-  value: "all" | "Bandung" | "Bali" | "Surabaya" | "Jakarta";
-  label: string;
-}
-
-const categories: CategoryOption[] = [
-  { value: "all", label: "All Categories" },
-  { value: "Music", label: "Music" },
-  { value: "Orchestra", label: "Orchestra" },
-  { value: "Opera", label: "Opera" },
-  { value: "Other", label: "Other" },
-];
-
-const locations: LocationOption[] = [
-  { value: "all", label: "All Locations" },
-  { value: "Bandung", label: "Bandung" },
-  { value: "Jakarta", label: "Jakarta" },
-  { value: "Surabaya", label: "Surabaya" },
-  { value: "Bali", label: "Bali" },
-];
 
 export default function EventSection() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<CategoryOption["value"]>("all");
-  const [activeLocation, setActiveLocation] = useState<LocationOption["value"]>("all");
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE || 'http://localhost:8000/api';
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/events");
+        console.log('Fetching events from:', `${base_url}/events`);
+        const response = await fetch(`${base_url}/events`);
         const data = await response.json();
-        setEvents(data);
+        console.log('Received data:', data);
+
+        if (!Array.isArray(data)) {
+          console.error('Data is not an array:', data);
+          return;
+        }
+
+        // Filter future events
+        const now = new Date();
+        const upcomingEvents = data.filter(event => {
+          const eventDate = new Date(event.date);
+          return eventDate > now;
+        });
+
+        console.log('Filtered upcoming events:', upcomingEvents);
+        setEvents(upcomingEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
       } finally {
@@ -55,167 +62,84 @@ export default function EventSection() {
     };
 
     fetchEvents();
-  }, []);
+  }, [base_url]);
 
-  const getLowestTicketPrice = (tickets: Event["tickets"]) => {
-    if (!tickets?.length) return "Price not available";
-    const lowestPrice = Math.min(...tickets.map((ticket) => ticket.price));
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(lowestPrice);
-  };
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const filteredEvents = events.filter((event) => {
-    const matchesCategory = activeCategory === "all" || event.category === activeCategory;
-    const matchesLocation = activeLocation === "all" || event.location === activeLocation;
-    return matchesCategory && matchesLocation;
-  });
-
+  // Sort and filter events
   const topEvents = events
-    .filter(event => event.tickets.length > 0)
+    .filter(event => event.tickets.some(ticket => ticket.price > 1500000))
+    .slice(0, 5);
+
+  const upcomingEvents = [...events]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 5);
+
+  const freeEvents = events
+    .filter(event => event.tickets.some(ticket => ticket.price === 0))
     .slice(0, 5);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-orange-500" />
+        <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  return (
-    <div className="space-y-12">
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-white">Top Events</h2>
-        <Swiper
-          modules={[Autoplay]}
-          spaceBetween={16}
-          slidesPerView={2}
-          autoplay={{
-            delay: 3000,
-            disableOnInteraction: false,
-          }}
-          breakpoints={{
-            640: { slidesPerView: 3 },
-            768: { slidesPerView: 4 },
-            1024: { slidesPerView: 5 },
-          }}
-          className="!px-1"
-        >
-          {topEvents.map((event) => (
-            <SwiperSlide key={`top-${event.id}`}>
-              <EventCard
-                event={{
-                  id: event.id.toString(),
-                  slug: event.slug,
-                  title: event.title,
-                  date: formatDate(event.date),
-                  venue: event.venue,
-                  location: event.location,
-                  ticketPrice: getLowestTicketPrice(event.tickets),
-                  imageUrl: event.thumbnail || "/default-event.jpg",
-                  isTopEvent: true,
-                  category: event.category,
-                }}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </section>
-
-
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Upcoming Events</h2>
-          <Link href="/events" className="text-orange-400 hover:text-orange-300 text-sm">
+  const EventSlider = ({ title, events, viewAllLink }: { title: string; events: Event[]; viewAllLink?: string }) => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">{title}</h2>
+        {viewAllLink && events.length > 0 && (
+          <Link
+            href={viewAllLink}
+            className="px-4 py-2 bg-orange-500 rounded-full text-white text-sm hover:bg-orange-600 transition-colors"
+          >
             View All
           </Link>
-        </div>
+        )}
+      </div>
 
-
-        <div className="space-y-3">
-
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <button
-                key={category.value}
-                onClick={() => setActiveCategory(category.value)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors
-                  ${activeCategory === category.value
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
-                  }`}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
-
-
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {locations.map((location) => (
-              <button
-                key={location.value}
-                onClick={() => setActiveLocation(location.value)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors
-                  ${activeLocation === location.value
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
-                  }`}
-              >
-                {location.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-
+      {events.length > 0 ? (
         <Swiper
           modules={[Navigation, Autoplay]}
-          spaceBetween={16}
-          slidesPerView={2}
+          spaceBetween={20}
+          slidesPerView={1}
           navigation
-          loop={filteredEvents.length > 2}
+          loop={events.length > 1}
           autoplay={{
             delay: 3000,
             disableOnInteraction: false,
           }}
           breakpoints={{
-            640: { slidesPerView: 3 },
-            768: { slidesPerView: 4 },
-            1024: { slidesPerView: 5 },
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 }
           }}
-          className="!px-1"
+          className="py-4"
         >
-          {filteredEvents.map((event) => (
+          {events.map((event) => (
             <SwiperSlide key={event.id}>
-              <EventCard
-                event={{
-                  id: event.id.toString(),
-                  slug: event.slug,
-                  title: event.title,
-                  date: formatDate(event.date),
-                  venue: event.venue,
-                  location: event.location,
-                  ticketPrice: getLowestTicketPrice(event.tickets),
-                  imageUrl: event.thumbnail || "/default-event.jpg",
-                  category: event.category,
-                }}
+              <EventCard 
+                event={event} 
+                isTopEvent={event.tickets.some(ticket => ticket.price > 1500000)} 
               />
             </SwiperSlide>
           ))}
-        </Swiper>
-      </section>
+        </Swiper >
+      ) : (
+        <div className="text-center py-10 text-gray-400">
+          No events available for this category
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-12 px-4 md:px-6 lg:px-8 max-w-[2000px] mx-auto">
+      {topEvents.length > 0 && <EventSlider title="Premium Events" events={topEvents} />}
+      {upcomingEvents.length > 0 && <EventSlider title="Upcoming Events" events={upcomingEvents} viewAllLink="/events" />}
+      {freeEvents.length > 0 && <EventSlider title="Free Events" events={freeEvents} viewAllLink="/events?free=true" />}
     </div>
   );
 }
