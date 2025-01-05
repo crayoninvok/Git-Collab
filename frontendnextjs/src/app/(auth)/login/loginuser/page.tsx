@@ -96,6 +96,36 @@ export default function LoginUser() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`${base_url}/oauth/login/google`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to initiate Google login");
+      }
+
+      // Redirecting the user to Google's OAuth URL
+      const result = await res.json();
+      window.location.href = result.url; // Ensure backend sends the redirect URL
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred during Google login.";
+      toast.error(errorMessage, {
+        position: "bottom-right",
+        autoClose: 5000,
+        theme: "colored",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center px-4">
       <ToastContainer />
@@ -126,9 +156,15 @@ export default function LoginUser() {
         </div>
 
         {/* Login Section */}
+<<<<<<< HEAD
         <div className="w-full lg:w-1/2 bg-gray-900 bg-opacity-90 rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-600 backdrop-blur-lg">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Login</h1>
           <p className="text-sm sm:text-lg text-gray-400 mb-6">Welcome back!</p>
+=======
+        <div className="w-full sm:w-[90%] lg:w-[50%] bg-gray-900/70 bg-opacity-90 rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-600 backdrop-blur-lg">
+          <h1 className="text-3xl font-bold mb-2">Login</h1>
+          <p className="text-sm text-gray-400 mb-6">Welcome back!</p>
+>>>>>>> 25c3be0773dd935f8fb0f566d3c52a0743d74776
 
           {alertMessage && (
             <div className="flex items-center bg-red-500 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-md space-x-3 mb-4">
@@ -182,10 +218,14 @@ export default function LoginUser() {
                     <Field type="checkbox" className="mr-2" />
                     Remember me
                   </label>
+<<<<<<< HEAD
                   <a
                     href="/login/loginuser/forgotpassworduser"
                     className="text-sm text-indigo-400 hover:underline"
                   >
+=======
+                  <a href="/login/loginuser/forgotpassworduser" className="text-sm text-indigo-400">
+>>>>>>> 25c3be0773dd935f8fb0f566d3c52a0743d74776
                     Forgot password?
                   </a>
                 </div>
