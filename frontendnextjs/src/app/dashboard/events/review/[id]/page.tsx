@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from '@/context/useSessionHook';
 import { formatDate } from '@/helpers/formatDate';
 import { FaStar } from 'react-icons/fa';
-import AdminSidebar from '@/components/AdminSidebar';
+import AdminSidebar from '@/components/adminSidebarDashboard';
 
 interface Review {
   id: number;

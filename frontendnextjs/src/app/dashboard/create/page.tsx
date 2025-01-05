@@ -27,11 +27,7 @@ type TicketType = {
 export default function CreateEventPage() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
-<<<<<<< HEAD
-    { id: "free", name: "Free", price: 0, quantity: 1 },
-=======
     { id: "free", category: "Free", price: 0, quantity: 1 }
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -57,18 +53,12 @@ export default function CreateEventPage() {
         quantity: currentQuantity 
       }]);
     } else {
-<<<<<<< HEAD
-      setTicketTypes([
-        { id: Date.now().toString(), name: "", price: 0, quantity: 1 },
-      ]);
-=======
       setTicketTypes([{
         id: Date.now().toString(),
         category: "",
         price: 0,
         quantity: currentQuantity
       }]);
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
     }
   }, [eventType]);
 
@@ -151,23 +141,12 @@ export default function CreateEventPage() {
       if (data.bannerImage?.[0]) {
         formData.append("banner", data.bannerImage[0]);
       }
-<<<<<<< HEAD
-=======
-
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
       const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:8000/api/events/create", {
         method: "POST",
         headers: {
-<<<<<<< HEAD
-          Authorization: `Bearer ${token}`,
-        },
-
-        // credentials: "include",
-=======
           "Authorization": `Bearer ${token}`,
         },
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
         body: formData,
       });
 
@@ -180,19 +159,10 @@ export default function CreateEventPage() {
       alert("Event created successfully!");
       reset();
       setImagePreview("");
-<<<<<<< HEAD
-      setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Error while Creating an event.";
-      console.error("Error:", err);
-      alert(errorMessage || "An error occurred while creating the event.");
-=======
       setTicketTypes([{ id: "free", category: "Free", price: 0, quantity: 1 }]);
     } catch (error: any) {
       console.error("Error:", error);
       alert(error.message || "An error occurred while creating the event.");
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
     } finally {
       setLoading(false);
     }
@@ -342,70 +312,29 @@ export default function CreateEventPage() {
                 {eventType === "free" ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-zinc-800 rounded-lg">
                     <div>
-<<<<<<< HEAD
-                      <label className="block mb-1 font-medium">
-                        Ticket Name
-                      </label>
-                      <input
-                        type="text"
-                        value={ticket.name}
-                        onChange={(e) =>
-                          handleTicketChange(index, "name", e.target.value)
-                        }
-                        className="p-3 bg-zinc-700 rounded-lg w-full"
-                        disabled={eventType === "free"}
-                        required
-=======
                       <label className="block mb-1 font-medium">Category</label>
                       <input
                         type="text"
                         value="Free"
                         className="p-3 bg-zinc-700 rounded-lg w-full cursor-not-allowed opacity-50"
                         disabled
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
                       />
                     </div>
                     <div>
                       <label className="block mb-1 font-medium">Price (Rp)</label>
                       <input
                         type="number"
-<<<<<<< HEAD
-                        value={ticket.price}
-                        onChange={(e) =>
-                          handleTicketChange(
-                            index,
-                            "price",
-                            parseInt(e.target.value)
-                          )
-                        }
-                        className="p-3 bg-zinc-700 rounded-lg w-full"
-                        disabled={eventType === "free"}
-                        min="0"
-                        required
-=======
                         value={0}
                         className="p-3 bg-zinc-700 rounded-lg w-full cursor-not-allowed opacity-50"
                         disabled
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
                       />
                     </div>
                     <div>
                       <label className="block mb-1 font-medium">Quantity</label>
                       <input
                         type="number"
-<<<<<<< HEAD
-                        value={ticket.quantity}
-                        onChange={(e) =>
-                          handleTicketChange(
-                            index,
-                            "quantity",
-                            parseInt(e.target.value)
-                          )
-                        }
-=======
                         value={ticketTypes[0].quantity}
                         onChange={(e) => handleTicketChange(0, "quantity", parseInt(e.target.value))}
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
                         className="p-3 bg-zinc-700 rounded-lg w-full"
                         min="1"
                         required

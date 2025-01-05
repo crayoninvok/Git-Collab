@@ -38,7 +38,6 @@ export default function NotAuthorized({
           
           <Button
             onClick={() => router.push("/registeruser")}
-            variant="outline"
             className="w-full border-orange-500 text-orange-500 hover:bg-orange-500/10"
           >
             Create Account

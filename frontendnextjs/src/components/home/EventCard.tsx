@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-
-=======
 import Image from "next/image";
 import { formatPrice } from "@/helpers/formatPrice";
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
 import Link from "next/link";
 import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt } from "react-icons/fa";
 import { formatDate } from "@/helpers/formatDate";

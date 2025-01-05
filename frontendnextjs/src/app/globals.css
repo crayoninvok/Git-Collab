@@ -118,7 +118,6 @@ body {
   }
 }
 
-<<<<<<< HEAD
 /* Loading Blizzard oren */
 .custom-loading-container {
   display: flex;
@@ -207,16 +206,6 @@ body {
 }
 
 
-=======
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
->>>>>>> e1fddd8f90f19c6e0630e2f0849cb2353045562c
 
 .swiper-button-next:after,
 .swiper-button-prev:after {

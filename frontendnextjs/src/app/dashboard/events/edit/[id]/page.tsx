@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from '@/context/useSessionHook';
 import { useRouter, useParams } from 'next/navigation';
-import AdminSidebar from '@/components/AdminSidebar';
+import AdminSidebar from '@/components/adminSidebarDashboard';
 
 
 interface Ticket {
