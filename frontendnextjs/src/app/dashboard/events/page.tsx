@@ -1,191 +1,411 @@
-'use client'
-// src/app/promotor/my-events/page.tsx
-import { useState, useEffect } from 'react';
-import { useSession } from '@/context/useSessionHook';
-import { formatDate } from '@/helpers/formatDate';
-import Link from 'next/link';
-import Image from 'next/image';
-import AdminSidebar from '@/components/adminSidebarDashboard';
+"use client";
 
-interface Event {
- id: number;
- title: string;
- date: string;
- venue: string;
- thumbnail: string;
- reviews: {
-   id: number;
-   rating: number;
-   comment: string;
-   user: {
-     username: string;
-   };
- }[];
+import { useState, useEffect } from "react";
+import { useSession } from "@/context/useSessionHook";
+import { useRouter, useParams } from "next/navigation";
+import AdminSidebar from "@/components/AdminSidebar";
+import { useEditEvent } from "@/context/useEditEvent";
+
+interface Ticket {
+  id: number;
+  category: string;
+  price: number;
+  quantity: number;
 }
 
-export default function MyEventsPage() {
-    const { isAuth, type } = useSession();
-    const [events, setEvents] = useState<Event[]>([]);
-    const [showPastEvents, setShowPastEvents] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+interface Event {
+  id: number;
+  title: string;
+  category: string;
+  location: string;
+  venue: string;
+  description: string;
+  date: string;
+  time: string;
+  thumbnail: string;
+  tickets: Ticket[];
+}
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            if (!isAuth || type !== 'promotor') return;
+export default function EditEventPage() {
+  const { isAuth, type } = useSession();
+  const router = useRouter();
+  const params = useParams();
+  const {
+    loading: hookLoading,
+    error: hookError,
+    event,
+    updateEvent,
+  } = useEditEvent(params.id as string);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [eventData, setEventData] = useState<Event | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) throw new Error('Authentication token not found');
+  useEffect(() => {
+    if (event) {
+      setEventData(event);
+      setImagePreview(event.thumbnail || "");
+    }
+  }, [event]);
 
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_BASE_URL_BE}/promotors/events`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                    }
-                );
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    if (!eventData) return;
+    const { name, value } = e.target;
+    setEventData({ ...eventData, [name]: value });
+  };
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to fetch events');
-                }
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-                const data = await response.json();
-                setEvents(data);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load events');
-            } finally {
-                setLoading(false);
-            }
-        };
+  const handleTicketChange = (
+    index: number,
+    field: keyof Ticket,
+    value: string
+  ) => {
+    if (!eventData) return;
+    const updatedTickets = [...eventData.tickets];
+    updatedTickets[index] = {
+      ...updatedTickets[index],
+      [field]: field === "category" ? value : Number(value),
+    };
+    setEventData({ ...eventData, tickets: updatedTickets });
+  };
 
-        fetchEvents();
-    }, [isAuth, type]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!eventData) return;
 
-    const now = new Date();
-    const filteredEvents = events.filter(event => {
-        const eventDate = new Date(event.date);
-        return showPastEvents ? eventDate <= now : eventDate > now;
-    });
+    setSubmitting(true);
+    setError("");
 
-    if (!isAuth || type !== 'promotor') return (
-        <div className="min-h-screen flex items-center justify-center bg-black">
-            <p className="text-xl text-white">Please log in as a promotor to view this page.</p>
-        </div>
-    );
+    try {
+      const formData = new FormData();
 
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-black">
-            <div className="animate-pulse text-xl text-white">Loading events...</div>
-        </div>
-    );
+      // Basic data
+      formData.append("title", eventData.title);
+      formData.append("category", eventData.category);
+      formData.append("location", eventData.location);
+      formData.append("venue", eventData.venue);
+      formData.append("description", eventData.description);
+      formData.append("date", eventData.date);
+      formData.append("time", eventData.time);
+      formData.append("eventType", "paid");
 
+      // Format tickets dengan benar
+      const formattedTickets = eventData.tickets.map((ticket) => ({
+        id: ticket.id,
+        category: ticket.category,
+        price: Number(ticket.price),
+        quantity: Number(ticket.quantity),
+      }));
+
+      // Pastikan tickets di-stringify dengan benar
+      formData.append("tickets", JSON.stringify(formattedTickets));
+
+      // Log untuk debugging
+      console.log("Tickets being sent:", formData.get("tickets"));
+
+      // Handle file upload
+      const fileInput = document.getElementById(
+        "banner-upload"
+      ) as HTMLInputElement;
+      if (fileInput?.files?.[0]) {
+        formData.append("banner", fileInput.files[0]);
+      }
+
+      await updateEvent(formData);
+      router.push("/dashboard/events");
+    } catch (err) {
+      console.error("Error:", err);
+      setError(err instanceof Error ? err.message : "Failed to update event");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (!isAuth || type !== "promotor") {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black pt-[65px]">
-            <div className="max-w-[2000px] mx-auto p-4 sm:p-6 lg:p-8">
-                <AdminSidebar/>
-
-                {/* Tab Buttons */}
-                <div className="mb-12 flex justify-between items-center gap-6">
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() => setShowPastEvents(false)}
-                            className={`px-8 py-4 rounded-2xl font-medium text-sm transition-all
-               ${!showPastEvents
-                                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30'
-                                    : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'}`}
-                        >
-                            Upcoming Events
-                        </button>
-                        <button
-                            onClick={() => setShowPastEvents(true)}
-                            className={`px-8 py-4 rounded-2xl font-medium text-sm transition-all
-               ${showPastEvents
-                                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30'
-                                    : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700'}`}
-                        >
-                            Past Events
-                        </button>
-                    </div>
-
-                    {!showPastEvents && (
-                        <Link href="/dashboard/create"
-                            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 
-                  text-white text-center rounded-2xl font-medium hover:from-green-600 
-                  hover:to-emerald-600 transition-all shadow-lg shadow-green-500/30"
-                        >
-                            Create New Event
-                        </Link>
-                    )}
-                </div>
-
-                {/* Events Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-                    {filteredEvents.length > 0 ? (
-                        filteredEvents.map((event) => (
-                            <div key={event.id}
-                                className="group bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-2xl overflow-hidden 
-                      hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 
-                      hover:scale-[1.02] border border-zinc-800/50"
-                            >
-                                <div className="relative aspect-[16/9]">
-                                    <Image
-                                        src={event.thumbnail || '/placeholder.jpg'}
-                                        alt={event.title}
-                                        layout="fill"
-                                        objectFit="cover"
-                                        className="transition-all duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 text-white">
-                                        <h3 className="text-lg font-bold">{event.title}</h3>
-                                        <div className="text-sm text-gray-300">
-                                            <p>{formatDate(event.date)}</p>
-                                            <p>{event.venue}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-6">
-                                    {showPastEvents ? (
-                                        <Link href={`/dashboard/events/review/${event.id}`}
-                                            className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-600 
-                            text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 
-                            hover:to-blue-700 transition-all shadow-lg shadow-blue-500/30"
-                                        >
-                                            {event.reviews.length} Reviews
-                                        </Link>
-                                    ) : (
-                                        <Link href={`/dashboard/events/edit/${event.id}`}
-                                            className="block w-full text-center bg-gradient-to-r from-orange-500 to-orange-600 
-                            text-white px-6 py-3 rounded-xl font-medium hover:from-orange-600 
-                            hover:to-orange-700 transition-all shadow-lg shadow-orange-500/30"
-                                        >
-                                            Edit Event
-                                        </Link>
-                                    )}
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="col-span-full">
-                            <div className="bg-gradient-to-r from-zinc-800/50 to-zinc-900/50 rounded-2xl p-12 text-center">
-                                <div className="text-5xl mb-4">🎪</div>
-                                <p className="text-xl text-gray-300 mb-2">
-                                    {showPastEvents ? 'No past events found' : 'No upcoming events'}
-                                </p>
-                                {!showPastEvents && (
-                                    <p className="text-gray-500">
-                                        Time to create your first amazing event!
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <p className="text-xl text-white">
+          Please log in as a promotor to edit events.
+        </p>
+      </div>
     );
+  }
+
+  // page.tsx
+  if (hookLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (error || hookError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <p className="text-xl text-red-500">{error || hookError}</p>
+      </div>
+    );
+  }
+
+  if (!eventData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <p className="text-xl text-white">Event not found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-black py-12 px-4">
+      <AdminSidebar />
+      <div className="max-w-4xl mx-auto">
+        <form onSubmit={handleSubmit} className="bg-zinc-900 rounded-lg p-8">
+          <h1 className="text-3xl font-bold text-orange-500 mb-8">
+            Edit Event
+          </h1>
+
+          {/* Banner Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-white mb-2">
+              Event Banner
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-lg">
+              <div className="space-y-1 text-center">
+                {imagePreview ? (
+                  <div className="mb-4">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="mx-auto h-48 w-96 object-cover rounded-lg"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex text-sm text-gray-400">
+                    <label className="relative cursor-pointer bg-zinc-800 rounded-md font-medium text-orange-500 hover:text-orange-400">
+                      <span>Upload a file</span>
+                      <input
+                        id="banner-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  </div>
+                )}
+                <p className="text-xs text-gray-400">
+                  PNG, JPG, GIF up to 10MB
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Event Details */}
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={eventData.title}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 bg-zinc-800 border border-gray-700 rounded-lg text-white"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Category
+                </label>
+                <select
+                  name="category"
+                  value={eventData.category}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 bg-zinc-800 border border-gray-700 rounded-lg text-white"
+                  required
+                >
+                  <option value="Music">Music</option>
+                  <option value="Orchestra">Orchestra</option>
+                  <option value="Opera">Opera</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Location
+                </label>
+                <select
+                  name="location"
+                  value={eventData.location}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 bg-zinc-800 border border-gray-700 rounded-lg text-white"
+                  required
+                >
+                  <option value="Bandung">Bandung</option>
+                  <option value="Bali">Bali</option>
+                  <option value="Surabaya">Surabaya</option>
+                  <option value="Jakarta">Jakarta</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Venue
+              </label>
+              <input
+                type="text"
+                name="venue"
+                value={eventData.venue}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 bg-zinc-800 border border-gray-700 rounded-lg text-white"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  value={eventData.date.split("T")[0]}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 bg-zinc-800 border border-gray-700 rounded-lg text-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  name="time"
+                  value={eventData.time}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 bg-zinc-800 border border-gray-700 rounded-lg text-white"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={eventData.description}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full px-3 py-2 bg-zinc-800 border border-gray-700 rounded-lg text-white"
+                required
+              />
+            </div>
+
+            {/* Tickets */}
+            <div>
+              <h3 className="text-lg font-medium text-orange-500 mb-4">
+                Tickets
+              </h3>
+              {eventData.tickets.map((ticket, index) => (
+                <div
+                  key={ticket.id}
+                  className="grid grid-cols-3 gap-4 mb-4 p-4 bg-zinc-800 rounded-lg"
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Category
+                    </label>
+                    <input
+                      type="text"
+                      value={ticket.category}
+                      onChange={(e) =>
+                        handleTicketChange(index, "category", e.target.value)
+                      }
+                      className="w-full px-3 py-2 bg-zinc-700 border border-gray-600 rounded-lg text-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Price
+                    </label>
+                    <input
+                      type="number"
+                      value={ticket.price}
+                      onChange={(e) =>
+                        handleTicketChange(index, "price", e.target.value)
+                      }
+                      className="w-full px-3 py-2 bg-zinc-700 border border-gray-600 rounded-lg text-white"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      value={ticket.quantity}
+                      onChange={(e) =>
+                        handleTicketChange(index, "quantity", e.target.value)
+                      }
+                      className="w-full px-3 py-2 bg-zinc-700 border border-gray-600 rounded-lg text-white"
+                      min="1"
+                      required
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50"
+              >
+                {submitting ? "Updating..." : "Update Event"}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
