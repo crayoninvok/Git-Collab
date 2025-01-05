@@ -1,4 +1,4 @@
-// src/app/event/[slug]/_components/EventDetails.tsx
+// src/components/detail/desc.tsx
 import { Event } from "@/types/event";
 import { MapPin } from "lucide-react";
 

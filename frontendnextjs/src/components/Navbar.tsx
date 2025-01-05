@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BiSearchAlt } from "react-icons/bi";
-import { FaSearch, FaTimes } from "react-icons/fa";
 import BurgerHandphone from "./BurgerMenuHP";
 import BurgerMenu from "./BurgerMenu";
 import Avatar from "./Avatar";
@@ -14,8 +12,6 @@ export default function Navbar() {
   const { isAuth } = useSession();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
@@ -26,35 +22,22 @@ export default function Navbar() {
     });
   };
 
-  const toggleSearchModal = () => setIsSearchModalOpen((prev) => !prev);
-  const closeModal = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setIsSearchModalOpen(false);
-  };
-
-  const performSearch = async () => {
-    setIsSearching(true);
-    // Simulate search action
-    setTimeout(() => {
-      setIsSearching(false);
-      closeModal();
-    }, 1000);
-  };
-
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isSearchModalOpen) {
-        setIsSearchModalOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isSearchModalOpen]);
+  const navLinks = isAuth 
+    ? [
+        { href: "/", label: "Homepage" },
+        { href: "/event", label: "Event" },
+        { href: "/artist", label: "Artist" },
+        { href: "/news", label: "News" },
+      ]
+    : [
+        { href: "/", label: "Homepage" },
+        { href: "/event", label: "Event" },
+      ];
 
   return (
     <nav
@@ -62,33 +45,15 @@ export default function Navbar() {
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      {/* LOGO */}
+      {/* LOGO with hover effect */}
       <Link href="/">
-        <div className="cursor-pointer w-[15vw] min-w-[90px]">
+        <div className="cursor-pointer w-[15vw] min-w-[90px] transform transition-transform duration-300 hover:scale-105">
           <Image src="/tiko.png" alt="Logo" width={110} height={40} priority />
         </div>
       </Link>
 
-      {/* Search Bar for Desktop */}
-      <div className="hidden md:block relative w-[35vw] min-w-[200px] mx-auto">
-        <input
-          type="text"
-          placeholder="Type to search..."
-          className="w-full px-6 py-3 text-white bg-zinc-700 rounded-full focus:outline-none focus:ring-2 focus:ring-[#f9a205] shadow-md"
-        />
-        <button className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-[#f9a205] text-white px-4 py-2 rounded-full hover:bg-[#e09104] shadow-lg transition duration-300 ease-in-out">
-          <BiSearchAlt />
-        </button>
-      </div>
-
-      {/* Mobile Search and Menu */}
-      <div className="lg:hidden flex items-center gap-4">
-        <button
-          onClick={toggleSearchModal}
-          className="text-2xl text-white hover:text-orange-400"
-        >
-          <FaSearch />
-        </button>
+      {/* Mobile Menu */}
+      <div className="lg:hidden flex items-center">
         {isAuth ? <Avatar /> : <BurgerHandphone />}
       </div>
 
@@ -98,59 +63,22 @@ export default function Navbar() {
           <Avatar />
         ) : (
           <>
-            {[
-              { href: "/", label: "Homepage" },
-              { href: "/event", label: "Event" },
-              { href: "/artist", label: "Artist" },
-              { href: "/news", label: "News" },
-            ].map((link) => (
+            {navLinks.map((link) => (
               <Link href={link.href} key={link.label}>
-                <div className="cursor-pointer transition-all duration-500 ease-in-out bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400 bg-[length:0%_100%] bg-left-bottom hover:bg-[length:100%_100%] hover:text-black text-white">
-                  {link.label}
+                <div className="relative group cursor-pointer">
+                  <span className="relative z-10 text-white transition-colors duration-300 group-hover:text-orange-400">
+                    {link.label}
+                  </span>
+                  <div className="absolute inset-x-0 bottom-0 h-0.5 w-0 bg-orange-400 group-hover:w-full transition-all duration-300 ease-out"></div>
                 </div>
               </Link>
             ))}
-            <BurgerMenu />
+            <div className="pl-4 ml-4 border-l border-white/10">
+              <BurgerMenu />
+            </div>
           </>
         )}
       </div>
-
-      {/* Mobile Search Modal */}
-      {isSearchModalOpen && (
-        <div
-          className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center h-[30vh]"
-          onClick={closeModal}
-        >
-          <div
-            className="bg-gray-900 text-white p-6 rounded-lg shadow-lg w-[90vw] max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">Search</h2>
-              <button
-                onClick={closeModal}
-                className="text-2xl hover:text-orange-400"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            <div className="mt-4">
-              <input
-                type="text"
-                placeholder="Type to search..."
-                className="w-full px-4 py-2 rounded-md bg-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-[#f9a205]"
-              />
-              <button
-                onClick={performSearch}
-                disabled={isSearching}
-                className="w-full mt-4 bg-[#f9a205] text-white px-4 py-2 rounded-md hover:bg-[#e09104] transition duration-300 disabled:opacity-50"
-              >
-                {isSearching ? "Searching..." : "Search"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }
