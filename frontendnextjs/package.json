@@ -53,6 +53,7 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.26.0",
     "@types/chart.js": "^2.9.41",
     "@types/node": "^20",
     "@types/react": "^18.3.12",
