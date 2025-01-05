@@ -26,24 +26,47 @@ const LoadingState = () => (
   </div>
 );
 
-const AnalyticsCard = ({
-  title,
-  value,
-  color,
-}: (typeof analyticsData)[number]) => (
-  <div className="p-6 bg-gray-700 shadow-lg rounded-lg flex flex-col justify-between">
-    <h2 className="text-xl font-bold text-white">{title}</h2>
-    <p className={`mt-2 text-4xl font-bold ${color}`}>
-      {title === "Total Revenue" && typeof value === "number"
-        ? formatPrice(value)
-        : value}
-    </p>
+const ErrorState = ({ message }: { message: string }) => (
+  <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
+    <h1 className="text-3xl font-bold">{message}</h1>
   </div>
 );
 
+const AnalyticsCard = (props: (typeof analyticsData)[number]) => {
+  const { title, value, color } = props;
+  return (
+    <div className="p-6 bg-gray-700 shadow-lg rounded-lg flex flex-col justify-between">
+      <h2 className="text-xl font-bold text-white">{title}</h2>
+      <p className={`mt-2 text-4xl font-bold ${color}`}>
+        {title === "Total Revenue" && typeof value === "number"
+          ? formatPrice(value)
+          : value}
+      </p>
+    </div>
+  );
+};
+
 function DashboardPage() {
-  const { user } = useSession();
+  const { promotor, checkSession } = useSession();
+  const [loading, setLoading] = useState(true);
   const [selectedGraph, setSelectedGraph] = useState<string>("By Month");
+
+  useEffect(() => {
+    const initializeSession = async () => {
+      try {
+        await checkSession();
+      } catch (err) {
+        console.error("Error fetching session:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeSession();
+  }, [checkSession]);
+
+  if (loading) return <LoadingState />;
+  if (!promotor) return <ErrorState message="No Promotor Data Found" />;
 
   return (
     <div className="flex min-h-screen bg-gray-900 text-white">
@@ -61,17 +84,17 @@ function DashboardPage() {
           <div className="flex items-center space-x-5 mt-4 lg:mt-0">
             <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-green-400 shadow-lg">
               <Image
-                src={user?.avatar || "/placeholder.png"}
-                alt={user?.username || "Profile Picture"}
+                src={promotor.avatar || "/placeholder.png"}
+                alt={promotor.name || "Profile Picture"}
                 layout="fill"
                 objectFit="cover"
               />
             </div>
             <div>
               <h1 className="text-xl font-extrabold text-white">
-                {user?.username}
+                {promotor.name}
               </h1>
-              <p className="text-gray-400">{user?.email}</p>
+              <p className="text-gray-400">{promotor.email}</p>
               <p className="text-gray-400">Event Promotor</p>
             </div>
           </div>
