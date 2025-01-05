@@ -36,7 +36,7 @@ export default function Navbar() {
       ]
     : [
         { href: "/", label: "Homepage" },
-        { href: "/events", label: "Event" },
+        { href: "/event", label: "Event" },
       ];
 
   return (

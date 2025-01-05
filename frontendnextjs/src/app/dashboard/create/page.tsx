@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
-import AdminSidebar from "@/components/adminSidebarDashboard";
+import AdminSidebar from "@/components/AdminSidebar";
 
 type EventForm = {
   title: string;
@@ -30,14 +30,12 @@ export default function CreateEventPage() {
     { id: "free", category: "Free", price: 0, quantity: 1 }
   ]);
   const [loading, setLoading] = useState(false);
-
-  const { register, handleSubmit, setValue, watch, reset } = useForm<EventForm>(
-    {
-      defaultValues: {
-        eventType: "free",
-      },
+  
+  const { register, handleSubmit, setValue, watch, reset } = useForm<EventForm>({
+    defaultValues: {
+      eventType: "free"
     }
-  );
+  });
 
   const eventType = watch("eventType");
 
@@ -141,6 +139,7 @@ export default function CreateEventPage() {
       if (data.bannerImage?.[0]) {
         formData.append("banner", data.bannerImage[0]);
       }
+
       const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:8000/api/events/create", {
         method: "POST",
@@ -170,7 +169,7 @@ export default function CreateEventPage() {
 
   return (
     <div className="min-h-screen bg-black text-white py-12">
-      <AdminSidebar />
+      <AdminSidebar/>
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto bg-zinc-900 rounded-xl p-8 shadow-lg">
           <h1 className="text-3xl font-bold text-orange-500 mb-8 text-center">
@@ -305,9 +304,7 @@ export default function CreateEventPage() {
 
             {/* Tickets Section */}
             <div>
-              <h2 className="text-lg font-bold mb-2 text-orange-500">
-                Tickets
-              </h2>
+              <h2 className="text-lg font-bold mb-2 text-orange-500">Tickets</h2>
               <div className="space-y-4">
                 {eventType === "free" ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-zinc-800 rounded-lg">
