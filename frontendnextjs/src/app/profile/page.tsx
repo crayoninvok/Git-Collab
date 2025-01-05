@@ -298,7 +298,7 @@ export default function ProfilePage() {
                   <p className="text-white">Expired At:</p>
                   <p className="text-white">{formatDate(user.userCoupon)}</p>
                 </div>
-              )}
+              )}  
             </div>
           </div>
         </div>
