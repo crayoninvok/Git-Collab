@@ -11,7 +11,7 @@ const LoginSchema = Yup.object().shape({
   password: Yup.string().required("Password is required"),
 });
 
-const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE
+const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
 export default function LoginPromotor() {
  
 
@@ -76,7 +76,9 @@ export default function LoginPromotor() {
         <h1 className="text-3xl font-bold mb-2">
           Login as <span className="text-blue-400">Promotor</span>
         </h1>
-        <p className="text-gray-400 text-sm mb-6">Welcome back! Please login.</p>
+        <p className="text-gray-400 text-sm mb-6">
+          Welcome back! Please login.
+        </p>
 
         <Formik
           initialValues={{ data: "", password: "" }}

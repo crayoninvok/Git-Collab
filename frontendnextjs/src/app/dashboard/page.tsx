@@ -13,13 +13,6 @@ import withGuard from "@/hoc/pageGuard";
 
 const graphOptions = ["By Month", "By Year", "Per 5 Years"];
 
-const analyticsData = [
-  { title: "Your Event", value: 10, color: "text-orange-500" },
-  { title: "Total Ticket Sold", value: 345, color: "text-orange-500" },
-  { title: "Total Revenue", value: 450000000, color: "text-orange-500" },
-  { title: "Profit", value: "90%", color: "text-orange-500" },
-];
-
 const LoadingState = () => (
   <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
     <h1 className="text-3xl font-bold">Loading...</h1>
@@ -32,26 +25,79 @@ const ErrorState = ({ message }: { message: string }) => (
   </div>
 );
 
-const AnalyticsCard = (props: (typeof analyticsData)[number]) => {
-  const { title, value, color } = props;
-  return (
-    <div className="p-6 bg-gray-700 shadow-lg rounded-lg flex flex-col justify-between">
-      <h2 className="text-xl font-bold text-white">{title}</h2>
-      <p className={`mt-2 text-4xl font-bold ${color}`}>
-        {title === "Total Revenue" && typeof value === "number"
-          ? formatPrice(value)
-          : value}
-      </p>
-    </div>
-  );
-};
+const AnalyticsCard = ({
+  title,
+  value,
+  color,
+}: {
+  title: string;
+  value: string | number;
+  color: string;
+}) => (
+  <div className="p-6 bg-gray-700 shadow-lg rounded-lg flex flex-col justify-between">
+    <h2 className="text-xl font-bold text-white">{title}</h2>
+    <p className={`mt-2 text-4xl font-bold ${color}`}>
+      {title === "Total Revenue" && typeof value === "number"
+        ? formatPrice(value)
+        : value}
+    </p>
+  </div>
+);
 
 function DashboardPage() {
   const { promotor, checkSession } = useSession();
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE || "http://localhost:8000/api";
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<
+    { title: string; value: number | string; color: string }[]
+  >([]);
   const [selectedGraph, setSelectedGraph] = useState<string>("By Month");
 
   useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("No token found. Please log in again.");
+
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        // Fetch all data from backend
+        const [totalResponse, activeResponse, deactiveResponse, revenueResponse] = await Promise.all([
+          fetch(`${base_url}/dashboard/getAllEvent`, { method: "GET", headers }),
+          fetch(`${base_url}/dashboard/getActiveEvent`, { method: "GET", headers }),
+          fetch(`${base_url}/dashboard/getDeactiveEvent`, { method: "GET", headers }),
+          fetch(`${base_url}/dashboard/getTotalRevenue`, { method: "GET", headers }),
+        ]);
+
+        if (!totalResponse.ok || !activeResponse.ok || !deactiveResponse.ok || !revenueResponse.ok) {
+          throw new Error("Failed to fetch analytics data.");
+        }
+
+        const [totalData, activeData, deactiveData, revenueData] = await Promise.all([
+          totalResponse.json(),
+          activeResponse.json(),
+          deactiveResponse.json(),
+          revenueResponse.json()
+        ]);
+
+        setAnalyticsData([
+          { title: "Your Event", value: totalData.totalEvents || 0, color: "text-blue-500" },
+          { title: "Active Events", value: activeData.activeEvents || 0, color: "text-green-500" },
+          { title: "Deactive Events", value: deactiveData.deactiveEvents || 0, color: "text-red-500" },
+          { title: "Total Revenue", value: revenueData.totalRevenue, color: "text-orange-500" },
+        ]);
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+        setError((error as Error).message || "Failed to load analytics data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const initializeSession = async () => {
       try {
         await checkSession();
@@ -63,9 +109,11 @@ function DashboardPage() {
     };
 
     initializeSession();
-  }, [checkSession]);
+    fetchAnalytics();
+  }, [base_url, checkSession]);
 
   if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
   if (!promotor) return <ErrorState message="No Promotor Data Found" />;
 
   return (
@@ -91,9 +139,7 @@ function DashboardPage() {
               />
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-white">
-                {promotor.name}
-              </h1>
+              <h1 className="text-xl font-extrabold text-white">{promotor.name}</h1>
               <p className="text-gray-400">{promotor.email}</p>
               <p className="text-gray-400">Event Promotor</p>
             </div>

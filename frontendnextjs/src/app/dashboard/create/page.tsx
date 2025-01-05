@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import AdminSidebar from "@/components/adminSidebarDashboard";
@@ -19,7 +19,7 @@ type EventForm = {
 
 type TicketType = {
   id: string;
-  name: string;
+  category: string;
   price: number;
   quantity: number;
 };
@@ -27,7 +27,7 @@ type TicketType = {
 export default function CreateEventPage() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
-    { id: "free", name: "Free", price: 0, quantity: 1 },
+    { id: "free", category: "Free", price: 0, quantity: 1 }
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -41,16 +41,26 @@ export default function CreateEventPage() {
 
   const eventType = watch("eventType");
 
-  // Update ticket types when event type changes
-  const handleEventTypeChange = (type: "free" | "paid") => {
-    if (type === "free") {
-      setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
+  // Effect to handle ticket type changes when event type changes
+  useEffect(() => {
+    const currentQuantity = ticketTypes[0]?.quantity || 1;
+    
+    if (eventType === "free") {
+      setTicketTypes([{ 
+        id: "free", 
+        category: "Free", 
+        price: 0, 
+        quantity: currentQuantity 
+      }]);
     } else {
-      setTicketTypes([
-        { id: Date.now().toString(), name: "", price: 0, quantity: 1 },
-      ]);
+      setTicketTypes([{
+        id: Date.now().toString(),
+        category: "",
+        price: 0,
+        quantity: currentQuantity
+      }]);
     }
-  };
+  }, [eventType]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,8 +77,19 @@ export default function CreateEventPage() {
   const addTicketType = () => {
     setTicketTypes([
       ...ticketTypes,
-      { id: Date.now().toString(), name: "", price: 0, quantity: 1 },
+      {
+        id: Date.now().toString(),
+        category: "",
+        price: 0,
+        quantity: 1
+      }
     ]);
+  };
+
+  const removeTicketType = (id: string) => {
+    if (ticketTypes.length > 1) {
+      setTicketTypes(ticketTypes.filter(ticket => ticket.id !== id));
+    }
   };
 
   const handleTicketChange = (
@@ -77,11 +98,26 @@ export default function CreateEventPage() {
     value: string | number
   ) => {
     const updatedTickets = [...ticketTypes];
-    updatedTickets[index] = { ...updatedTickets[index], [field]: value };
+    
+    if (eventType === "free") {
+      if (field === "quantity") {
+        updatedTickets[0] = {
+          ...updatedTickets[0],
+          quantity: Number(value)
+        };
+        setTicketTypes(updatedTickets);
+      }
+      return;
+    }
+
+    updatedTickets[index] = {
+      ...updatedTickets[index],
+      [field]: field === "price" || field === "quantity" ? Number(value) : value
+    };
     setTicketTypes(updatedTickets);
   };
 
-  const onSubmit = async (data: EventForm) => {
+    const onSubmit = async (data: EventForm) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -94,10 +130,10 @@ export default function CreateEventPage() {
       formData.append("time", data.time);
       formData.append("eventType", data.eventType);
 
-      const formattedTickets = ticketTypes.map((ticket) => ({
-        category: ticket.name,
-        price: Number(ticket.price),
-        quantity: Number(ticket.quantity),
+      const formattedTickets = ticketTypes.map(({ id, ...ticket }) => ({
+        category: ticket.category,
+        price: ticket.price,
+        quantity: ticket.quantity,
       }));
 
       formData.append("tickets", JSON.stringify(formattedTickets));
@@ -109,10 +145,8 @@ export default function CreateEventPage() {
       const response = await fetch("http://localhost:8000/api/events/create", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
         },
-
-        // credentials: "include",
         body: formData,
       });
 
@@ -125,12 +159,10 @@ export default function CreateEventPage() {
       alert("Event created successfully!");
       reset();
       setImagePreview("");
-      setTicketTypes([{ id: "free", name: "Free", price: 0, quantity: 1 }]);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Error while Creating an event.";
-      console.error("Error:", err);
-      alert(errorMessage || "An error occurred while creating the event.");
+      setTicketTypes([{ id: "free", category: "Free", price: 0, quantity: 1 }]);
+    } catch (error: any) {
+      console.error("Error:", error);
+      alert(error.message || "An error occurred while creating the event.");
     } finally {
       setLoading(false);
     }
@@ -155,7 +187,6 @@ export default function CreateEventPage() {
                     type="radio"
                     {...register("eventType")}
                     value="free"
-                    onChange={() => handleEventTypeChange("free")}
                     className="mr-2"
                   />
                   Free Event
@@ -165,7 +196,6 @@ export default function CreateEventPage() {
                     type="radio"
                     {...register("eventType")}
                     value="paid"
-                    onChange={() => handleEventTypeChange("paid")}
                     className="mr-2"
                   />
                   Paid Event
@@ -273,77 +303,103 @@ export default function CreateEventPage() {
               />
             </div>
 
-            {/* Tickets */}
+            {/* Tickets Section */}
             <div>
               <h2 className="text-lg font-bold mb-2 text-orange-500">
                 Tickets
               </h2>
               <div className="space-y-4">
-                {ticketTypes.map((ticket, index) => (
-                  <div
-                    key={ticket.id}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-zinc-800 rounded-lg"
-                  >
+                {eventType === "free" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-zinc-800 rounded-lg">
                     <div>
-                      <label className="block mb-1 font-medium">
-                        Ticket Name
-                      </label>
+                      <label className="block mb-1 font-medium">Category</label>
                       <input
                         type="text"
-                        value={ticket.name}
-                        onChange={(e) =>
-                          handleTicketChange(index, "name", e.target.value)
-                        }
-                        className="p-3 bg-zinc-700 rounded-lg w-full"
-                        disabled={eventType === "free"}
-                        required
+                        value="Free"
+                        className="p-3 bg-zinc-700 rounded-lg w-full cursor-not-allowed opacity-50"
+                        disabled
                       />
                     </div>
                     <div>
-                      <label className="block mb-1 font-medium">Price</label>
+                      <label className="block mb-1 font-medium">Price (Rp)</label>
                       <input
                         type="number"
-                        value={ticket.price}
-                        onChange={(e) =>
-                          handleTicketChange(
-                            index,
-                            "price",
-                            parseInt(e.target.value)
-                          )
-                        }
-                        className="p-3 bg-zinc-700 rounded-lg w-full"
-                        disabled={eventType === "free"}
-                        min="0"
-                        required
+                        value={0}
+                        className="p-3 bg-zinc-700 rounded-lg w-full cursor-not-allowed opacity-50"
+                        disabled
                       />
                     </div>
                     <div>
                       <label className="block mb-1 font-medium">Quantity</label>
                       <input
                         type="number"
-                        value={ticket.quantity}
-                        onChange={(e) =>
-                          handleTicketChange(
-                            index,
-                            "quantity",
-                            parseInt(e.target.value)
-                          )
-                        }
+                        value={ticketTypes[0].quantity}
+                        onChange={(e) => handleTicketChange(0, "quantity", parseInt(e.target.value))}
                         className="p-3 bg-zinc-700 rounded-lg w-full"
                         min="1"
                         required
                       />
                     </div>
                   </div>
-                ))}
-                {eventType === "paid" && (
-                  <button
-                    type="button"
-                    onClick={addTicketType}
-                    className="px-4 py-2 bg-orange-500 rounded-lg text-white mt-2"
-                  >
-                    Add Ticket Type
-                  </button>
+                ) : (
+                  <>
+                    {ticketTypes.map((ticket, index) => (
+                      <div
+                        key={ticket.id}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-zinc-800 rounded-lg relative group"
+                      >
+                        <div>
+                          <label className="block mb-1 font-medium">Category</label>
+                          <input
+                            type="text"
+                            value={ticket.category}
+                            onChange={(e) => handleTicketChange(index, "category", e.target.value)}
+                            className="p-3 bg-zinc-700 rounded-lg w-full"
+                            placeholder="Enter category"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block mb-1 font-medium">Price (Rp)</label>
+                          <input
+                            type="number"
+                            value={ticket.price}
+                            onChange={(e) => handleTicketChange(index, "price", parseInt(e.target.value))}
+                            className="p-3 bg-zinc-700 rounded-lg w-full"
+                            min="0"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block mb-1 font-medium">Quantity</label>
+                          <input
+                            type="number"
+                            value={ticket.quantity}
+                            onChange={(e) => handleTicketChange(index, "quantity", parseInt(e.target.value))}
+                            className="p-3 bg-zinc-700 rounded-lg w-full"
+                            min="1"
+                            required
+                          />
+                        </div>
+                        {ticketTypes.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeTicketType(ticket.id)}
+                            className="absolute -right-2 -top-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addTicketType}
+                      className="px-4 py-2 bg-orange-500 rounded-lg text-white hover:bg-orange-600 transition-colors"
+                    >
+                      Add Ticket Category
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -351,7 +407,7 @@ export default function CreateEventPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 py-3 rounded-lg text-white font-medium hover:bg-orange-600 transition-colors"
+              className="w-full bg-orange-500 py-3 rounded-lg text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
             >
               {loading ? "Creating Event..." : "Create Event"}
             </button>
