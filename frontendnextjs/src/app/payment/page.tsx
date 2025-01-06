@@ -60,7 +60,7 @@ export default function PaymentPage() {
     };
 
     checkAuth();
-  }, [isAuth, ticketId, user?.percentage]);
+  }, [isAuth, ticketId]);
 
   const fetchTicketData = async () => {
     if (!ticketId) {
@@ -75,6 +75,7 @@ export default function PaymentPage() {
         return;
       }
 
+      // Fetch ticket data
       const ticketResponse = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId}`,
         {
@@ -91,25 +92,43 @@ export default function PaymentPage() {
       const ticketData = await ticketResponse.json();
       setTicketData(ticketData);
 
-      if (ticketData.price > 0 && user?.percentage && ticketData.eventId) {
-        const couponStatusResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+      // Check coupon status if ticket is paid and has eventId
+      if (ticketData.price > 0 && ticketData.eventId) {
+        try {
+          const couponStatusResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-        if (couponStatusResponse.ok) {
-          const couponStatusData = await couponStatusResponse.json();
-          setCouponStatus(couponStatusData);
-          setCouponAvailable(couponStatusData.canUseCoupon && couponStatusData.remainingCoupons > 0);
+          if (couponStatusResponse.ok) {
+            const couponStatusData = await couponStatusResponse.json();
+            setCouponStatus(couponStatusData);
+            
+            // Only set coupon as available if user hasn't used it and coupons remain
+            const isCouponAvailable = couponStatusData.canUseCoupon && 
+                                    couponStatusData.remainingCoupons > 0;
+            setCouponAvailable(isCouponAvailable);
+            
+            // Always disable coupon if not available
+            if (!isCouponAvailable) {
+              setUseCoupon(false);
+            }
+          } else {
+            setCouponAvailable(false);
+            setUseCoupon(false);
+          }
+        } catch (error) {
+          console.error("Error checking coupon status:", error);
+          setCouponAvailable(false);
+          setUseCoupon(false);
         }
       } else {
-        setUsePoints(false);
-        setUseCoupon(false);
         setCouponAvailable(false);
+        setUseCoupon(false);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -121,14 +140,14 @@ export default function PaymentPage() {
     if (!ticketData) return 0;
     let total = ticketData.price * quantity;
 
-    if (ticketData.price > 0) {
-      if (usePoints && user?.points && user.points >= 10000) {
-        total -= 10000;
-      }
+    // Apply points discount (fixed 10,000)
+    if (ticketData.price > 0 && usePoints && user?.points && user.points >= 10000) {
+      total -= 10000;
+    }
 
-      if (useCoupon && user?.percentage && couponAvailable && couponStatus.canUseCoupon) {
-        total = total * (1 - user.percentage / 100);
-      }
+    // Apply coupon discount (10%)
+    if (ticketData.price > 0 && useCoupon && couponAvailable && couponStatus.canUseCoupon) {
+      total = total * 0.9;
     }
 
     return Math.max(total, 0);
@@ -152,9 +171,9 @@ export default function PaymentPage() {
 
       const isFreeTicket = ticketData.price === 0;
 
-      // Additional validation for coupon usage
-      if (useCoupon && !isFreeTicket) {
-        const couponStatusResponse = await fetch(
+      // Re-validate coupon status before proceeding
+      if (!isFreeTicket && useCoupon) {
+        const couponCheckResponse = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
           {
             headers: {
@@ -163,17 +182,27 @@ export default function PaymentPage() {
           }
         );
 
-        if (!couponStatusResponse.ok) {
-          throw new Error("Failed to validate coupon status");
+        if (!couponCheckResponse.ok) {
+          throw new Error("Failed to verify coupon status");
         }
 
-        const latestCouponStatus = await couponStatusResponse.json();
+        const couponData = await couponCheckResponse.json();
         
-        if (!latestCouponStatus.canUseCoupon || latestCouponStatus.remainingCoupons <= 0) {
-          setError("Coupon cannot be used for this purchase");
+        if (!couponData.canUseCoupon) {
+          setError("You've already used a coupon for this event");
           setLoading(false);
           return;
         }
+
+        if (couponData.remainingCoupons <= 0) {
+          setError("No more coupons available for this event");
+          setLoading(false);
+          return;
+        }
+
+        // Update local state with server state
+        setCouponStatus(couponData);
+        setCouponAvailable(couponData.canUseCoupon && couponData.remainingCoupons > 0);
       }
 
       const orderBody = {
@@ -253,7 +282,7 @@ export default function PaymentPage() {
       }
     } catch (error) {
       console.error("Payment error:", error);
-      setError(error instanceof Error ? error.message : "Failed to process payment. Please try again.");
+      setError(error instanceof Error ? error.message : "Failed to process payment");
     } finally {
       setLoading(false);
     }
@@ -329,6 +358,7 @@ export default function PaymentPage() {
               <div className="bg-zinc-800 p-4 rounded-lg">
                 <h3 className="font-semibold mb-4">Discounts</h3>
 
+                {/* Points Section */}
                 {user?.points && user.points >= 10000 && (
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -341,35 +371,42 @@ export default function PaymentPage() {
                   </div>
                 )}
 
-                {user?.percentage && (
-                  <div className="flex flex-col gap-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p>Use Coupon ({user.percentage}% discount)</p>
-                        <p className="text-sm text-gray-400">
-                          {couponStatus.remainingCoupons > 0
-                            ? `${couponStatus.remainingCoupons} coupons remaining`
-                            : "No more coupons available"}
+                {/* Coupon Section */}
+                <div className="flex flex-col gap-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={!couponStatus.canUseCoupon ? "text-gray-500" : ""}>
+                        Use Coupon (10% discount)
+                      </p>
+                      {!couponStatus.canUseCoupon ? (
+                        <p className="text-sm text-red-400">
+                          You have already used a coupon for this event
                         </p>
-                      </div>
-                      <Switch
-                        checked={useCoupon}
-                        onCheckedChange={setUseCoupon}
-                        disabled={!couponAvailable}
-                      />
+                      ) : couponStatus.remainingCoupons <= 0 ? (
+                        <p className="text-sm text-red-400">
+                          No more coupons available for this event
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-400">
+                          {couponStatus.remainingCoupons} of 10 coupons remaining
+                        </p>
+                      )}
                     </div>
-                    {!couponStatus.canUseCoupon && (
-                      <p className="text-center text-sm text-gray-400">
-                        You have already used a coupon for this event
-                      </p>
-                    )}
-                    {couponStatus.remainingCoupons === 0 && (
-                      <p className="text-center text-sm text-gray-400">
-                        All coupons for this event have been claimed
-                      </p>
-                    )}
+                    <Switch
+                      checked={useCoupon}
+                      onCheckedChange={(checked) => {
+                        if (checked && (!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0)) {
+                          return;
+                        }
+                        setUseCoupon(checked);
+                      }}
+                      disabled={!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0}
+                      className={(!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0) 
+                        ? "cursor-not-allowed opacity-50" 
+                        : ""}
+                    />
                   </div>
-                )}
+                </div>
               </div>
             )}
 
@@ -381,10 +418,8 @@ export default function PaymentPage() {
               {!isFreeTicket && usePoints && (
                 <p className="text-sm text-gray-400">-Rp 10,000 (Points)</p>
               )}
-              {!isFreeTicket && useCoupon && user?.percentage && (
-                <p className="text-sm text-gray-400">
-                  -{user.percentage}% (Coupon)
-                </p>
+              {!isFreeTicket && useCoupon && (
+                <p className="text-sm text-gray-400">-10% (Coupon)</p>
               )}
             </div>
 
