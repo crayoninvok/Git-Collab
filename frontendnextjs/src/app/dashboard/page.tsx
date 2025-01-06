@@ -8,6 +8,7 @@ import { formatPrice } from "@/helpers/formatPrice";
 import AdminSidebar from "@/components/adminSidebarDashboard";
 
 import withGuard from "@/hoc/pageGuard";
+import RevenueGraph from "../../components/graph/revenueGraphSort";
 
 const graphOptions = ["By Month", "By Year", "Per 5 Years"];
 
@@ -44,7 +45,8 @@ const AnalyticsCard = ({
 
 function DashboardPage() {
   const { promotor, checkSession } = useSession();
-  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE || "http://localhost:8000/api";
+  const base_url =
+    process.env.NEXT_PUBLIC_BASE_URL_BE || "http://localhost:8000/api";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [analyticsData, setAnalyticsData] = useState<
@@ -64,29 +66,68 @@ function DashboardPage() {
         };
 
         // Fetch all data from backend
-        const [totalResponse, activeResponse, deactiveResponse, revenueResponse] = await Promise.all([
-          fetch(`${base_url}/dashboard/getAllEvent`, { method: "GET", headers }),
-          fetch(`${base_url}/dashboard/getActiveEvent`, { method: "GET", headers }),
-          fetch(`${base_url}/dashboard/getDeactiveEvent`, { method: "GET", headers }),
-          fetch(`${base_url}/dashboard/getTotalRevenue`, { method: "GET", headers }),
+        const [
+          totalResponse,
+          activeResponse,
+          deactiveResponse,
+          revenueResponse,
+        ] = await Promise.all([
+          fetch(`${base_url}/dashboard/getAllEvent`, {
+            method: "GET",
+            headers,
+          }),
+          fetch(`${base_url}/dashboard/getActiveEvent`, {
+            method: "GET",
+            headers,
+          }),
+          fetch(`${base_url}/dashboard/getDeactiveEvent`, {
+            method: "GET",
+            headers,
+          }),
+          fetch(`${base_url}/dashboard/getTotalRevenue`, {
+            method: "GET",
+            headers,
+          }),
         ]);
 
-        if (!totalResponse.ok || !activeResponse.ok || !deactiveResponse.ok || !revenueResponse.ok) {
+        if (
+          !totalResponse.ok ||
+          !activeResponse.ok ||
+          !deactiveResponse.ok ||
+          !revenueResponse.ok
+        ) {
           throw new Error("Failed to fetch analytics data.");
         }
 
-        const [totalData, activeData, deactiveData, revenueData] = await Promise.all([
-          totalResponse.json(),
-          activeResponse.json(),
-          deactiveResponse.json(),
-          revenueResponse.json()
-        ]);
+        const [totalData, activeData, deactiveData, revenueData] =
+          await Promise.all([
+            totalResponse.json(),
+            activeResponse.json(),
+            deactiveResponse.json(),
+            revenueResponse.json(),
+          ]);
 
         setAnalyticsData([
-          { title: "Your Event", value: totalData.totalEvents || 0, color: "text-blue-500" },
-          { title: "Active Events", value: activeData.activeEvents || 0, color: "text-green-500" },
-          { title: "Deactive Events", value: deactiveData.deactiveEvents || 0, color: "text-red-500" },
-          { title: "Total Revenue", value: revenueData.totalRevenue, color: "text-orange-500" },
+          {
+            title: "Your Event",
+            value: totalData.totalEvents || 0,
+            color: "text-blue-500",
+          },
+          {
+            title: "Active Events",
+            value: activeData.activeEvents || 0,
+            color: "text-green-500",
+          },
+          {
+            title: "Deactive Events",
+            value: deactiveData.deactiveEvents || 0,
+            color: "text-red-500",
+          },
+          {
+            title: "Total Revenue",
+            value: revenueData.totalRevenue,
+            color: "text-orange-500",
+          },
         ]);
       } catch (error) {
         console.error("Error fetching analytics:", error);
@@ -160,29 +201,9 @@ function DashboardPage() {
 
         {/* Graph Section */}
 
-        <section>
-          <h1 className="text-center text-3xl font-bold text-white">
-            Statistic Graph
-          </h1>
-          <div className="my-6 text-center">
-            <label htmlFor="graphSelector" className="sr-only">
-              Select Graph
-            </label>
-
-            <select
-              id="graphSelector"
-              value={selectedGraph}
-              onChange={(e) => setSelectedGraph(e.target.value)}
-              className="p-3 bg-gray-700 text-white rounded-md shadow-lg"
-            >
-              {graphOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
+        <div className="flex items-center justify-center">
+          <RevenueGraph />
+        </div>
       </main>
     </div>
   );
