@@ -48,6 +48,31 @@ export default function PaymentPage() {
   const ticketId = searchParams.get("ticketId");
   const quantity = Number(searchParams.get("quantity")) || 0;
 
+  // Verifikasi status kupon
+  const verifyCouponStatus = async (eventId: number): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return false;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${eventId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+      return data.canUseCoupon && data.remainingCoupons > 0;
+    } catch (error) {
+      console.error("Error verifying coupon:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
@@ -75,7 +100,6 @@ export default function PaymentPage() {
         return;
       }
 
-      // First, fetch the ticket data
       const ticketResponse = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId}`,
         {
@@ -92,7 +116,6 @@ export default function PaymentPage() {
       const ticketData = await ticketResponse.json();
       setTicketData(ticketData);
 
-      // Only fetch coupon data if it's not a free ticket
       if (ticketData.price > 0 && user?.percentage && ticketData.eventId) {
         const couponStatusResponse = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
@@ -107,6 +130,11 @@ export default function PaymentPage() {
           const couponStatusData = await couponStatusResponse.json();
           setCouponStatus(couponStatusData);
           setCouponAvailable(couponStatusData.canUseCoupon && couponStatusData.remainingCoupons > 0);
+          
+          // Reset useCoupon if coupon is not available
+          if (!couponStatusData.canUseCoupon || couponStatusData.remainingCoupons <= 0) {
+            setUseCoupon(false);
+          }
         }
       } else {
         setUsePoints(false);
@@ -128,7 +156,7 @@ export default function PaymentPage() {
         total -= 10000;
       }
 
-      if (useCoupon && user?.percentage && couponAvailable) {
+      if (useCoupon && user?.percentage && couponAvailable && couponStatus.canUseCoupon) {
         total = total * (1 - user.percentage / 100);
       }
     }
@@ -137,108 +165,115 @@ export default function PaymentPage() {
   };
 
   const handlePayment = async () => {
-  if (!ticketId || !quantity || !user || !ticketData) {
-    setError("Missing required information");
-    return;
-  }
-
-  setLoading(true);
-  setError("");
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push('/login');
+    if (!ticketId || !quantity || !user || !ticketData) {
+      setError("Missing required information");
       return;
     }
 
-    const isFreeTicket = ticketData.price === 0;
+    setLoading(true);
+    setError("");
 
-    const orderBody = {
-      eventId: Number(ticketData.eventId),
-      ticketId: Number(ticketId),
-      quantity: Number(quantity),
-      totalPrice: ticketData.price * Number(quantity),
-      finalPrice: calculateTotalPrice(),
-      usePoints: isFreeTicket ? false : (usePoints && user.points >= 10000),
-      useCoupon: isFreeTicket ? false : (useCoupon && couponAvailable),
-      status: isFreeTicket ? "PAID" : "PENDING" // Set initial status for free tickets
-    };
-
-    const orderResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(orderBody),
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push('/login');
+        return;
       }
-    );
 
-    if (!orderResponse.ok) {
-      const errorData = await orderResponse.json();
-      throw new Error(errorData.message || "Failed to create order");
-    }
+      const isFreeTicket = ticketData.price === 0;
 
-    const orderResult = await orderResponse.json();
-
-    if (isFreeTicket) {
-      // For free tickets, send success email and redirect to success page
-      try {
-        await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id}`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      } catch (emailError) {
-        console.error("Error sending success email:", emailError);
+      // Double check coupon validity before proceeding
+      if (!isFreeTicket && useCoupon) {
+        const isValidCoupon = await verifyCouponStatus(ticketData.eventId);
+        if (!isValidCoupon) {
+          setError("Coupon is no longer valid or has reached its usage limit");
+          setLoading(false);
+          return;
+        }
       }
-      
-      // Redirect to success page instead of my-tickets
-      router.push(`/payment/success?order_id=ORDER-${orderResult.data.id}`);
-      return;
-    }
 
-    // Rest of the code for paid tickets...
-    const paymentResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          orderId: orderResult.data.id,
-        }),
+      const orderBody = {
+        eventId: Number(ticketData.eventId),
+        ticketId: Number(ticketId),
+        quantity: Number(quantity),
+        totalPrice: ticketData.price * Number(quantity),
+        finalPrice: calculateTotalPrice(),
+        usePoints: isFreeTicket ? false : (usePoints && user.points >= 10000),
+        useCoupon: isFreeTicket ? false : (useCoupon && couponAvailable && couponStatus.canUseCoupon),
+        status: isFreeTicket ? "PAID" : "PENDING"
+      };
+
+      const orderResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(orderBody),
+        }
+      );
+
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.message || "Failed to create order");
       }
-    );
 
-    if (!paymentResponse.ok) {
-      const errorData = await paymentResponse.json();
-      throw new Error(errorData.message || "Failed to create payment");
+      const orderResult = await orderResponse.json();
+
+      if (isFreeTicket) {
+        try {
+          await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id}`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        } catch (emailError) {
+          console.error("Error sending success email:", emailError);
+        }
+        
+        router.push(`/payment/success?order_id=ORDER-${orderResult.data.id}`);
+        return;
+      }
+
+      const paymentResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            orderId: orderResult.data.id,
+          }),
+        }
+      );
+
+      if (!paymentResponse.ok) {
+        const errorData = await paymentResponse.json();
+        throw new Error(errorData.message || "Failed to create payment");
+      }
+
+      const paymentResult = await paymentResponse.json();
+
+      if (paymentResult.data?.paymentUrl) {
+        window.location.href = paymentResult.data.paymentUrl;
+      } else {
+        throw new Error("No payment URL received");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      setError(error instanceof Error ? error.message : "Failed to process payment. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    const paymentResult = await paymentResponse.json();
-
-    if (paymentResult.data?.paymentUrl) {
-      window.location.href = paymentResult.data.paymentUrl;
-    } else {
-      throw new Error("No payment URL received");
-    }
-  } catch (error) {
-    console.error("Payment error:", error);
-    setError(error instanceof Error ? error.message : "Failed to process payment. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   if (isChecking) {
     return (
