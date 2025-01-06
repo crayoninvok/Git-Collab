@@ -7,8 +7,9 @@ export interface IUser {
   points: number;
   userCouponId: number;
   percentage: number;
-  userCoupon: string;
+  expiredAt: string;
 }
+
 export interface IPromotor {
   id: string;
   name: string;
@@ -41,6 +42,9 @@ export interface Event {
   time: Date;
   tickets: Ticket[];
   isPurchased?: boolean;
+  ticketsSold: number
+  revenue: number
+  profitPercentage:number
 }
 
 export interface Ticket {

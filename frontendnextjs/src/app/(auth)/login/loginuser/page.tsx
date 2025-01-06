@@ -39,7 +39,6 @@ export default function LoginUser() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Login failed!");
 
-      // Save token to localStorage
       localStorage.setItem("token", result.token);
 
       toast.success("Login successful! Redirecting...", {
@@ -48,14 +47,14 @@ export default function LoginUser() {
         theme: "colored",
       });
 
-      // Redirect
       setTimeout(() => {
         window.location.assign("/");
-      }, 1000);
+      }, 3000);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "An error occurred during login.";
-      setAlertMessage(errorMessage || "An error occurred");
-      toast.error(errorMessage || "An error occurred", {
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred during login.";
+      setAlertMessage(errorMessage);
+      toast.error(errorMessage, {
         position: "bottom-right",
         autoClose: 5000,
         theme: "colored",
@@ -84,7 +83,9 @@ export default function LoginUser() {
       window.location.href = result.url; // Ensure backend sends the redirect URL
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "An error occurred during Google login.";
+        err instanceof Error
+          ? err.message
+          : "An error occurred during Google login.";
       toast.error(errorMessage, {
         position: "bottom-right",
         autoClose: 5000,
@@ -95,8 +96,9 @@ export default function LoginUser() {
     }
   };
 
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white relative flex items-center justify-center">
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center px-4">
       <ToastContainer />
 
       {/* Background Image */}
@@ -108,24 +110,26 @@ export default function LoginUser() {
         }}
       ></div>
 
-      {/* Login */}
-      <div className="relative z-10 w-full lg:w-[70%] xl:w-[60%] flex flex-col lg:flex-row items-center justify-between space-y-10 lg:space-y-0 lg:space-x-10">
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-7xl flex flex-col lg:flex-row items-center justify-between space-y-10 lg:space-y-0 p-6">
         {/* Info Section */}
-        <div className="text-center lg:text-left max-w-lg">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 mt-[10vh] md:mt-0 lg:mt-0">
-            Find Amazing Events with{" "}
-            <span className="text-orange-400">TIKO</span>
+        <div className="lg:w-1/2 max-w-lg">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-shadow">
+            Find Amazing
+            <h1 className="mt-3">
+              Events With <span className="text-orange-400 glowing-text">TIKO</span>
+            </h1>
           </h1>
-          <p className="text-gray-300 text-sm sm:text-base">
+          <p className="text-lg sm:text-xl text-gray-300 text-shadow">
             Discover the best events in town and get exclusive access to tickets
             and updates!
           </p>
         </div>
 
         {/* Login Section */}
-        <div className="w-full sm:w-[90%] lg:w-[50%] bg-gray-900/70 bg-opacity-90 rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-600 backdrop-blur-lg">
-          <h1 className="text-3xl font-bold mb-2">Login</h1>
-          <p className="text-sm text-gray-400 mb-6">Welcome back!</p>
+        <div className="w-full lg:w-1/2 bg-gray-900 bg-opacity-90 rounded-3xl shadow-lg p-6 sm:p-8 md:p-12 border border-gray-600 backdrop-blur-lg">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Login</h1>
+          <p className="text-sm sm:text-lg text-gray-400 mb-6">Welcome back!</p>
 
           {alertMessage && (
             <div className="flex items-center bg-red-500 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-md space-x-3 mb-4">
@@ -179,14 +183,17 @@ export default function LoginUser() {
                     <Field type="checkbox" className="mr-2" />
                     Remember me
                   </label>
-                  <a href="/login/loginuser/forgotpassworduser" className="text-sm text-indigo-400">
+                  <a
+                    href="/login/loginuser/forgotpassworduser"
+                    className="text-sm text-indigo-400 hover:underline"
+                  >
                     Forgot password?
                   </a>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg text-white font-bold flex items-center justify-center transition-transform transform hover:scale-105"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg text-white font-bold flex items-center justify-center transition-transform transform hover:scale-105 disabled:opacity-50"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -218,8 +225,8 @@ export default function LoginUser() {
           </div>
 
           <div className="text-center text-sm mt-6">
-            Don&apos;t have an account?{" "}
-            <a href="/registeruser" className="text-indigo-400">
+            Don’t have an account?{" "}
+            <a href="/registeruser" className="text-indigo-400 hover:underline">
               Sign up
             </a>
           </div>

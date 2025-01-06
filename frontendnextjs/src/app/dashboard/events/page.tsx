@@ -5,7 +5,7 @@ import { useSession } from '@/context/useSessionHook';
 import { formatDate } from '@/helpers/formatDate';
 import Link from 'next/link';
 import Image from 'next/image';
-import AdminSidebar from '@/components/AdminSidebar';
+import AdminSidebar from '@/components/adminSidebarDashboard';
 
 interface Event {
  id: number;
@@ -28,7 +28,7 @@ export default function MyEventsPage() {
     const [events, setEvents] = useState<Event[]>([]);
     const [showPastEvents, setShowPastEvents] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [, setError] = useState('');
 
     useEffect(() => {
         const fetchEvents = async () => {

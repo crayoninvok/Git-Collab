@@ -93,7 +93,7 @@ export default function RegisterUser() {
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between w-full px-6 sm:px-8 md:px-12 lg:px-20 max-w-5xl">
         <div className="hidden lg:flex flex-col justify-center w-full lg:w-1/2 text-left text-white space-y-6">
           <h1 className="text-5xl font-bold leading-tight">
-            Join <span className="text-orange-400">TIKO</span> Today
+            Join <span className="text-orange-400 glowing-text">TIKO</span> Today
           </h1>
           <p className="text-gray-300 text-lg">
             Explore amazing events, connect with people, and build experiences

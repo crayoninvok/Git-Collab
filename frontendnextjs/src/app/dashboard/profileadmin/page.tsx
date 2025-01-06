@@ -3,16 +3,18 @@
 import AdminSidebar from "@/components/adminSidebarDashboard";
 import { useSession } from "@/context/useSessionHook";
 import { useEffect, useRef, useState } from "react";
-import { formatDate } from "@/helpers/formatDate";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { Event } from "@/types/event";
 
 export default function AdminProfile() {
   const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
-  const { promotor, checkSession, logout } = useSession();
-  const [lastLogin, setLastLogin] = useState<string | null>(null);
+  const { promotor, logout } = useSession();
+  const [lastLogin] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [events, setEvents] = useState<any[]>([]); // State for real events
+  const [events, setEvents] = useState<Event[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [eventsPerPage] = useState(6); 
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +77,13 @@ export default function AdminProfile() {
     fetchEvents();
   }, [base_url]);
 
+  // Pagination Controls
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
+  const totalPages = Math.ceil(events.length / eventsPerPage);
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
   // Avatar Update
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -113,7 +122,10 @@ export default function AdminProfile() {
           confirmButtonText: "OK",
         });
       }
-    } catch (error) {
+    } catch (err:unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred.";
+        console.log(errorMessage);
       Swal.fire({
         title: "Error!",
         text: "Failed to update your profile picture. Please try again later.",
@@ -127,7 +139,6 @@ export default function AdminProfile() {
 
   const triggerFileInput = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
       fileInputRef.current.click();
     }
   };
@@ -154,10 +165,10 @@ export default function AdminProfile() {
 
   return (
     <>
-      <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+      <div className="flex min-h-screen bg-gradient-to-br bg-black text-white">
         <AdminSidebar />
         <div className="flex-1 px-6 py-6">
-          <div className="bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 rounded-lg shadow-lg p-6">
+          <div className="bg-gradient-to-b from-gray-900 via-black to-gray-900 rounded-lg shadow-lg p-6">
             <h1 className="text-3xl font-bold mb-4 text-center">
               Admin Profile
             </h1>
@@ -222,10 +233,10 @@ export default function AdminProfile() {
               </button>
             </div>
           </div>
-          <div className="rounded-lg bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 mt-5 p-6">
+          <div className="rounded-lg bg-gradient-to-b from-gray-900 via-black to-gray-900 mt-5 p-6">
             <h1 className="text-2xl font-bold text-white mb-4">Your Events</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event) => (
+              {currentEvents.map((event) => (
                 <div
                   key={event.id}
                   className="p-4 bg-gradient-to-tl from-gray-800 to-gray-700 rounded-lg shadow-lg hover:scale-105 transition-transform"
@@ -262,6 +273,19 @@ export default function AdminProfile() {
                   </p>
                 </div>
               ))}
+            </div>
+            <div className="flex justify-center space-x-2 mt-4">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (number) => (
+                  <button
+                    key={number}
+                    onClick={() => paginate(number)}
+                    className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    {number}
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>

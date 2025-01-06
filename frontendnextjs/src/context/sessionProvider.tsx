@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, ReactNode, useEffect, useState, useCallback } from "react";
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import {
   SessionContext as ISessionContext,
   UserType,
@@ -91,6 +97,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [resetSession]);
 
   useEffect(() => {
+    console.log("Initializing session provider...");
     const token = localStorage.getItem("token");
     if (token) {
       checkSession();

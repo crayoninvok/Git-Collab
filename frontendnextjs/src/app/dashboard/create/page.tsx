@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
-import AdminSidebar from "../../../components/AdminSidebar";
+import AdminSidebar from "@/components/adminSidebarDashboard";
 
 type EventForm = {
   title: string;
@@ -128,7 +128,7 @@ export default function CreateEventPage() {
       formData.append("time", data.time);
       formData.append("eventType", data.eventType);
 
-      const formattedTickets = ticketTypes.map(({ id, ...ticket }) => ({
+      const formattedTickets = ticketTypes.map(({ ...ticket }) => ({
         category: ticket.category,
         price: ticket.price,
         quantity: ticket.quantity,
@@ -159,9 +159,11 @@ export default function CreateEventPage() {
       reset();
       setImagePreview("");
       setTicketTypes([{ id: "free", category: "Free", price: 0, quantity: 1 }]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred.";
       console.error("Error:", error);
-      alert(error.message || "An error occurred while creating the event.");
+      alert(errorMessage || "An error occurred while creating the event.");
     } finally {
       setLoading(false);
     }
