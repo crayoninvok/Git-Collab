@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
-import AdminSidebar from "@/components/adminSidebarDashboard";
+import AdminSidebar from "../../../components/adminSidebarDashboard";
 
 type EventForm = {
   title: string;
@@ -22,6 +22,12 @@ type TicketType = {
   category: string;
   price: number;
   quantity: number;
+};
+
+// Define a custom error type
+type ApiError = {
+  message: string;
+  error?: string;
 };
 
 export default function CreateEventPage() {
@@ -115,7 +121,7 @@ export default function CreateEventPage() {
     setTicketTypes(updatedTickets);
   };
 
-    const onSubmit = async (data: EventForm) => {
+  const onSubmit = async (data: EventForm) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -128,10 +134,10 @@ export default function CreateEventPage() {
       formData.append("time", data.time);
       formData.append("eventType", data.eventType);
 
-      const formattedTickets = ticketTypes.map(({ ...ticket }) => ({
-        category: ticket.category,
-        price: ticket.price,
-        quantity: ticket.quantity,
+      const formattedTickets = ticketTypes.map(({ category, price, quantity }) => ({
+        category,
+        price,
+        quantity,
       }));
 
       formData.append("tickets", JSON.stringify(formattedTickets));
@@ -141,7 +147,7 @@ export default function CreateEventPage() {
       }
 
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8000/api/events/create", {
+      const response = await fetch("https://backend-minpro-kappa.vercel.app/api/events/create", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -160,10 +166,9 @@ export default function CreateEventPage() {
       setImagePreview("");
       setTicketTypes([{ id: "free", category: "Free", price: 0, quantity: 1 }]);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unexpected error occurred.";
       console.error("Error:", error);
-      alert(errorMessage || "An error occurred while creating the event.");
+      const apiError = error as ApiError;
+      alert(apiError.message || "An error occurred while creating the event.");
     } finally {
       setLoading(false);
     }

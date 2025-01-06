@@ -15,13 +15,14 @@ export default function EventDetailPage({
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const base_url=process.env.NEXT_PUBLIC_BASE_URL_BE
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         // Remove token requirement from the fetch request
         const response = await fetch(
-          `http://localhost:8000/api/events/slug/${params.slug}`
+          `${base_url}/events/slug/${params.slug}`
         );
 
         if (!response.ok) {

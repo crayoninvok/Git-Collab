@@ -49,11 +49,12 @@ export default function ViewAllEvents() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 12;
+  const base_url=process.env.NEXT_PUBLIC_BASE_URL_BE
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/events");
+        const response = await fetch(`${base_url}/events`);
         if (!response.ok) throw new Error("Failed to fetch events");
         const data = await response.json();
         if (!Array.isArray(data)) {

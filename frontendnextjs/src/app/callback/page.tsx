@@ -10,37 +10,37 @@ export default function CallbackPage() {
 
   useEffect(() => {
     const processAccessToken = () => {
-      const hash = window.location.hash.substring(1); // Remove the `#`
+      const hash = window.location.hash.substring(1); 
       const params = new URLSearchParams(hash);
 
-      // Extract the access_token from the URL
+
       const accessToken = params.get("access_token");
       console.log("Extracted access_token:", accessToken);
 
-      // Check if the access_token is valid
+  
       if (!accessToken || accessToken.trim() === "") {
         console.warn("Missing or invalid access_token:", accessToken);
         toast.error("Authentication token is missing or invalid. Redirecting to login...");
-        router.push("/auth/login"); // Redirect to login if access_token is invalid
+        router.push("/auth/login"); 
         return;
       }
 
       try {
-        // Save the access_token to localStorage
+        
         console.log("Saving access_token to localStorage...");
         localStorage.setItem("access_token", accessToken);
         console.log("Access token successfully saved.");
 
-        // Notify user of successful login
+
         toast.success("Login successful! Redirecting...");
         setTimeout(() => {
-          router.push("/"); // Redirect to the homepage
-        }, 2000); // 2-second delay before redirecting
+          router.push("/"); 
+        }, 2000); 
       } catch (error) {
-        // Handle errors while saving the access_token
+
         console.error("Error saving access_token to localStorage:", error);
         toast.error("An error occurred while processing the access token.");
-        router.push("/auth/login"); // Redirect to login on error
+        router.push("/auth/login")
       }
     };
 

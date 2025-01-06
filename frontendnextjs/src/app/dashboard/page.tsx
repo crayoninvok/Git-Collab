@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSession } from "@/context/useSessionHook";
 import { formatPrice } from "@/helpers/formatPrice";
-import StatisticChart from "@/components/graph/statistiChart";
-import { graphDataDaily } from "@/components/graph/dayData";
-import { graphDataMonth } from "@/components/graph/monthData";
+
 import AdminSidebar from "@/components/adminSidebarDashboard";
 
 import withGuard from "@/hoc/pageGuard";
@@ -183,19 +181,6 @@ function DashboardPage() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="flex justify-center">
-            <div className="w-full max-w-[1700px] h-[600px] mx-auto">
-              {selectedGraph === "By Year" && (
-                <StatisticChart data={graphDataMonth} selectedGraph="By Year" />
-              )}
-              {selectedGraph === "By Month" && (
-                <StatisticChart
-                  data={graphDataDaily}
-                  selectedGraph="By Month"
-                />
-              )}
-            </div>
           </div>
         </section>
       </main>
