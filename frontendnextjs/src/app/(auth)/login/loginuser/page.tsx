@@ -80,7 +80,7 @@ export default function LoginUser() {
 
       // Redirecting the user to Google's OAuth URL
       const result = await res.json();
-      window.location.href = result.url; // Ensure backend sends the redirect URL
+      window.location.href = result.url; 
     } catch (err) {
       const errorMessage =
         err instanceof Error
