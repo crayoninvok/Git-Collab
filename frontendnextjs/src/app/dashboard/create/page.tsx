@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
-import AdminSidebar from "@/components/adminSidebarDashboard";
+import AdminSidebar from "../../../components/adminSidebarDashboard";
 
 type EventForm = {
   title: string;
@@ -128,7 +128,7 @@ export default function CreateEventPage() {
       formData.append("time", data.time);
       formData.append("eventType", data.eventType);
 
-      const formattedTickets = ticketTypes.map(({ ...ticket }) => ({
+      const formattedTickets = ticketTypes.map(({ id, ...ticket }) => ({
         category: ticket.category,
         price: ticket.price,
         quantity: ticket.quantity,
@@ -141,7 +141,7 @@ export default function CreateEventPage() {
       }
 
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8000/api/events/create", {
+      const response = await fetch("https://backend-minpro-kappa.vercel.app/api/events/create", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -159,11 +159,9 @@ export default function CreateEventPage() {
       reset();
       setImagePreview("");
       setTicketTypes([{ id: "free", category: "Free", price: 0, quantity: 1 }]);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unexpected error occurred.";
+    } catch (error: any) {
       console.error("Error:", error);
-      alert(errorMessage || "An error occurred while creating the event.");
+      alert(error.message || "An error occurred while creating the event.");
     } finally {
       setLoading(false);
     }
