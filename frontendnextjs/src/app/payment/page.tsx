@@ -77,10 +77,10 @@ export default function PaymentPage() {
 
       // First, fetch the ticket data
       const ticketResponse = await fetch(
-        ${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId},
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId}`,
         {
           headers: {
-            Authorization: Bearer ${token},
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -95,10 +95,10 @@ export default function PaymentPage() {
       // Only fetch coupon data if it's not a free ticket
       if (ticketData.price > 0 && user?.percentage && ticketData.eventId) {
         const couponStatusResponse = await fetch(
-          ${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId},
+          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
           {
             headers: {
-              Authorization: Bearer ${token},
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -166,12 +166,12 @@ export default function PaymentPage() {
     };
 
     const orderResponse = await fetch(
-      ${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders,
+      `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: Bearer ${token},
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(orderBody),
       }
@@ -188,11 +188,11 @@ export default function PaymentPage() {
       // For free tickets, send success email and redirect to success page
       try {
         await fetch(
-          ${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id},
+          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id}`,
           {
             method: "POST",
             headers: {
-              Authorization: Bearer ${token},
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -201,18 +201,18 @@ export default function PaymentPage() {
       }
       
       // Redirect to success page instead of my-tickets
-      router.push(/payment/success?order_id=ORDER-${orderResult.data.id});
+      router.push(`/payment/success?order_id=ORDER-${orderResult.data.id}`);
       return;
     }
 
     // Rest of the code for paid tickets...
     const paymentResponse = await fetch(
-      ${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create,
+      `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: Bearer ${token},
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           orderId: orderResult.data.id,
@@ -329,7 +329,7 @@ export default function PaymentPage() {
                         <p>Use Coupon ({user.percentage}% discount)</p>
                         <p className="text-sm text-gray-400">
                           {couponStatus.remainingCoupons > 0
-                            ? ${couponStatus.remainingCoupons} coupons remaining
+                            ? `${couponStatus.remainingCoupons} coupons remaining`
                             : "No more coupons available"}
                         </p>
                       </div>
