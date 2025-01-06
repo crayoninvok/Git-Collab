@@ -76,7 +76,7 @@ export default function PaymentPage() {
       }
 
       const ticketResponse = await fetch(
-        `http://localhost:8000/api/events/ticket/${ticketId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -94,7 +94,7 @@ export default function PaymentPage() {
       // Cek status kupon hanya jika tiket berbayar
       if (ticketData.price > 0 && ticketData.eventId) {
         const couponStatusResponse = await fetch(
-          `http://localhost:8000/api/payment/check-coupon/${ticketData.eventId}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -105,10 +105,8 @@ export default function PaymentPage() {
         if (couponStatusResponse.ok) {
           const couponStatusData = await couponStatusResponse.json();
           setCouponStatus(couponStatusData);
-          // Kupon tersedia jika user belum menggunakan kupon untuk event ini dan masih ada slot
           setCouponAvailable(couponStatusData.canUseCoupon && couponStatusData.remainingCoupons > 0);
           
-          // Reset toggle kupon jika tidak tersedia
           if (!couponStatusData.canUseCoupon || couponStatusData.remainingCoupons <= 0) {
             setUseCoupon(false);
           }
@@ -128,14 +126,12 @@ export default function PaymentPage() {
     if (!ticketData) return 0;
     let total = ticketData.price * quantity;
 
-    // Jika menggunakan points (fixed 10.000)
     if (ticketData.price > 0 && usePoints && user?.points && user.points >= 10000) {
-      total -= 10000; // Kurangi 10.000 dari total
+      total -= 10000;
     }
 
-    // Jika menggunakan kupon (10% discount)
     if (ticketData.price > 0 && useCoupon && couponAvailable) {
-      total = total * 0.9; // Diskon 10%
+      total = total * 0.9; // 10% discount
     }
 
     return Math.max(total, 0);
@@ -159,10 +155,9 @@ export default function PaymentPage() {
 
       const isFreeTicket = ticketData.price === 0;
 
-      // Verifikasi ulang status kupon
       if (!isFreeTicket && useCoupon) {
         const couponCheckResponse = await fetch(
-          `http://localhost:8000/api/payment/check-coupon/${ticketData.eventId}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -194,7 +189,7 @@ export default function PaymentPage() {
       };
 
       const orderResponse = await fetch(
-        `http://localhost:8000/api/orders`,
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders`,
         {
           method: "POST",
           headers: {
@@ -215,7 +210,7 @@ export default function PaymentPage() {
       if (isFreeTicket) {
         try {
           await fetch(
-            `http://localhost:8000/api/payment/success-email-order/${orderResult.data.id}`,
+            `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id}`,
             {
               method: "POST",
               headers: {
@@ -232,7 +227,7 @@ export default function PaymentPage() {
       }
 
       const paymentResponse = await fetch(
-        `http://localhost:8000/api/payment/create`,
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create`,
         {
           method: "POST",
           headers: {
@@ -335,7 +330,7 @@ export default function PaymentPage() {
               <div className="bg-zinc-800 p-4 rounded-lg">
                 <h3 className="font-semibold mb-4">Discounts</h3>
 
-                {/* Points Section - Fixed 10.000 points usage */}
+                {/* Points Section */}
                 {user?.points && user.points >= 10000 && (
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -348,7 +343,7 @@ export default function PaymentPage() {
                   </div>
                 )}
 
-                {/* Coupon Section - 10% discount */}
+                {/* Coupon Section */}
                 <div className="flex flex-col gap-y-4">
                   <div className="flex items-center justify-between">
                     <div>
