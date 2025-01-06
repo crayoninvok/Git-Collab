@@ -5,7 +5,7 @@ import { useSession } from '@/context/useSessionHook';
 import { formatDate } from '@/helpers/formatDate';
 import Link from 'next/link';
 import Image from 'next/image';
-import AdminSidebar from '@/components/AdminSidebar';
+import AdminSidebar from '@/components/adminSidebarDashboard';
 
 interface Event {
  id: number;

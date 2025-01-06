@@ -1,3 +1,4 @@
+//src/app/dashboard/events/review/[id]
 'use client'
 
 import { useEffect, useState } from 'react';

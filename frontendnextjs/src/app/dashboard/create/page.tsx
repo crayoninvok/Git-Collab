@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
-import AdminSidebar from "../../../components/AdminSidebar";
+import AdminSidebar from "../../../components/adminSidebarDashboard";
 
 type EventForm = {
   title: string;

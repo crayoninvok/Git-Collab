@@ -41,6 +41,9 @@ export interface Event {
   time: Date;
   tickets: Ticket[];
   isPurchased?: boolean;
+  ticketsSold: number;
+  revenue: number;
+  profitPercentage: number;
 }
 
 export interface Ticket {
