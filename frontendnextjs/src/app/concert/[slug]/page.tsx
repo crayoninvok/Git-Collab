@@ -21,7 +21,7 @@ export default function EventDetailPage({
       try {
         // Remove token requirement from the fetch request
         const response = await fetch(
-          `http://localhost:8000/api/events/slug/${params.slug}`
+          `https://backend-minpro-kappa.vercel.app/api/events/slug/${params.slug}`
         );
 
         if (!response.ok) {
