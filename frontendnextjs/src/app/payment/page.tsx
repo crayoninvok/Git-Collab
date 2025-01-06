@@ -75,11 +75,12 @@ export default function PaymentPage() {
         return;
       }
 
+      // First, fetch the ticket data
       const ticketResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId}`,
+        ${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId},
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: Bearer ${token},
           },
         }
       );
@@ -91,13 +92,13 @@ export default function PaymentPage() {
       const ticketData = await ticketResponse.json();
       setTicketData(ticketData);
 
-      // Cek status kupon hanya jika tiket berbayar
-      if (ticketData.price > 0 && ticketData.eventId) {
+      // Only fetch coupon data if it's not a free ticket
+      if (ticketData.price > 0 && user?.percentage && ticketData.eventId) {
         const couponStatusResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
+          ${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId},
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: Bearer ${token},
             },
           }
         );
@@ -106,10 +107,6 @@ export default function PaymentPage() {
           const couponStatusData = await couponStatusResponse.json();
           setCouponStatus(couponStatusData);
           setCouponAvailable(couponStatusData.canUseCoupon && couponStatusData.remainingCoupons > 0);
-          
-          if (!couponStatusData.canUseCoupon || couponStatusData.remainingCoupons <= 0) {
-            setUseCoupon(false);
-          }
         }
       } else {
         setUsePoints(false);
@@ -126,139 +123,122 @@ export default function PaymentPage() {
     if (!ticketData) return 0;
     let total = ticketData.price * quantity;
 
-    if (ticketData.price > 0 && usePoints && user?.points && user.points >= 10000) {
-      total -= 10000;
-    }
+    if (ticketData.price > 0) {
+      if (usePoints && user?.points && user.points >= 10000) {
+        total -= 10000;
+      }
 
-    if (ticketData.price > 0 && useCoupon && couponAvailable) {
-      total = total * 0.9; // 10% discount
+      if (useCoupon && user?.percentage && couponAvailable) {
+        total = total * (1 - user.percentage / 100);
+      }
     }
 
     return Math.max(total, 0);
   };
 
   const handlePayment = async () => {
-    if (!ticketId || !quantity || !user || !ticketData) {
-      setError("Missing required information");
+  if (!ticketId || !quantity || !user || !ticketData) {
+    setError("Missing required information");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push('/login');
       return;
     }
 
-    setLoading(true);
-    setError("");
+    const isFreeTicket = ticketData.price === 0;
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push('/login');
-        return;
+    const orderBody = {
+      eventId: Number(ticketData.eventId),
+      ticketId: Number(ticketId),
+      quantity: Number(quantity),
+      totalPrice: ticketData.price * Number(quantity),
+      finalPrice: calculateTotalPrice(),
+      usePoints: isFreeTicket ? false : (usePoints && user.points >= 10000),
+      useCoupon: isFreeTicket ? false : (useCoupon && couponAvailable),
+      status: isFreeTicket ? "PAID" : "PENDING" // Set initial status for free tickets
+    };
+
+    const orderResponse = await fetch(
+      ${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: Bearer ${token},
+        },
+        body: JSON.stringify(orderBody),
       }
+    );
 
-      const isFreeTicket = ticketData.price === 0;
+    if (!orderResponse.ok) {
+      const errorData = await orderResponse.json();
+      throw new Error(errorData.message || "Failed to create order");
+    }
 
-      if (!isFreeTicket && useCoupon) {
-        const couponCheckResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
+    const orderResult = await orderResponse.json();
+
+    if (isFreeTicket) {
+      // For free tickets, send success email and redirect to success page
+      try {
+        await fetch(
+          ${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id},
           {
+            method: "POST",
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: Bearer ${token},
             },
           }
         );
-
-        if (!couponCheckResponse.ok) {
-          throw new Error("Failed to verify coupon status");
-        }
-
-        const couponData = await couponCheckResponse.json();
-        if (!couponData.canUseCoupon || couponData.remainingCoupons <= 0) {
-          setError("Coupon is no longer valid or has reached its usage limit");
-          setLoading(false);
-          return;
-        }
+      } catch (emailError) {
+        console.error("Error sending success email:", emailError);
       }
-
-      const orderBody = {
-        eventId: Number(ticketData.eventId),
-        ticketId: Number(ticketId),
-        quantity: Number(quantity),
-        totalPrice: ticketData.price * Number(quantity),
-        finalPrice: calculateTotalPrice(),
-        usePoints: isFreeTicket ? false : (usePoints && user.points >= 10000),
-        useCoupon: isFreeTicket ? false : (useCoupon && couponAvailable),
-        status: isFreeTicket ? "PAID" : "PENDING"
-      };
-
-      const orderResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(orderBody),
-        }
-      );
-
-      if (!orderResponse.ok) {
-        const errorData = await orderResponse.json();
-        throw new Error(errorData.message || "Failed to create order");
-      }
-
-      const orderResult = await orderResponse.json();
-
-      if (isFreeTicket) {
-        try {
-          await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id}`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-        } catch (emailError) {
-          console.error("Error sending success email:", emailError);
-        }
-        
-        router.push(`/payment/success?order_id=ORDER-${orderResult.data.id}`);
-        return;
-      }
-
-      const paymentResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            orderId: orderResult.data.id,
-          }),
-        }
-      );
-
-      if (!paymentResponse.ok) {
-        const errorData = await paymentResponse.json();
-        throw new Error(errorData.message || "Failed to create payment");
-      }
-
-      const paymentResult = await paymentResponse.json();
-
-      if (paymentResult.data?.paymentUrl) {
-        window.location.href = paymentResult.data.paymentUrl;
-      } else {
-        throw new Error("No payment URL received");
-      }
-    } catch (error) {
-      console.error("Payment error:", error);
-      setError(error instanceof Error ? error.message : "Failed to process payment. Please try again.");
-    } finally {
-      setLoading(false);
+      
+      // Redirect to success page instead of my-tickets
+      router.push(/payment/success?order_id=ORDER-${orderResult.data.id});
+      return;
     }
-  };
+
+    // Rest of the code for paid tickets...
+    const paymentResponse = await fetch(
+      ${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: Bearer ${token},
+        },
+        body: JSON.stringify({
+          orderId: orderResult.data.id,
+        }),
+      }
+    );
+
+    if (!paymentResponse.ok) {
+      const errorData = await paymentResponse.json();
+      throw new Error(errorData.message || "Failed to create payment");
+    }
+
+    const paymentResult = await paymentResponse.json();
+
+    if (paymentResult.data?.paymentUrl) {
+      window.location.href = paymentResult.data.paymentUrl;
+    } else {
+      throw new Error("No payment URL received");
+    }
+  } catch (error) {
+    console.error("Payment error:", error);
+    setError(error instanceof Error ? error.message : "Failed to process payment. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (isChecking) {
     return (
@@ -330,7 +310,6 @@ export default function PaymentPage() {
               <div className="bg-zinc-800 p-4 rounded-lg">
                 <h3 className="font-semibold mb-4">Discounts</h3>
 
-                {/* Points Section */}
                 {user?.points && user.points >= 10000 && (
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -343,34 +322,35 @@ export default function PaymentPage() {
                   </div>
                 )}
 
-                {/* Coupon Section */}
-                <div className="flex flex-col gap-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p>Use Coupon (10% discount)</p>
-                      <p className="text-sm text-gray-400">
-                        {couponStatus.remainingCoupons > 0
-                          ? `${couponStatus.remainingCoupons} of 10 coupons remaining`
-                          : "No more coupons available"}
-                      </p>
+                {user?.percentage && (
+                  <div className="flex flex-col gap-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p>Use Coupon ({user.percentage}% discount)</p>
+                        <p className="text-sm text-gray-400">
+                          {couponStatus.remainingCoupons > 0
+                            ? ${couponStatus.remainingCoupons} coupons remaining
+                            : "No more coupons available"}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={useCoupon}
+                        onCheckedChange={setUseCoupon}
+                        disabled={!couponAvailable}
+                      />
                     </div>
-                    <Switch
-                      checked={useCoupon}
-                      onCheckedChange={setUseCoupon}
-                      disabled={!couponAvailable}
-                    />
+                    {!couponStatus.canUseCoupon && (
+                      <p className="text-center text-sm text-gray-400">
+                        You have already used a coupon for this event
+                      </p>
+                    )}
+                    {couponStatus.remainingCoupons === 0 && (
+                      <p className="text-center text-sm text-gray-400">
+                        All coupons for this event have been claimed
+                      </p>
+                    )}
                   </div>
-                  {!couponStatus.canUseCoupon && (
-                    <p className="text-center text-sm text-gray-400">
-                      You have already used a coupon for this event
-                    </p>
-                  )}
-                  {couponStatus.remainingCoupons === 0 && (
-                    <p className="text-center text-sm text-gray-400">
-                      All coupons for this event have been claimed
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
             )}
 
@@ -382,8 +362,10 @@ export default function PaymentPage() {
               {!isFreeTicket && usePoints && (
                 <p className="text-sm text-gray-400">-Rp 10,000 (Points)</p>
               )}
-              {!isFreeTicket && useCoupon && (
-                <p className="text-sm text-gray-400">-10% (Coupon)</p>
+              {!isFreeTicket && useCoupon && user?.percentage && (
+                <p className="text-sm text-gray-400">
+                  -{user.percentage}% (Coupon)
+                </p>
               )}
             </div>
 
