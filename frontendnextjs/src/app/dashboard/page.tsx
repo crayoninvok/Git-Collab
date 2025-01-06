@@ -4,13 +4,10 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSession } from "@/context/useSessionHook";
 import { formatPrice } from "@/helpers/formatPrice";
-
 import AdminSidebar from "@/components/adminSidebarDashboard";
-
 import withGuard from "@/hoc/pageGuard";
 import RevenueGraph from "../../components/graph/revenueGraphSort";
 
-const graphOptions = ["By Month", "By Year", "Per 5 Years"];
 
 const LoadingState = () => (
   <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
@@ -45,14 +42,12 @@ const AnalyticsCard = ({
 
 function DashboardPage() {
   const { promotor, checkSession } = useSession();
-  const base_url =
-    process.env.NEXT_PUBLIC_BASE_URL_BE || "http://localhost:8000/api";
+  const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [analyticsData, setAnalyticsData] = useState<
     { title: string; value: number | string; color: string }[]
   >([]);
-  const [selectedGraph, setSelectedGraph] = useState<string>("By Month");
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -65,7 +60,7 @@ function DashboardPage() {
           Authorization: `Bearer ${token}`,
         };
 
-        // Fetch all data from backend
+      
         const [
           totalResponse,
           activeResponse,
@@ -211,5 +206,5 @@ function DashboardPage() {
 
 export default withGuard(DashboardPage, {
   requiredRole: "promotor",
-  redirectTo: "/login",
+  redirectTo: "/not-authorized-dashboard",
 });

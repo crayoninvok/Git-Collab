@@ -5,8 +5,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "@/context/useSessionHook";
 import { formatPrice } from "@/helpers/formatPrice";
 import { Switch } from "@/components/ui/switch";
-import NotAuthorized from "@/components/not-authorized/not";
+import withGuard from "@/hoc/pageGuard";
 import { Loader2 } from "lucide-react";
+
 
 interface TicketData {
   id: number;
@@ -28,7 +29,7 @@ interface CouponStatus {
   remainingCoupons: number;
 }
 
-export default function PaymentPage() {
+ function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuth } = useSession();
@@ -251,15 +252,6 @@ export default function PaymentPage() {
     );
   }
 
-  if (!isAuth || !user) {
-    return (
-      <NotAuthorized
-        title="Authentication Required"
-        description="Please sign in to proceed with your payment."
-      />
-    );
-  }
-
   if (!ticketData) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center pt-16">
@@ -395,3 +387,8 @@ export default function PaymentPage() {
     </div>
   );
 }
+
+export default withGuard(PaymentPage, {
+  requiredRole: "user",
+  redirectTo: "/not-authorized-payment",
+});

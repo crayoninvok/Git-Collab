@@ -3,7 +3,7 @@
 import React, { useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SessionContext } from "@/context/sessionProvider";
-import Loading from "@/app/loading"; // Adjust the path based on your project structure
+import Loading from "@/app/loading"; 
 
 export default function withGuard<P extends JSX.IntrinsicAttributes>(
   Component: React.ComponentType<P>,

@@ -12,6 +12,7 @@ import {
   MdLogout,
 } from "react-icons/md";
 import { useSession } from "@/context/useSessionHook";
+import Swal from "sweetalert2";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -19,9 +20,20 @@ export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const { logout } = useSession();
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login/loginpromotor");
+ const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, logout!",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logout();
+        router.push("/login/loginpromotor");
+      }
+    });
   };
 
   return (

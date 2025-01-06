@@ -124,12 +124,12 @@ const RevenueGraph: React.FC = () => {
                   {
                     label: `Revenue (${period})`,
                     data: graphData.data,
-                    fill: true, // Enable background fill
-                    backgroundColor: "rgba(75,192,192,0.2)", // Light fill under the line
-                    borderColor: "rgba(75,192,192,1)", // Line color
-                    pointBorderColor: "rgba(75,192,192,1)", // Point border color
-                    pointBackgroundColor: "rgba(255,255,255,1)", // Point fill color
-                    tension: 0.3, // Smoother curves
+                    fill: true, 
+                    backgroundColor: "rgba(75,192,192,0.2)", 
+                    borderColor: "rgba(75,192,192,1)", 
+                    pointBorderColor: "rgba(75,192,192,1)", 
+                    pointBackgroundColor: "rgba(255,255,255,1)", 
+                    tension: 0.3, 
                   },
                 ],
               }}
@@ -141,7 +141,7 @@ const RevenueGraph: React.FC = () => {
                     display: true,
                     position: "top",
                     labels: {
-                      color: "rgba(75,192,192,1)", // Legend label color
+                      color: "rgba(75,192,192,1)", 
                     },
                   },
                 },
