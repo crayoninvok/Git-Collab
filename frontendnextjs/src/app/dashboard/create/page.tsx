@@ -24,6 +24,12 @@ type TicketType = {
   quantity: number;
 };
 
+// Define a custom error type
+type ApiError = {
+  message: string;
+  error?: string;
+};
+
 export default function CreateEventPage() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
@@ -115,7 +121,7 @@ export default function CreateEventPage() {
     setTicketTypes(updatedTickets);
   };
 
-    const onSubmit = async (data: EventForm) => {
+  const onSubmit = async (data: EventForm) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -128,10 +134,10 @@ export default function CreateEventPage() {
       formData.append("time", data.time);
       formData.append("eventType", data.eventType);
 
-      const formattedTickets = ticketTypes.map(({ id, ...ticket }) => ({
-        category: ticket.category,
-        price: ticket.price,
-        quantity: ticket.quantity,
+      const formattedTickets = ticketTypes.map(({ category, price, quantity }) => ({
+        category,
+        price,
+        quantity,
       }));
 
       formData.append("tickets", JSON.stringify(formattedTickets));
@@ -159,9 +165,10 @@ export default function CreateEventPage() {
       reset();
       setImagePreview("");
       setTicketTypes([{ id: "free", category: "Free", price: 0, quantity: 1 }]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error:", error);
-      alert(error.message || "An error occurred while creating the event.");
+      const apiError = error as ApiError;
+      alert(apiError.message || "An error occurred while creating the event.");
     } finally {
       setLoading(false);
     }

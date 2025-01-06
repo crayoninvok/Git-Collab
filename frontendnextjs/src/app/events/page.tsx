@@ -53,7 +53,7 @@ export default function ViewAllEvents() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/events");
+        const response = await fetch("https://backend-minpro-kappa.vercel.app/api/events");
         if (!response.ok) throw new Error("Failed to fetch events");
         const data = await response.json();
         if (!Array.isArray(data)) {
