@@ -470,9 +470,5 @@ function PaymentPage() {
 
 export default withGuard(PaymentPage, {
   requiredRole: "user",
-<<<<<<< HEAD
-  redirectTo: "/not-authorized-payment",
-=======
   redirectTo: "/not-authorized",
->>>>>>> 2d1adea1aad8433b1d466c6ac045f8babccf5bf3
 });
