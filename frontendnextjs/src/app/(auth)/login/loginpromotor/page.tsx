@@ -50,7 +50,7 @@ export default function LoginPromotor() {
     } catch (err:unknown) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred during login.";
       toast.error(errorMessage || "An error occurred during login.", {
-        position: "top-right",
+        position: "bottom-right",
         autoClose: 3000,
       });
     } finally {

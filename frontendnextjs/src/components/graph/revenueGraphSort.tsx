@@ -24,7 +24,6 @@ const RevenueGraph: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
   const fetchRevenueData = async () => {
