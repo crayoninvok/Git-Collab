@@ -52,7 +52,7 @@ function PaymentPage() {
   useEffect(() => {
     const checkAuth = async () => {
       if (!isAuth) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
       await fetchTicketData();
@@ -71,7 +71,7 @@ function PaymentPage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
@@ -98,7 +98,11 @@ function PaymentPage() {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      setError(error instanceof Error ? error.message : "Failed to load ticket information");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load ticket information"
+      );
     }
   };
 
@@ -135,16 +139,19 @@ function PaymentPage() {
       }
 
       const eventCouponData = await eventCouponResponse.json();
-      console.log('User coupon data:', userCouponData);
-      console.log('Event coupon data:', eventCouponData);
+      console.log("User coupon data:", userCouponData);
+      console.log("Event coupon data:", eventCouponData);
 
-      const canUseCoupon = userCouponData.canUseCoupon && eventCouponData.remainingCoupons > 0;
-      
+      const canUseCoupon =
+        userCouponData.canUseCoupon && eventCouponData.remainingCoupons > 0;
+
       setCouponStatus({
         canUseCoupon,
         couponUsageCount: eventCouponData.couponUsageCount,
         remainingCoupons: eventCouponData.remainingCoupons,
-        message: !canUseCoupon ? (userCouponData.message || eventCouponData.message) : undefined
+        message: !canUseCoupon
+          ? userCouponData.message || eventCouponData.message
+          : undefined,
       });
 
       if (!canUseCoupon) {
@@ -191,7 +198,7 @@ function PaymentPage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
@@ -206,20 +213,23 @@ function PaymentPage() {
         finalPrice: calculateTotalPrice(),
         usePoints: !isFreeTicket && usePoints,
         useCoupon: !isFreeTicket && useCoupon,
-        status: isFreeTicket ? "PAID" : "PENDING"
+        status: isFreeTicket ? "PAID" : "PENDING",
       };
 
-      const orderResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders`,
-        {
+      // Add response type
+      const orderResponse = (await Promise.race([
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(orderBody),
-        }
-      );
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timeout")), 30000)
+        ),
+      ])) as Response; // Type assertion here
 
       if (!orderResponse.ok) {
         const errorData = await orderResponse.json();
@@ -243,7 +253,7 @@ function PaymentPage() {
         } catch (emailError) {
           console.error("Error sending confirmation email:", emailError);
         }
-        
+
         router.push(`/payment/success?order_id=ORDER-${orderResult.data.id}`);
         return;
       }
@@ -276,8 +286,8 @@ function PaymentPage() {
         }
 
         const paymentResult = await paymentResponse.json();
-        console.log('Payment result:', paymentResult);
-        
+        console.log("Payment result:", paymentResult);
+
         if (!paymentResult.data?.paymentUrl) {
           throw new Error("No payment URL received");
         }
@@ -285,11 +295,17 @@ function PaymentPage() {
         window.location.href = paymentResult.data.paymentUrl;
       } catch (paymentError) {
         console.error("Payment creation error:", paymentError);
-        throw new Error(paymentError instanceof Error ? paymentError.message : "Payment processing failed");
+        throw new Error(
+          paymentError instanceof Error
+            ? paymentError.message
+            : "Payment processing failed"
+        );
       }
     } catch (error) {
       console.error("Process error:", error);
-      setError(error instanceof Error ? error.message : "An unexpected error occurred");
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
     } finally {
       setLoading(false);
     }
@@ -326,7 +342,7 @@ function PaymentPage() {
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto bg-zinc-900 rounded-xl p-8">
           <h1 className="text-3xl font-bold text-orange-500 mb-8">
-            {ticketData.price === 0 ? 'Order Details' : 'Payment Details'}
+            {ticketData.price === 0 ? "Order Details" : "Payment Details"}
           </h1>
 
           {error && (
@@ -344,7 +360,12 @@ function PaymentPage() {
               <div className="space-y-2">
                 <p>Ticket Type: {ticketData.category}</p>
                 <p>Quantity: {quantity}</p>
-                <p>Price per ticket: {ticketData.price === 0 ? "Free" : formatPrice(ticketData.price)}</p>
+                <p>
+                  Price per ticket:{" "}
+                  {ticketData.price === 0
+                    ? "Free"
+                    : formatPrice(ticketData.price)}
+                </p>
               </div>
             </div>
 
@@ -372,14 +393,21 @@ function PaymentPage() {
                 {/* Coupon Discount */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className={!couponStatus.canUseCoupon ? "text-gray-500" : ""}>
+                    <p
+                      className={
+                        !couponStatus.canUseCoupon ? "text-gray-500" : ""
+                      }
+                    >
                       Apply 10% Coupon Discount
                     </p>
                     {couponStatus.message ? (
-                      <p className="text-sm text-red-400">{couponStatus.message}</p>
+                      <p className="text-sm text-red-400">
+                        {couponStatus.message}
+                      </p>
                     ) : couponStatus.canUseCoupon ? (
                       <p className="text-sm text-gray-400">
-                        {couponStatus.remainingCoupons} coupons remaining for this event
+                        {couponStatus.remainingCoupons} coupons remaining for
+                        this event
                       </p>
                     ) : null}
                   </div>
@@ -399,7 +427,9 @@ function PaymentPage() {
             <div className="bg-zinc-800 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">Total Payment</h3>
               <p className="text-2xl font-bold text-orange-500">
-                {ticketData.price === 0 ? "Free" : formatPrice(calculateTotalPrice())}
+                {ticketData.price === 0
+                  ? "Free"
+                  : formatPrice(calculateTotalPrice())}
               </p>
               {ticketData.price > 0 && (
                 <div className="text-sm text-gray-400 mt-2">
@@ -413,10 +443,11 @@ function PaymentPage() {
             <button
               onClick={handlePayment}
               disabled={loading}
-              className={`w-full py-3 rounded-lg text-white font-semibold ${loading
-                ? "bg-gray-500 cursor-not-allowed"
-                : "bg-orange-500 hover:bg-orange-600 transition-colors"
-                }`}
+              className={`w-full py-3 rounded-lg text-white font-semibold ${
+                loading
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-orange-500 hover:bg-orange-600 transition-colors"
+              }`}
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -433,7 +464,7 @@ function PaymentPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default withGuard(PaymentPage, {
