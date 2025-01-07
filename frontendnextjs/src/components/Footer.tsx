@@ -1,12 +1,7 @@
 "use client";
 
 import {
-  FaFacebook,
   FaInstagram,
-  FaTiktok,
-  FaTwitter,
-  FaTwitch,
-  FaYoutube,
 } from "react-icons/fa";
 import Link from "next/link";
 import { useSession } from "@/context/useSessionHook";
@@ -15,12 +10,9 @@ export default function Footer() {
   const { isAuth } = useSession();
 
   const socialLinks = [
-    { icon: FaFacebook, href: "https://facebook.com", hoverColor: "hover:text-blue-600" },
-    { icon: FaInstagram, href: "https://instagram.com", hoverColor: "hover:text-pink-500" },
-    { icon: FaTiktok, href: "https://tiktok.com", hoverColor: "hover:text-black" },
-    { icon: FaTwitter, href: "https://twitter.com", hoverColor: "hover:text-blue-400" },
-    { icon: FaTwitch, href: "https://twitch.tv", hoverColor: "hover:text-purple-500" },
-    { icon: FaYoutube, href: "https://youtube.com", hoverColor: "hover:text-red-600" },
+    { icon: FaInstagram, href: "https://instagram.com/tsani", hoverColor: "hover:text-pink-500", label: "Tsania's Instagram" },
+    { icon: FaInstagram, href: "https://instagram.com/dzaky", hoverColor: "hover:text-pink-500", label: "Dzaky's Instagram" },
+
   ];
 
   const navLinks = isAuth 
@@ -44,39 +36,42 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="w-full bg-white text-gray-700 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <footer className="bg-gradient-to-r from-orange-700 to-red-800 text-white">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Company Info */}
-          <div className="flex flex-col space-y-4">
-            <h1 className="text-2xl font-bold text-orange-600">TIKO</h1>
-            <div className="text-sm space-y-2">
-              <p>Copyright © 2024 TIKO</p>
-              <p>Bojongsoang, Bandung</p>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+   
+          <div>
+            <h1 className="text-3xl font-bold mb-4">TIKO</h1>
+            <p className="text-sm">Asia Afrika Tower , Bandung</p>
+            <p className="text-xs mt-2">© 2024 TIKO. All Rights Reserved.</p>
+            <div className="flex flex-wrap mt-4 gap-2 text-xs">
               {legalLinks.map((link, index) => (
-                <Link 
-                  key={link.label} 
+                <Link
+                  key={link.label}
                   href={link.href}
-                  className="hover:text-orange-500 transition-colors"
+                  className="hover:underline"
                 >
                   {link.label}
-                  {index !== legalLinks.length - 1 && <span className="mx-2">|</span>}
+                  {index !== legalLinks.length - 1 && (
+                    <span className="mx-1 text-gray-300">|</span>
+                  )}
                 </Link>
               ))}
             </div>
+            <p className="mt-4 text-xs italic">
+              Developed by <strong>Tsania</strong> and <strong>Dzaky</strong>, Purwadhika Bandung
+            </p>
           </div>
 
-          {/* Navigation Links */}
-          <div className="flex flex-col space-y-4">
-            <h2 className="text-lg font-semibold">Quick Links</h2>
-            <div className="grid grid-cols-2 gap-2">
+
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
+            <div className="grid grid-cols-2 gap-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-sm hover:text-orange-500 transition-colors"
+                  className="text-sm hover:underline hover:text-gray-200"
                 >
                   {link.label}
                 </Link>
@@ -84,9 +79,9 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Social Media */}
-          <div className="flex flex-col space-y-4">
-            <h2 className="text-lg font-semibold">Connect With Us</h2>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Connect With Us</h2>
             <div className="flex flex-wrap gap-4">
               {socialLinks.map((social, index) => {
                 const Icon = social.icon;
@@ -96,16 +91,20 @@ export default function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`transition-colors ${social.hoverColor}`}
-                    aria-label={`Visit our ${social.href.split('https://')[1].split('.')[0]} page`}
+                    className={`text-white transition-colors ${social.hoverColor}`}
+                    aria-label={social.label || `Visit our ${social.href.split('https://')[1].split('.')[0]} page`}
                   >
-                    <Icon size={24} />
+                    <div className="flex flex-col items-center text-xs">
+                      <Icon size={28} />
+                      {social.label && <span className="mt-1 text-gray-300">{social.label}</span>}
+                    </div>
                   </a>
                 );
               })}
             </div>
           </div>
         </div>
+
       </div>
     </footer>
   );
