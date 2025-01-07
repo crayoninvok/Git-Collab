@@ -8,7 +8,6 @@ import { Switch } from "@/components/ui/switch";
 import withGuard from "@/hoc/pageGuard";
 import { Loader2 } from "lucide-react";
 
-
 interface TicketData {
   id: number;
   eventId: number;
@@ -27,9 +26,10 @@ interface CouponStatus {
   canUseCoupon: boolean;
   couponUsageCount: number;
   remainingCoupons: number;
+  message?: string;
 }
 
- function PaymentPage() {
+function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuth } = useSession();
@@ -148,7 +148,7 @@ interface CouponStatus {
 
     // Apply coupon discount (10%)
     if (ticketData.price > 0 && useCoupon && couponAvailable && couponStatus.canUseCoupon) {
-      total = total * 0.9;
+      total = total * 0.9; // 10% discount
     }
 
     return Math.max(total, 0);
@@ -184,26 +184,17 @@ interface CouponStatus {
         );
 
         if (!couponCheckResponse.ok) {
-          throw new Error("Failed to verify coupon status");
+          const errorData = await couponCheckResponse.json();
+          throw new Error(errorData.message || "Failed to verify coupon status");
         }
 
         const couponData = await couponCheckResponse.json();
         
         if (!couponData.canUseCoupon) {
-          setError("You've already used a coupon for this event");
+          setError(couponData.message || "Coupon cannot be used for this purchase");
           setLoading(false);
           return;
         }
-
-        if (couponData.remainingCoupons <= 0) {
-          setError("No more coupons available for this event");
-          setLoading(false);
-          return;
-        }
-
-        // Update local state with server state
-        setCouponStatus(couponData);
-        setCouponAvailable(couponData.canUseCoupon && couponData.remainingCoupons > 0);
       }
 
       const orderBody = {
@@ -212,8 +203,8 @@ interface CouponStatus {
         quantity: Number(quantity),
         totalPrice: ticketData.price * Number(quantity),
         finalPrice: calculateTotalPrice(),
-        usePoints: isFreeTicket ? false : (usePoints && user.points >= 10000),
-        useCoupon: isFreeTicket ? false : (useCoupon && couponAvailable && couponStatus.canUseCoupon),
+        usePoints: isFreeTicket ? false : usePoints,
+        useCoupon: isFreeTicket ? false : useCoupon,
         status: isFreeTicket ? "PAID" : "PENDING"
       };
 
@@ -370,9 +361,9 @@ interface CouponStatus {
                       <p className={!couponStatus.canUseCoupon ? "text-gray-500" : ""}>
                         Use Coupon (10% discount)
                       </p>
-                      {!couponStatus.canUseCoupon ? (
+                      {couponStatus.message ? (
                         <p className="text-sm text-red-400">
-                          You have already used a coupon for this event
+                          {couponStatus.message}
                         </p>
                       ) : couponStatus.remainingCoupons <= 0 ? (
                         <p className="text-sm text-red-400">
