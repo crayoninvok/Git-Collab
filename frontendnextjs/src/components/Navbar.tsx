@@ -30,9 +30,7 @@ export default function Navbar() {
   const navLinks = isAuth 
     ? [
         { href: "/", label: "Homepage" },
-        { href: "/event", label: "Event" },
-        { href: "/artist", label: "Artist" },
-        { href: "/news", label: "News" },
+        { href: "/events", label: "Event" },
       ]
     : [
         { href: "/", label: "Homepage" },
