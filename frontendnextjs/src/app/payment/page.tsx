@@ -362,8 +362,8 @@ function PaymentPage() {
                         Available: {formatPrice(user.points)} pts
                       </p>
                     </div>
-                    <Switch 
-                      checked={usePoints} 
+                    <Switch
+                      checked={usePoints}
                       onCheckedChange={setUsePoints}
                     />
                   </div>
@@ -413,11 +413,10 @@ function PaymentPage() {
             <button
               onClick={handlePayment}
               disabled={loading}
-              className={`w-full py-3 rounded-lg text-white font-semibold ${
-                loading
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-orange-500 hover:bg-orange-600 transition-colors"
-              }`}
+              className={`w-full py-3 rounded-lg text-white font-semibold ${loading
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600 transition-colors"
+                }`}
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -433,3 +432,11 @@ function PaymentPage() {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+export default withGuard(PaymentPage, {
+  requiredRole: "user",
+  redirectTo: "/not-authorized",
+});
