@@ -57,7 +57,7 @@ export default function PromoterRegister() {
         body: JSON.stringify(values),
       });
       const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Registration failed");
+      if (!res.ok) throw new Error(result.message || "Please check the username and email its has been used");
 
       Swal.fire({
         title: "Success!",
@@ -69,9 +69,11 @@ export default function PromoterRegister() {
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "An unexpected error occurred.";
+        console.log(errorMessage);
+        
       Swal.fire({
         title: "Error!",
-        text: errorMessage,
+        text: "Please check the username and password its has been used",
         icon: "error",
         confirmButtonText: "OK",
       });

@@ -52,7 +52,7 @@ export default function RegisterUser() {
       });
     } catch (err: unknown) {
       const errorMessage =
-      err instanceof Error ? err.message : "An unexpected error occurred.";
+      err instanceof Error ? err.message : "Please check username and password";
       console.error(err);
       Swal.fire({
         title: "Registration Failed",

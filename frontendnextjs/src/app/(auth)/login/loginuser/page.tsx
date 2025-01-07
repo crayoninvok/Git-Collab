@@ -36,8 +36,8 @@ export default function LoginUser() {
         body: JSON.stringify(values),
       });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Login failed!");
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.message || "Please check your username and password");
 
       localStorage.setItem("token", result.token);
 
