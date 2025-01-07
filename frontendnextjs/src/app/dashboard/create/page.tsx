@@ -145,9 +145,9 @@ export default function CreateEventPage() {
       if (data.bannerImage?.[0]) {
         formData.append("banner", data.bannerImage[0]);
       }
-
+      const base_url=process.env.NEXT_PUBLIC_BASE_URL_BE
       const token = localStorage.getItem("token");
-      const response = await fetch("https://backend-minpro-kappa.vercel.app/api/events/create", {
+      const response = await fetch(`${base_url}/events/create`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

@@ -3,18 +3,18 @@
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "@/context/useSessionHook";
 import { useRouter } from "next/navigation";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { TbMenuDeep } from "react-icons/tb";
 import { FaUserCircle, FaSignOutAlt, FaMicroblog } from "react-icons/fa";
 import { FiChevronRight } from "react-icons/fi";
 import { RiHomeSmileFill } from "react-icons/ri";
 import { SiEventbrite } from "react-icons/si";
+import Swal from "sweetalert2";
 
 export default function Avatar() {
   const { isAuth, user, logout } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [,setIsLoggingOut] = useState(false);
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -31,25 +31,22 @@ export default function Avatar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    toast.success("You have been logged out successfully.", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
+ const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, logout!",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        logout();
+        router.push("/login/loginpromotor");
+      }
     });
-
-    logout();
-
-    setTimeout(() => {
-      window.location.assign("/login/");
-    }, 1000);
   };
+
 
   const navigateTo = (path: string) => {
     setIsMenuOpen(false);
