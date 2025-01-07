@@ -8,7 +8,6 @@ import { Switch } from "@/components/ui/switch";
 import withGuard from "@/hoc/pageGuard";
 import { Loader2 } from "lucide-react";
 
-
 interface TicketData {
   id: number;
   eventId: number;
@@ -106,25 +105,25 @@ function PaymentPage() {
             }
           );
 
-if (couponStatusResponse.ok) {
-  const couponStatusData = await couponStatusResponse.json();
-  setCouponStatus(couponStatusData);
-  
-  // Only set coupon as available if user hasn't used it, coupon is valid (isRedeem true), and coupons remain
-  const isCouponAvailable = couponStatusData.canUseCoupon && 
-                          couponStatusData.remainingCoupons > 0;
-  setCouponAvailable(isCouponAvailable);
-  
-  // Always disable coupon if not available
-  if (!isCouponAvailable) {
-    setUseCoupon(false);
-  }
+          if (couponStatusResponse.ok) {
+            const couponStatusData = await couponStatusResponse.json();
+            setCouponStatus(couponStatusData);
+            
+            // Set coupon availability based on isRedeem status and remaining coupons
+            const isCouponAvailable = couponStatusData.canUseCoupon && 
+                                    couponStatusData.remainingCoupons > 0;
+            setCouponAvailable(isCouponAvailable);
+            
+            // Disable coupon if not available
+            if (!isCouponAvailable) {
+              setUseCoupon(false);
+            }
 
-  // Display specific message if coupon has been used
-  if (couponStatusData.message) {
-    setError(couponStatusData.message);
-  }
-} else {
+            // Display message if coupon has been used
+            if (couponStatusData.message) {
+              setError(couponStatusData.message);
+            }
+          } else {
             setCouponAvailable(false);
             setUseCoupon(false);
           }
@@ -360,42 +359,42 @@ if (couponStatusResponse.ok) {
                   </div>
                 )}
 
-{/* Coupon Section */}
-<div className="flex flex-col gap-y-4">
-  <div className="flex items-center justify-between">
-    <div>
-      <p className={!couponStatus.canUseCoupon ? "text-gray-500" : ""}>
-        Use Coupon (10% discount)
-      </p>
-      {couponStatus.message ? (
-        <p className="text-sm text-red-400">
-          {couponStatus.message}
-        </p>
-      ) : couponStatus.remainingCoupons <= 0 ? (
-        <p className="text-sm text-red-400">
-          No more coupons available for this event
-        </p>
-      ) : (
-        <p className="text-sm text-gray-400">
-          {couponStatus.remainingCoupons} of 10 coupons remaining
-        </p>
-      )}
-    </div>
-    <Switch
-      checked={useCoupon}
-      onCheckedChange={(checked) => {
-        if (checked && (!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0)) {
-          return;
-        }
-        setUseCoupon(checked);
-      }}
-      disabled={!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0}
-      className={(!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0) 
-        ? "cursor-not-allowed opacity-50" 
-        : ""}
-    />
-  </div>
-</div>
+                {/* Coupon Section */}
+                <div className="flex flex-col gap-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={!couponStatus.canUseCoupon ? "text-gray-500" : ""}>
+                        Use Coupon (10% discount)
+                      </p>
+                      {couponStatus.message ? (
+                        <p className="text-sm text-red-400">
+                          {couponStatus.message}
+                        </p>
+                      ) : couponStatus.remainingCoupons <= 0 ? (
+                        <p className="text-sm text-red-400">
+                          No more coupons available for this event
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-400">
+                          {couponStatus.remainingCoupons} of 10 coupons remaining
+                        </p>
+                      )}
+                    </div>
+                    <Switch
+                      checked={useCoupon}
+                      onCheckedChange={(checked) => {
+                        if (checked && (!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0)) {
+                          return;
+                        }
+                        setUseCoupon(checked);
+                      }}
+                      disabled={!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0}
+                      className={(!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0) 
+                        ? "cursor-not-allowed opacity-50" 
+                        : ""}
+                    />
+                  </div>
+                </div>
               </div>
             )}
 
