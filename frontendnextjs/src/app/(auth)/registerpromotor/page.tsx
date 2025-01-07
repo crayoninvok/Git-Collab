@@ -147,7 +147,7 @@ export default function PromoterRegister() {
           <p className="text-sm text-gray-400 mb-6">
             Already have an account?{" "}
             <Link
-              href="/loginpromotor"
+              href="/login/loginpromotor"
               className="text-orange-500 hover:underline"
             >
               Log in

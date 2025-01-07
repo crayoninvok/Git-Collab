@@ -11,10 +11,20 @@ import {
   Legend,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const RevenueGraph: React.FC = () => {
-  const [period, setPeriod] = useState<"week" | "month" | "year">("week");
+  const [period, setPeriod] = useState<"day" | "week" | "month" | "year">(
+    "week"
+  );
   const [graphData, setGraphData] = useState<{
     labels: string[];
     data: number[];
@@ -67,7 +77,7 @@ const RevenueGraph: React.FC = () => {
     fetchRevenueData();
   }, [period]);
 
-  const handlePeriodChange = (newPeriod: "week" | "month" | "year") => {
+  const handlePeriodChange = (newPeriod: "day" | "week" | "month" | "year") => {
     setPeriod(newPeriod);
   };
 
@@ -75,36 +85,19 @@ const RevenueGraph: React.FC = () => {
     <div className="p-6">
       <h2 className="text-3xl font-bold mb-6 text-center">Revenue Graph</h2>
       <div className="flex justify-center gap-6 mb-8">
-        <button
-          onClick={() => handlePeriodChange("week")}
-          className={`px-6 py-3 text-lg font-bold rounded-lg transition ${
-            period === "week"
-              ? "bg-blue-600 text-white shadow-lg scale-110"
-              : "bg-gray-300 hover:bg-gray-400"
-          }`}
-        >
-          Week
-        </button>
-        <button
-          onClick={() => handlePeriodChange("month")}
-          className={`px-6 py-3 text-lg font-bold rounded-lg transition ${
-            period === "month"
-              ? "bg-blue-600 text-white shadow-lg scale-110"
-              : "bg-gray-300 hover:bg-gray-400"
-          }`}
-        >
-          Month
-        </button>
-        <button
-          onClick={() => handlePeriodChange("year")}
-          className={`px-6 py-3 text-lg font-bold rounded-lg transition ${
-            period === "year"
-              ? "bg-blue-600 text-white shadow-lg scale-110"
-              : "bg-gray-300 hover:bg-gray-400"
-          }`}
-        >
-          Year
-        </button>
+        {["day", "week", "month", "year"].map((item) => (
+          <button
+            key={item}
+            onClick={() => handlePeriodChange(item as "day" | "week" | "month" | "year")}
+            className={`px-6 py-3 text-lg font-bold rounded-lg transition ${
+              period === item
+                ? "bg-blue-600 text-white shadow-lg scale-110"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
+          >
+            {item.charAt(0).toUpperCase() + item.slice(1)}
+          </button>
+        ))}
       </div>
 
       <div className="flex items-center justify-center w-full">
@@ -123,12 +116,12 @@ const RevenueGraph: React.FC = () => {
                   {
                     label: `Revenue (${period})`,
                     data: graphData.data,
-                    fill: true, 
-                    backgroundColor: "rgba(75,192,192,0.2)", 
-                    borderColor: "rgba(75,192,192,1)", 
-                    pointBorderColor: "rgba(75,192,192,1)", 
-                    pointBackgroundColor: "rgba(255,255,255,1)", 
-                    tension: 0.3, 
+                    fill: true,
+                    backgroundColor: "rgba(75,192,192,0.2)",
+                    borderColor: "rgba(75,192,192,1)",
+                    pointBorderColor: "rgba(75,192,192,1)",
+                    pointBackgroundColor: "rgba(255,255,255,1)",
+                    tension: 0.3,
                   },
                 ],
               }}
@@ -140,7 +133,7 @@ const RevenueGraph: React.FC = () => {
                     display: true,
                     position: "top",
                     labels: {
-                      color: "rgba(75,192,192,1)", 
+                      color: "rgba(75,192,192,1)",
                     },
                   },
                 },
