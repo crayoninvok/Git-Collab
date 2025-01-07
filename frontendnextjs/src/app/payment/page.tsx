@@ -104,7 +104,24 @@ function PaymentPage() {
 
   const checkCouponAvailability = async (eventId: number, token: string) => {
     try {
-      const response = await fetch(
+      // First check if user has valid coupon
+      const userCouponResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-user-coupon`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!userCouponResponse.ok) {
+        throw new Error("Failed to check user coupon");
+      }
+
+      const userCouponData = await userCouponResponse.json();
+
+      // Then check event coupon availability
+      const eventCouponResponse = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${eventId}`,
         {
           headers: {
@@ -113,16 +130,24 @@ function PaymentPage() {
         }
       );
 
-      if (!response.ok) {
+      if (!eventCouponResponse.ok) {
         throw new Error("Failed to check coupon status");
       }
 
-      const couponData = await response.json();
-       console.log('Coupon check response:', couponData);
-      setCouponStatus(couponData);
+      const eventCouponData = await eventCouponResponse.json();
+      console.log('User coupon data:', userCouponData);
+      console.log('Event coupon data:', eventCouponData);
 
-      // Automatically disable coupon if not available
-      if (!couponData.canUseCoupon || couponData.remainingCoupons <= 0) {
+      const canUseCoupon = userCouponData.canUseCoupon && eventCouponData.remainingCoupons > 0;
+      
+      setCouponStatus({
+        canUseCoupon,
+        couponUsageCount: eventCouponData.couponUsageCount,
+        remainingCoupons: eventCouponData.remainingCoupons,
+        message: !canUseCoupon ? (userCouponData.message || eventCouponData.message) : undefined
+      });
+
+      if (!canUseCoupon) {
         setUseCoupon(false);
       }
     } catch (error) {
@@ -172,27 +197,6 @@ function PaymentPage() {
 
       const isFreeTicket = ticketData.price === 0;
 
-      // Verify coupon status one last time before proceeding
-      if (!isFreeTicket && useCoupon) {
-        const verifyStatus = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!verifyStatus.ok) {
-          throw new Error("Coupon verification failed");
-        }
-
-        const couponVerification = await verifyStatus.json();
-        if (!couponVerification.canUseCoupon) {
-          throw new Error(couponVerification.message || "Coupon is no longer valid");
-        }
-      }
-
       // Create order
       const orderBody = {
         eventId: ticketData.eventId,
@@ -226,48 +230,66 @@ function PaymentPage() {
 
       // Handle free tickets
       if (isFreeTicket) {
-        await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id}`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        try {
+          await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${orderResult.data.id}`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        } catch (emailError) {
+          console.error("Error sending confirmation email:", emailError);
+        }
         
         router.push(`/payment/success?order_id=ORDER-${orderResult.data.id}`);
         return;
       }
 
       // Create payment for paid tickets
-      const paymentResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            orderId: orderResult.data.id,
-          }),
+      try {
+        const paymentResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/create`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              orderId: orderResult.data.id,
+            }),
+          }
+        );
+
+        if (!paymentResponse.ok) {
+          const errorText = await paymentResponse.text();
+          console.error("Payment response error:", errorText);
+          try {
+            const errorData = JSON.parse(errorText);
+            throw new Error(errorData.message || "Failed to initiate payment");
+          } catch {
+            throw new Error("Failed to process payment response");
+          }
         }
-      );
 
-      if (!paymentResponse.ok) {
-        throw new Error("Failed to initiate payment");
-      }
+        const paymentResult = await paymentResponse.json();
+        console.log('Payment result:', paymentResult);
+        
+        if (!paymentResult.data?.paymentUrl) {
+          throw new Error("No payment URL received");
+        }
 
-      const paymentResult = await paymentResponse.json();
-      if (paymentResult.data?.paymentUrl) {
         window.location.href = paymentResult.data.paymentUrl;
-      } else {
-        throw new Error("No payment URL received");
+      } catch (paymentError) {
+        console.error("Payment creation error:", paymentError);
+        throw new Error(paymentError instanceof Error ? paymentError.message : "Payment processing failed");
       }
     } catch (error) {
-      console.error("Payment error:", error);
-      setError(error instanceof Error ? error.message : "Payment processing failed");
+      console.error("Process error:", error);
+      setError(error instanceof Error ? error.message : "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -411,11 +433,3 @@ function PaymentPage() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default withGuard(PaymentPage, {
-  requiredRole: "user",
-  redirectTo: "/not-authorized",
-});
