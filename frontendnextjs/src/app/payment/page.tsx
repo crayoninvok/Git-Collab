@@ -27,9 +27,14 @@ interface CouponStatus {
   canUseCoupon: boolean;
   couponUsageCount: number;
   remainingCoupons: number;
+  message?: string;
 }
 
+<<<<<<< HEAD
  function PaymentPage() {
+=======
+function PaymentPage() {
+>>>>>>> 9b79313e6e375c3ca33d3db7e2a3cfdd6c424ce2
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuth } = useSession();
@@ -105,20 +110,25 @@ interface CouponStatus {
             }
           );
 
-          if (couponStatusResponse.ok) {
-            const couponStatusData = await couponStatusResponse.json();
-            setCouponStatus(couponStatusData);
-            
-            // Only set coupon as available if user hasn't used it and coupons remain
-            const isCouponAvailable = couponStatusData.canUseCoupon && 
-                                    couponStatusData.remainingCoupons > 0;
-            setCouponAvailable(isCouponAvailable);
-            
-            // Always disable coupon if not available
-            if (!isCouponAvailable) {
-              setUseCoupon(false);
-            }
-          } else {
+if (couponStatusResponse.ok) {
+  const couponStatusData = await couponStatusResponse.json();
+  setCouponStatus(couponStatusData);
+  
+  // Only set coupon as available if user hasn't used it, coupon is valid (isRedeem true), and coupons remain
+  const isCouponAvailable = couponStatusData.canUseCoupon && 
+                          couponStatusData.remainingCoupons > 0;
+  setCouponAvailable(isCouponAvailable);
+  
+  // Always disable coupon if not available
+  if (!isCouponAvailable) {
+    setUseCoupon(false);
+  }
+
+  // Display specific message if coupon has been used
+  if (couponStatusData.message) {
+    setError(couponStatusData.message);
+  }
+} else {
             setCouponAvailable(false);
             setUseCoupon(false);
           }
@@ -148,7 +158,7 @@ interface CouponStatus {
 
     // Apply coupon discount (10%)
     if (ticketData.price > 0 && useCoupon && couponAvailable && couponStatus.canUseCoupon) {
-      total = total * 0.9;
+      total = total * 0.9; // 10% discount
     }
 
     return Math.max(total, 0);
@@ -184,26 +194,17 @@ interface CouponStatus {
         );
 
         if (!couponCheckResponse.ok) {
-          throw new Error("Failed to verify coupon status");
+          const errorData = await couponCheckResponse.json();
+          throw new Error(errorData.message || "Failed to verify coupon status");
         }
 
         const couponData = await couponCheckResponse.json();
         
         if (!couponData.canUseCoupon) {
-          setError("You've already used a coupon for this event");
+          setError(couponData.message || "Coupon cannot be used for this purchase");
           setLoading(false);
           return;
         }
-
-        if (couponData.remainingCoupons <= 0) {
-          setError("No more coupons available for this event");
-          setLoading(false);
-          return;
-        }
-
-        // Update local state with server state
-        setCouponStatus(couponData);
-        setCouponAvailable(couponData.canUseCoupon && couponData.remainingCoupons > 0);
       }
 
       const orderBody = {
@@ -212,8 +213,8 @@ interface CouponStatus {
         quantity: Number(quantity),
         totalPrice: ticketData.price * Number(quantity),
         finalPrice: calculateTotalPrice(),
-        usePoints: isFreeTicket ? false : (usePoints && user.points >= 10000),
-        useCoupon: isFreeTicket ? false : (useCoupon && couponAvailable && couponStatus.canUseCoupon),
+        usePoints: isFreeTicket ? false : usePoints,
+        useCoupon: isFreeTicket ? false : useCoupon,
         status: isFreeTicket ? "PAID" : "PENDING"
       };
 
@@ -363,42 +364,42 @@ interface CouponStatus {
                   </div>
                 )}
 
-                {/* Coupon Section */}
-                <div className="flex flex-col gap-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className={!couponStatus.canUseCoupon ? "text-gray-500" : ""}>
-                        Use Coupon (10% discount)
-                      </p>
-                      {!couponStatus.canUseCoupon ? (
-                        <p className="text-sm text-red-400">
-                          You have already used a coupon for this event
-                        </p>
-                      ) : couponStatus.remainingCoupons <= 0 ? (
-                        <p className="text-sm text-red-400">
-                          No more coupons available for this event
-                        </p>
-                      ) : (
-                        <p className="text-sm text-gray-400">
-                          {couponStatus.remainingCoupons} of 10 coupons remaining
-                        </p>
-                      )}
-                    </div>
-                    <Switch
-                      checked={useCoupon}
-                      onCheckedChange={(checked) => {
-                        if (checked && (!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0)) {
-                          return;
-                        }
-                        setUseCoupon(checked);
-                      }}
-                      disabled={!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0}
-                      className={(!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0) 
-                        ? "cursor-not-allowed opacity-50" 
-                        : ""}
-                    />
-                  </div>
-                </div>
+{/* Coupon Section */}
+<div className="flex flex-col gap-y-4">
+  <div className="flex items-center justify-between">
+    <div>
+      <p className={!couponStatus.canUseCoupon ? "text-gray-500" : ""}>
+        Use Coupon (10% discount)
+      </p>
+      {couponStatus.message ? (
+        <p className="text-sm text-red-400">
+          {couponStatus.message}
+        </p>
+      ) : couponStatus.remainingCoupons <= 0 ? (
+        <p className="text-sm text-red-400">
+          No more coupons available for this event
+        </p>
+      ) : (
+        <p className="text-sm text-gray-400">
+          {couponStatus.remainingCoupons} of 10 coupons remaining
+        </p>
+      )}
+    </div>
+    <Switch
+      checked={useCoupon}
+      onCheckedChange={(checked) => {
+        if (checked && (!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0)) {
+          return;
+        }
+        setUseCoupon(checked);
+      }}
+      disabled={!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0}
+      className={(!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0) 
+        ? "cursor-not-allowed opacity-50" 
+        : ""}
+    />
+  </div>
+</div>
               </div>
             )}
 
@@ -445,4 +446,8 @@ interface CouponStatus {
 export default withGuard(PaymentPage, {
   requiredRole: "user",
   redirectTo: "/not-authorized-payment",
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 9b79313e6e375c3ca33d3db7e2a3cfdd6c424ce2
