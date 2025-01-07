@@ -69,6 +69,8 @@ export default function PromoterRegister() {
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "An unexpected error occurred.";
+        console.log(errorMessage);
+        
       Swal.fire({
         title: "Error!",
         text: "Please check the username and password its has been used",

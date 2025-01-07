@@ -30,11 +30,7 @@ interface CouponStatus {
   message?: string;
 }
 
-<<<<<<< HEAD
- function PaymentPage() {
-=======
 function PaymentPage() {
->>>>>>> 9b79313e6e375c3ca33d3db7e2a3cfdd6c424ce2
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuth } = useSession();
@@ -446,8 +442,4 @@ if (couponStatusResponse.ok) {
 export default withGuard(PaymentPage, {
   requiredRole: "user",
   redirectTo: "/not-authorized-payment",
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 9b79313e6e375c3ca33d3db7e2a3cfdd6c424ce2
