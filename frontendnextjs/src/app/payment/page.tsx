@@ -75,7 +75,6 @@ export default function PaymentPage() {
         return;
       }
 
-      // Fetch ticket data
       const ticketResponse = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL_BE}/events/ticket/${ticketId}`,
         {
@@ -92,7 +91,6 @@ export default function PaymentPage() {
       const ticketData = await ticketResponse.json();
       setTicketData(ticketData);
 
-      // Check coupon status if ticket is paid and has eventId
       if (ticketData.price > 0 && ticketData.eventId) {
         try {
           const couponStatusResponse = await fetch(
@@ -107,13 +105,12 @@ export default function PaymentPage() {
           if (couponStatusResponse.ok) {
             const couponStatusData = await couponStatusResponse.json();
             setCouponStatus(couponStatusData);
-            
-            // Only set coupon as available if user hasn't used it and coupons remain
+
+            // Only allow coupon if user hasn't used one for this event and coupons remain
             const isCouponAvailable = couponStatusData.canUseCoupon && 
                                     couponStatusData.remainingCoupons > 0;
             setCouponAvailable(isCouponAvailable);
-            
-            // Always disable coupon if not available
+
             if (!isCouponAvailable) {
               setUseCoupon(false);
             }
@@ -140,14 +137,12 @@ export default function PaymentPage() {
     if (!ticketData) return 0;
     let total = ticketData.price * quantity;
 
-    // Apply points discount (fixed 10,000)
     if (ticketData.price > 0 && usePoints && user?.points && user.points >= 10000) {
       total -= 10000;
     }
 
-    // Apply coupon discount (10%)
     if (ticketData.price > 0 && useCoupon && couponAvailable && couponStatus.canUseCoupon) {
-      total = total * 0.9;
+      total = total * 0.9; // 10% discount
     }
 
     return Math.max(total, 0);
@@ -171,7 +166,7 @@ export default function PaymentPage() {
 
       const isFreeTicket = ticketData.price === 0;
 
-      // Re-validate coupon status before proceeding
+      // Verify coupon status again before proceeding
       if (!isFreeTicket && useCoupon) {
         const couponCheckResponse = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/check-coupon/${ticketData.eventId}`,
@@ -199,10 +194,6 @@ export default function PaymentPage() {
           setLoading(false);
           return;
         }
-
-        // Update local state with server state
-        setCouponStatus(couponData);
-        setCouponAvailable(couponData.canUseCoupon && couponData.remainingCoupons > 0);
       }
 
       const orderBody = {
@@ -388,22 +379,15 @@ export default function PaymentPage() {
                         </p>
                       ) : (
                         <p className="text-sm text-gray-400">
-                          {couponStatus.remainingCoupons} of 10 coupons remaining
+                          {couponStatus.remainingCoupons} of 10 coupons remaining for this event
                         </p>
                       )}
                     </div>
                     <Switch
                       checked={useCoupon}
-                      onCheckedChange={(checked) => {
-                        if (checked && (!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0)) {
-                          return;
-                        }
-                        setUseCoupon(checked);
-                      }}
-                      disabled={!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0}
-                      className={(!couponStatus.canUseCoupon || couponStatus.remainingCoupons <= 0) 
-                        ? "cursor-not-allowed opacity-50" 
-                        : ""}
+                      onCheckedChange={setUseCoupon}
+                      disabled={!couponAvailable}
+                      className={!couponAvailable ? "cursor-not-allowed opacity-50" : ""}
                     />
                   </div>
                 </div>
