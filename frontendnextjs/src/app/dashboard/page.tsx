@@ -66,6 +66,7 @@ function DashboardPage() {
           activeResponse,
           deactiveResponse,
           revenueResponse,
+          transactionResponse
         ] = await Promise.all([
           fetch(`${base_url}/dashboard/getAllEvent`, {
             method: "GET",
@@ -83,23 +84,29 @@ function DashboardPage() {
             method: "GET",
             headers,
           }),
+          fetch(`${base_url}/dashboard/getalltransaction`, {
+            method: "GET",
+            headers,
+          }),
         ]);
 
         if (
           !totalResponse.ok ||
           !activeResponse.ok ||
           !deactiveResponse.ok ||
-          !revenueResponse.ok
+          !revenueResponse.ok ||
+          !transactionResponse.ok
         ) {
           throw new Error("Failed to fetch analytics data.");
         }
 
-        const [totalData, activeData, deactiveData, revenueData] =
+        const [totalData, activeData, deactiveData, revenueData, transactionData] =
           await Promise.all([
             totalResponse.json(),
             activeResponse.json(),
             deactiveResponse.json(),
             revenueResponse.json(),
+            transactionResponse.json()
           ]);
 
         setAnalyticsData([
@@ -117,6 +124,11 @@ function DashboardPage() {
             title: "Deactive Events",
             value: deactiveData.deactiveEvents || 0,
             color: "text-red-500",
+          },
+          {
+            title: "Total Transaction",
+            value: transactionData.totalPaidTransactions,
+            color: "text-orange-500",
           },
           {
             title: "Total Revenue",
@@ -185,14 +197,14 @@ function DashboardPage() {
         {/* Analytics Section */}
 
         <section className="mb-10">
-          <h1 className="text-3xl font-bold text-white ml-[5rem]">Overview</h1>
-          <hr className="border-gray-700 my-4" />
-          <div className="mx-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {analyticsData.map((data, index) => (
-              <AnalyticsCard key={index} {...data} />
-            ))}
-          </div>
-        </section>
+  <h1 className="text-3xl font-bold text-white ml-[5rem]">Overview</h1>
+  <hr className="border-gray-700 my-4" />
+  <div className="mx-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+    {analyticsData.map((data, index) => (
+      <AnalyticsCard key={index} {...data} />
+    ))}
+  </div>
+</section>
 
         {/* Graph Section */}
 

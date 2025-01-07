@@ -10,8 +10,8 @@ export default function Footer() {
   const { isAuth } = useSession();
 
   const socialLinks = [
-    { icon: FaInstagram, href: "https://instagram.com/tsani", hoverColor: "hover:text-pink-500", label: "Tsania's Instagram" },
-    { icon: FaInstagram, href: "https://instagram.com/dzaky", hoverColor: "hover:text-pink-500", label: "Dzaky's Instagram" },
+    { icon: FaInstagram, href: "https://instagram.com/tsaniamaf", hoverColor: "hover:text-pink-500", label: "Tsania's Instagram" },
+    { icon: FaInstagram, href: "https://instagram.com/dzakyathariq", hoverColor: "hover:text-pink-500", label: "Dzaky's Instagram" },
 
   ];
 
