@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "@/context/useSessionHook";
 import { useRouter } from "next/navigation";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { TbMenuDeep } from "react-icons/tb";
 import { FaUserCircle, FaSignOutAlt, FaMicroblog } from "react-icons/fa";
@@ -15,7 +15,6 @@ import Swal from "sweetalert2";
 export default function Avatar() {
   const { isAuth, user, logout } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [,setIsLoggingOut] = useState(false);
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 
