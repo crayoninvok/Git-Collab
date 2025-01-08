@@ -1,3 +1,4 @@
+// The imports and interfaces remain the same as in the original code
 "use client";
 
 import { useSession } from "@/context/useSessionHook";
@@ -63,12 +64,14 @@ export default function ProfilePage() {
           },
         });
         const data = await response.json();
-        setTickets(data.orders);
+        // Filter only PAID tickets
+        const paidTickets = data.orders.filter((ticket: UserTicket) => ticket.status === "PAID");
+        setTickets(paidTickets);
 
-        // Check for reviews for each ticket
+        // Check for reviews for each paid ticket
         const reviewStatuses: { [key: number]: boolean } = {};
         await Promise.all(
-          data.orders.map(async (ticket: UserTicket) => {
+          paidTickets.map(async (ticket: UserTicket) => {
             const reviewResponse = await fetch(
               `${base_url}/reviews/event/${ticket.eventId}`,
               {
@@ -96,9 +99,8 @@ export default function ProfilePage() {
     }
   }, [isAuth, user, base_url]);
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  // Rest of the component functionality remains the same
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       Swal.fire({
@@ -191,7 +193,7 @@ export default function ProfilePage() {
         {/* Left Section - Tickets */}
         <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-5 rounded-xl shadow-lg mt-10">
           <h2 className="text-2xl font-bold mb-6 text-gray-100">
-            Your Tickets
+            Your Paid Tickets
           </h2>
           <div className="space-y-4">
             {loadingTickets ? (
@@ -231,15 +233,7 @@ export default function ProfilePage() {
                       </p>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span
-                        className={`mb-2 px-2 py-1 rounded text-xs ${
-                          ticket.status === "PAID"
-                            ? "bg-green-500"
-                            : ticket.status === "PENDING"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        } text-white`}
-                      >
+                      <span className="mb-2 px-2 py-1 rounded text-xs bg-green-500 text-white">
                         {ticket.status}
                       </span>
                       <button
@@ -268,7 +262,7 @@ export default function ProfilePage() {
               ))
             ) : (
               <div className="text-center text-gray-400">
-                No tickets available for review.
+                No paid tickets available for review.
               </div>
             )}
           </div>
@@ -296,7 +290,10 @@ export default function ProfilePage() {
               />
             </label>
             <Link href={"/profile/editprofile"}>
-            <button className="p-1 mt-3 text-white bg-slate-800 rounded-xl hover:bg-yellow-500 hover:text-orange-600">Edit Profile</button></Link>
+              <button className="p-1 mt-3 text-white bg-slate-800 rounded-xl hover:bg-yellow-500 hover:text-orange-600">
+                Edit Profile
+              </button>
+            </Link>
             <h2 className="text-2xl font-bold text-white mt-4">
               {user?.username || "Guest"}
             </h2>
@@ -362,7 +359,7 @@ export default function ProfilePage() {
                   <p className="text-white">Expired At:</p>
                   <p className="text-white">{formatDate(user.expiredAt)}</p>
                 </div>
-              )}  
+              )}
             </div>
           </div>
         </div>
