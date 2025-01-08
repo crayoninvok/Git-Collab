@@ -9,7 +9,6 @@ import withGuard from "@/hoc/pageGuard";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-
 interface TicketData {
   id: number;
   eventId: number;
