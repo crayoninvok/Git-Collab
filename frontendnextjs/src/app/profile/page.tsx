@@ -1,4 +1,3 @@
-// The imports and interfaces remain the same as in the original code
 "use client";
 
 import { useSession } from "@/context/useSessionHook";
